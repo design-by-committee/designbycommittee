@@ -65,14 +65,59 @@
       firstNavStep.classList.remove('active');
       firstNavStep.classList.add('complete');
       secondNavStep.classList.add('active');
-
       document.getElementById('contactForm').scrollIntoView();
     } else {
       // form.messages.style.display = 'block';
     }
   });
 
+  // on step two
+  form.submit.addEventListener('click', function () {
+
+    // 1. validate fields
+    var validFields = validateFields('two');
+
+    if (validFields){
+      document.getElementById('landing-page-assessment').submit();
+    }
+
+  });
+
+  
+  // Send form data to Netlify
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    let myForm = document.getElementById('landing-page-assessment');
+    let formData = new FormData(myForm)
+    fetch('/', {
+      method: 'POST',
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData).toString()
+    })
+    .then(data => {
+
+      // hide step two
+      secondStep.classList.add('hidden');
+      secondStep.classList.remove('active');
+      secondNavStep.classList.add('complete');
+      secondNavStep.classList.remove('active');
+      thirdNavStep.classList.add('active');
+
+      // display step three
+      thirdStep.classList.remove('hidden');
+      document.querySelector('.firstName').innerText = document.querySelector('#firstName').value; 
+      document.querySelector('.thx-gif').setAttribute('src', 'https://media.giphy.com/media/WZ4M8M2VbauEo/source.gif');
+      document.getElementById('contactForm').scrollIntoView();
+
+    }).catch((error) =>
+      alert(error))
+  }
+
+  // Listen for form submissions
+  document.querySelector("form").addEventListener("submit", handleSubmit);
+
   // on form submit
+  /*
   form.submit.addEventListener('click', function () {
 
     // 1. validate fields
@@ -165,6 +210,7 @@
     }
 
   });
+  */
   
 
 })();
