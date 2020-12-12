@@ -46,10 +46,10 @@
     // selectors
     stepOne: document.querySelector('#submitS1'),
     submit: document.querySelector('#submitForm'),
-    messages: document.querySelector('#errorMessage'),
+    messages: document.querySelector('#errorMessage')
     // hidden fields
-    csrf_name: document.querySelector('input[name="csrf_name"]'),
-    csrf_value: document.querySelector('input[name="csrf_value"]')
+    // csrf_name: document.querySelector('input[name="csrf_name"]'),
+    // csrf_value: document.querySelector('input[name="csrf_value"]')
   };
 
   // on step one
@@ -73,6 +73,7 @@
   });
 
   // on form submit
+  /*
   form.submit.addEventListener('click', function () {
 
     // 1. validate fields
@@ -96,9 +97,9 @@
       '&email=' + form.email.value +
       '&appDate=' + form.appDate.value +
       '&appTime=' + form.appTime.value +
-      '&timezone=' + form.timezone +
-      '&csrf_name=' + form.csrf_name.value +
-      '&csrf_value=' + form.csrf_value.value;
+      '&timezone=' + form.timezone;
+      // '&csrf_name=' + form.csrf_name.value +
+      // '&csrf_value=' + form.csrf_value.value;
 
 
   
@@ -165,6 +166,7 @@
     }
 
   });
+  */
 
 })();
 
