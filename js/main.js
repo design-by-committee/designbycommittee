@@ -78,15 +78,15 @@
     var validFields = validateFields('two');
 
     if (validFields){
-      document.getElementById('landing-page-assessment').submit();
+      handleSubmit();
     }
 
   });
 
   
   // Send form data to Netlify
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = () => {
+    //e.preventDefault()
     let myForm = document.getElementById('landing-page-assessment');
     let formData = new FormData(myForm)
     fetch('/', {
@@ -114,7 +114,7 @@
   }
 
   // Listen for form submissions
-  document.querySelector("form").addEventListener("submit", handleSubmit);
+  // document.querySelector("form").addEventListener("submit", handleSubmit);
 
   // on form submit
   /*
