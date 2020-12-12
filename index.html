@@ -260,43 +260,43 @@
                 <p class="text-bold">I want to...</p>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__factors" name="factors" value="factors" checked>
+                  <input type="checkbox" id="check__factors" name="factors" value="YES" checked>
                   <label for="check__factors">Discover which factors have the most powerful influence on my
                     visitors</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__offer" name="offer" value="offer">
+                  <input type="checkbox" id="check__offer" name="offer" value="YES">
                   <label for="check__offer">Test a new offer or price point on my landing page</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__ux" name="ux" value="ux">
+                  <input type="checkbox" id="check__ux" name="ux" value="YES">
                   <label for="check__ux">Update my landing page to fix UX issues and increase conversions</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__cpa" name="cpa" value="cpa">
+                  <input type="checkbox" id="check__cpa" name="cpa" value="YES">
                   <label for="check__cpa">Lower the average cost-per-acquisition (CPA) in my ad campaigns</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__mobile" name="mobile" value="mobile">
+                  <input type="checkbox" id="check__mobile" name="mobile" value="YES">
                   <label for="check__mobile">Optimize my landing page to convert on mobile devices</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__content" name="content" value="content">
+                  <input type="checkbox" id="check__content" name="content" value="YES">
                   <label for="check__content">Personalize my content to more closely match my visitor’s intent</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__speed" name="speed" value="speed">
+                  <input type="checkbox" id="check__speed" name="speed" value="YES">
                   <label for="check__speed">Reduce load time on my landing page to improve PageSpeed scores</label>
                 </div>
 
                 <div class="check__wrapper">
-                  <input type="checkbox" id="check__ai" name="ai" value="ai">
+                  <input type="checkbox" id="check__ai" name="ai" value="YES">
                   <label for="check__ai">Utilize machine learning to identify new opportunities for growth</label>
                 </div>
 
@@ -324,13 +324,14 @@
 
                 <div class="text-left">
                   <p class="text-bold">Best time to discuss my project</p>
-                  
                   <input type="text" id="date" name="date" placeholder="MM - DD - YY">
                   <input type="text" id="time" name="time" placeholder="00:00">
-                  
+                  <input type="hidden" id="timezone" name="timezone"/>
                 </div>
+
+
               
-                <a href="javascript:void(0)" class="btn btn-prim" id="submitForm">Book My Appointment</a>
+                <a href="javascript:void(0)" class="btn btn-prim" id="submitForm">Send My Request</a>
                 
               </fieldset>
             </section>
@@ -338,10 +339,10 @@
             <section class="step__three hidden">
               <fieldset>
                 <h4 class="text-bold">Thanks <span class="firstName">stranger</span>!</h4>
-                <img alt="Brilliant GIF" class="thx-gif">
-                <p class="text-center">We look forward to speaking to you about your project. Please be sure to add the meeting to your calendar and review the confirmation email we've sent you with our dial-in details.</p>   
+                <img alt="T.Hanks for contacting us!" class="thx-gif">
+                <p class="text-center">We look forward to speaking to you about your project. We'll reach out shortly to confirm the meeting time and provide you with our dial-in details.</p>
 
-                <a class="add-to-calendar" href="#contactForm"></a>
+                <!-- <a class="add-to-calendar" href="#contactForm"></a> -->
               </fieldset>
             </section>
           </form>
