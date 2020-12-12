@@ -73,7 +73,6 @@
   });
 
   // on form submit
-  /*
   form.submit.addEventListener('click', function () {
 
     // 1. validate fields
@@ -153,7 +152,7 @@
       };
 
 
-      request.open('post', 'https://designbycommitt.ee/contact');
+      request.open('post', '/');
       request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
       request.onreadystatechange = function() { 
@@ -166,7 +165,7 @@
     }
 
   });
-  */
+  
 
 })();
 
