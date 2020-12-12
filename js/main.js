@@ -41,7 +41,7 @@
     email: document.querySelector('#email'),
     appDate: document.querySelector('#date'),
     appTime: document.querySelector('#time'),
-    appTimezone: document.querySelector('#timezone');
+    appTimezone: document.querySelector('#timezone'),
     //appTimezone: getTimezone().replace(/ /g, ''),
     // selectors
     stepOne: document.querySelector('#submitS1'),
