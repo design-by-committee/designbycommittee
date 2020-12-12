@@ -17,7 +17,7 @@
        initWheelTurn('.mopedPiggy');
        clearInterval(checkForPiggy);
     }
-  }, 100); 
+  }, 100);
 
   // wait for flatpickr
   var checkForPicker = setInterval(function() {
@@ -25,8 +25,7 @@
       initFlatpickr(flatpickr);
       clearInterval(checkForPicker);
     }
-  }, 100); 
-
+  }, 100);
 
   window.addEventListener('resize', function () {
     initSlider();
@@ -42,7 +41,8 @@
     email: document.querySelector('#email'),
     appDate: document.querySelector('#date'),
     appTime: document.querySelector('#time'),
-    timezone: getTimezone().replace(/ /g, ''),
+    appTimezone: document.querySelector('#timezone');
+    //appTimezone: getTimezone().replace(/ /g, ''),
     // selectors
     stepOne: document.querySelector('#submitS1'),
     submit: document.querySelector('#submitForm'),
@@ -51,6 +51,9 @@
     // csrf_name: document.querySelector('input[name="csrf_name"]'),
     // csrf_value: document.querySelector('input[name="csrf_value"]')
   };
+
+  // Set the timezone field to the visitor's local timezone
+  form.appTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   // on step one
   form.stepOne.addEventListener('click', function () {
@@ -74,7 +77,7 @@
   // on step two
   form.submit.addEventListener('click', function () {
 
-    // 1. validate fields
+    // validate fields
     var validFields = validateFields('two');
 
     if (validFields){
@@ -217,13 +220,12 @@
 
 
 /* form functions */
-
 function validateFields(step) {
 
   var errorMessage = document.querySelector('#errorMessage');
 
   switch(step){
-    case 'one': 
+    case 'one':
       var url = document.querySelector('#url').value,
           interest = document.querySelector('input[type="checkbox"]:checked'),
           urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
@@ -239,15 +241,16 @@ function validateFields(step) {
       }
     break;
 
-    case 'two': 
+    case 'two':
       var firstName = document.querySelector('#firstName').value,
           lastName = document.querySelector('#lastName').value,
           email = document.querySelector('#email').value,
           emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
           appDate = document.querySelector('#date').value,
-          appTime = document.querySelector('#time').value;
+          appTime = document.querySelector('#time').value,
+          appTimezone = document.querySelector('#timezone').value;
 
-      if(firstName && lastName && email.match(emailRegex) && appDate && appTime){
+      if(firstName && lastName && email.match(emailRegex) && appDate && appTime && appTimezone){
         errorMessage.classList.remove('active');
         return true;
       } 
@@ -271,7 +274,6 @@ function handleResponse(requestStatus) {
   if (requestStatus === 200) {
     // hide step two
     secondStep.classList.add('hidden');
-
     secondStep.classList.remove('active');
     secondNavStep.classList.add('complete');
     secondNavStep.classList.remove('active');
@@ -279,10 +281,8 @@ function handleResponse(requestStatus) {
 
     // display step three
     thirdStep.classList.remove('hidden');
-
     document.querySelector('.firstName').innerText = document.querySelector('#firstName').value; 
     document.querySelector('.thx-gif').setAttribute('src', 'https://media.giphy.com/media/WZ4M8M2VbauEo/source.gif');
-
     document.getElementById('contactForm').scrollIntoView();
   } else {
     document.getElementById('contactForm').scrollIntoView();
@@ -291,9 +291,11 @@ function handleResponse(requestStatus) {
   }
 }
 
+/*
 function getTimezone() {
   return /\((.*)\)/.exec(new Date().toString())[1];
 }
+*/
 
 
 
@@ -354,7 +356,7 @@ function initFlatpickr(flatpickr) {
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
-    minDate: "10:00",
+    minDate: "09:00",
     maxDate: "18:00",
     time_24hr: false
   });
