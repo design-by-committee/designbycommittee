@@ -148,7 +148,7 @@ html {
 }
 
 body {
-  overflow: hidden;
+  overflow-x: hidden;
   counter-reset: step;
 }
 
@@ -229,6 +229,7 @@ h4 {
   margin: 0.5em 0;
   line-height: 1;
   text-align: center;
+  overflow-wrap: break-word;
 }
 
 p,
@@ -236,7 +237,7 @@ a,
 li {
   line-height: 1.6;
   font-size: 1em;
-  font-size: calc(16px + 0.25vw);
+  font-size: calc(1rem + 0.25vw);
 }
 
 .lead {
@@ -259,7 +260,6 @@ img {
 
 a {
   color: #00bcb8;
-  outline: none;
   text-decoration: none;
   transition: all 0.2s ease-in-out;
 }
@@ -379,7 +379,7 @@ header {
 }
 
 .nav__item {
-  font-size: 16px;
+  font-size: 1rem;
   padding: 0.5em 0;
   text-transform: uppercase;
   color: #00bcb8;
@@ -513,7 +513,7 @@ header {
 /** form **/
 input::placeholder,
 span.optional {
-  color: #9d9d9d;
+  color: #6b6b6b;
 }
 
 span.optional {
@@ -541,7 +541,7 @@ input#time {
   margin: 0;
   display: inline-block;
   width: 100%;
-  font-size: calc(14px + 0.25vw);
+  font-size: calc(0.875rem + 0.25vw);
   margin-bottom: 1em;
 }
 
@@ -597,7 +597,7 @@ input[type="checkbox"] {
   flex: 1;
 }
 
-.step a {
+.step .step__link {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -605,7 +605,7 @@ input[type="checkbox"] {
   width: 100%;
   cursor: initial;
   pointer-events: none;
-  font-size: calc(16px + 0.25vw);
+  font-size: calc(1rem + 0.25vw);
 }
 
 .step, .step a, .step__nr {
@@ -638,7 +638,7 @@ input[type="checkbox"] {
 .step .step__nr:after {
   counter-increment: step;
   content: counter(step);
-  font-size: 18px;
+  font-size: 1.125rem;
   transition: border 0.2s ease-in-out;
 }
 
@@ -660,28 +660,27 @@ input[type="checkbox"] {
 }
 
 .step__nr {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
   color: rgb(53, 57, 60, 1);
 }
 
 .step__three h4.text-bold {
-  font-size: 22px;
-  font-size: calc(22px + 0.25vw);
+  font-size: 1.375rem;
+  font-size: calc(1.375rem + 0.25vw);
   margin: 2em 0 1em 0;
 }
 
 /* FORM */
 
 #errorMessage {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
-  color: #fc3948;
-  display: none;
+  color: #d3202e;
 }
 
-#errorMessage.active {
-  display: block;
+#errorMessage:empty {
+  display: none;
 }
 
 .form__wrapper {
@@ -698,7 +697,7 @@ input,
 .form__wrapper p,
 textarea {
   font-size: 1em;
-  font-size: calc(14px + 0.25vw);
+  font-size: calc(0.875rem + 0.25vw);
   line-height: 1.5;
   text-align: left;
 }
@@ -745,7 +744,7 @@ textarea {
 
 .form__wrapper .btn.add-to-calendar-checkbox {
   margin-bottom: 2em;
-  font-size: calc(16px + 0.25vw);
+  font-size: calc(1rem + 0.25vw);
   transition: all 0.2s ease-in-out;
 }
 
@@ -841,11 +840,64 @@ footer,
     font-size: 0.9em;
   }
 
-  .step a {
-    font-size: 14px;
+  .step .step__link {
+    font-size: 0.875rem;
   }
 
   .step__nr {
-    font-size: 16px;
+    font-size: 1rem;
+  }
+}
+
+/** accessibility **/
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #35393c;
+  outline-offset: 3px;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline-offset: 1px;
+}
+
+/* elements focused by script (section targets, step headings) */
+[tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button.btn {
+  border: 0;
+  width: 100%;
+  font-family: inherit;
+  font-size: calc(1rem + 0.25vw);
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
