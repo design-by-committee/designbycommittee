@@ -259,7 +259,7 @@ img {
 }
 
 a {
-  color: #00bcb8;
+  color: #16807d;
   text-decoration: none;
   transition: all 0.2s ease-in-out;
 }
@@ -303,15 +303,15 @@ main {
 }
 
 .btn-prim {
-  background-color: #fd5f6b;
-  box-shadow: 0 15px 30px -15px #fd5f6b;
+  background-color: #d92b3a;
+  box-shadow: 0 15px 30px -15px #d92b3a;
 }
 
 .btn:hover,
 .btn:focus {
-  background-color: #fc3948;
+  background-color: #b81d2b;
   transform: translateY(-0.25em);
-  box-shadow: 0 15px 30px -15px #fc3948;
+  box-shadow: 0 15px 30px -15px #b81d2b;
 }
 
 /** arrows **/
@@ -352,7 +352,7 @@ ul li::before {
 }
 
 .arrow-right::after {
-  border-left-color: #00bcb8;
+  border-left-color: #16807d;
   margin-left: 10px;
   bottom: 10px;
 }
@@ -382,7 +382,7 @@ header {
   font-size: 1rem;
   padding: 0.5em 0;
   text-transform: uppercase;
-  color: #00bcb8;
+  color: #16807d;
   position: relative;
   padding-right: 1em;
 }
@@ -499,7 +499,7 @@ header {
   border-radius: 50%;
   border: none;
   box-shadow: none;
-  background: rgba(53, 57, 60, 0.25);
+  background: #8a8d90;
   padding: 5px;
   transition: all 0.2s ease-in-out;
   margin: 0 -50px;
@@ -522,7 +522,7 @@ span.optional {
 
 input.invalid,
 textarea.invalid {
-  border: 1px solid #fd5f6b;
+  border: 1px solid #d92b3a;
 }
 
 input[type="url"],
@@ -613,7 +613,7 @@ input[type="checkbox"] {
 }
 
 .step.active, .step.complete {
-  background-color: #00bcb8;
+  background-color: #16807d;
 }
 
 .step.active .step__title,
@@ -709,7 +709,7 @@ fieldset {
 input,
 textarea {
   padding: 1em;
-  border: 1px solid rgba(53, 57, 60, 0.2);
+  border: 1px solid #8a8d90;
   border-radius: 4px;
 }
 
