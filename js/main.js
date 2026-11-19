@@ -11,8 +11,12 @@
   initSlider();
   animateHTML().init();
 
-  // wait for svg
+  // wait for svg (skip the spinning wheels if the visitor prefers reduced motion)
   var checkForPiggy = setInterval(function() {
+    if (prefersReducedMotion()) {
+      clearInterval(checkForPiggy);
+      return;
+    }
     if (document.querySelector('.mopedPiggy')) {
        initWheelTurn('.mopedPiggy');
        clearInterval(checkForPiggy);
@@ -52,6 +56,14 @@
     // csrf_value: document.querySelector('input[name="csrf_value"]')
   };
 
+  // Clear a field's error state as soon as the visitor edits it
+  document.querySelectorAll('#landing-page-assessment input, #landing-page-assessment textarea').forEach(function (el) {
+    el.addEventListener('input', function () {
+      el.removeAttribute('aria-invalid');
+      el.classList.remove('invalid');
+    });
+  });
+
   // Set the timezone field to the visitor's local timezone
   form.appTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -68,7 +80,9 @@
       firstNavStep.classList.remove('active');
       firstNavStep.classList.add('complete');
       secondNavStep.classList.add('active');
+      setCurrentStep(secondNavStep);
       document.getElementById('contactForm').scrollIntoView();
+      form.firstName.focus();
     } else {
       // form.messages.style.display = 'block';
     }
@@ -105,15 +119,18 @@
       secondNavStep.classList.add('complete');
       secondNavStep.classList.remove('active');
       thirdNavStep.classList.add('active');
+      setCurrentStep(thirdNavStep);
 
       // display step three
       thirdStep.classList.remove('hidden');
       document.querySelector('.firstName').innerText = document.querySelector('#firstName').value; 
       document.querySelector('.thx-gif').setAttribute('src', 'https://media.giphy.com/media/WZ4M8M2VbauEo/source.gif');
       document.getElementById('contactForm').scrollIntoView();
+      document.getElementById('thanksHeading').focus();
 
-    }).catch((error) =>
-      alert(error))
+    }).catch(function () {
+      showError('Oops, something went wrong sending your request. Please try again.', form.submit);
+    })
   }
 
   // Listen for form submissions
@@ -221,48 +238,82 @@
 
 /* form functions */
 function validateFields(step) {
-
-  var errorMessage = document.querySelector('#errorMessage');
+  var invalid = [];
 
   switch(step){
     case 'one':
-      var url = document.querySelector('#url').value,
+      var url = document.querySelector('#url'),
           interest = document.querySelector('input[type="checkbox"]:checked'),
           urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 
-      if(url.match(urlRegex) && interest){
-        errorMessage.classList.remove('active');
+      markInvalid(url, !url.value.match(urlRegex), invalid);
+      if (!interest) invalid.push(document.querySelector('#check__factors'));
+
+      if (!invalid.length) {
+        clearError();
         return true;
-      } 
-      else {
-        document.getElementById('contactForm').scrollIntoView();
-        errorMessage.innerText = 'Please ensure your landing page URL is correct and you have at least one interest checked.';
-        errorMessage.classList.add('active');
       }
+      showError('Please ensure your landing page URL is correct and you have at least one interest checked.', invalid[0]);
     break;
 
     case 'two':
-      var firstName = document.querySelector('#firstName').value,
-          lastName = document.querySelector('#lastName').value,
-          email = document.querySelector('#email').value,
-          emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
-          appDate = document.querySelector('#date').value,
-          appTime = document.querySelector('#time').value,
-          appTimezone = document.querySelector('#timezone').value;
+      var emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+          email = document.querySelector('#email');
 
-      if(firstName && lastName && email.match(emailRegex) && appDate && appTime && appTimezone){
-        errorMessage.classList.remove('active');
+      ['#firstName', '#lastName'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        markInvalid(el, !el.value.trim(), invalid);
+      });
+      markInvalid(email, !email.value.match(emailRegex), invalid);
+      ['#date', '#time'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        markInvalid(el, !el.value, invalid);
+      });
+
+      if (!invalid.length && document.querySelector('#timezone').value) {
+        clearError();
         return true;
-      } 
-      else {
-        document.getElementById('contactForm').scrollIntoView();
-        errorMessage.innerText = 'Please complete all the fields below before moving on to the next step.';
-        errorMessage.classList.add('active');
       }
+      showError('Please complete all the fields below before moving on to the next step.', invalid[0]);
     break;
   }
+}
 
-  
+function markInvalid(el, isInvalid, list) {
+  if (isInvalid) {
+    el.setAttribute('aria-invalid', 'true');
+    el.classList.add('invalid');
+    list.push(el);
+  } else {
+    el.removeAttribute('aria-invalid');
+    el.classList.remove('invalid');
+  }
+}
+
+// #errorMessage is a role="alert" live region: setting its text announces it
+function showError(message, focusTarget) {
+  var errorMessage = document.querySelector('#errorMessage');
+  errorMessage.textContent = message;
+  errorMessage.classList.add('active');
+  document.getElementById('contactForm').scrollIntoView();
+  if (focusTarget) focusTarget.focus();
+}
+
+function clearError() {
+  var errorMessage = document.querySelector('#errorMessage');
+  errorMessage.textContent = '';
+  errorMessage.classList.remove('active');
+}
+
+function setCurrentStep(stepEl) {
+  document.querySelectorAll('.form__steps .step').forEach(function (el) {
+    el.removeAttribute('aria-current');
+  });
+  stepEl.setAttribute('aria-current', 'step');
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function handleResponse(requestStatus) {
@@ -339,6 +390,7 @@ function animateHTML() {
 function initFlatpickr(flatpickr) {
   flatpickr("#date", {
     disableMobile: true,
+    allowInput: true,
     dateFormat: "m-d-Y",
     minDate: new Date().fp_incr(1), // tomorrow
     maxDate: new Date().fp_incr(14), // 2 weeks ahead
@@ -353,6 +405,7 @@ function initFlatpickr(flatpickr) {
 
   flatpickr("#time", {
     disableMobile: true,
+    allowInput: true,
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
@@ -363,6 +416,12 @@ function initFlatpickr(flatpickr) {
 }
 
 function initSlider() {
+  // tiny-slider loads async; wait for it instead of throwing (which would stop the form from wiring up)
+  if (typeof tns !== 'function') {
+    clearTimeout(initSlider.retry);
+    initSlider.retry = setTimeout(initSlider, 100);
+    return;
+  }
   // if mobile & the carousel hasn't been initiated
   if (window.innerWidth < 1000 && !document.querySelector('.tns-outer')) {
     slider = tns({
@@ -400,8 +459,11 @@ function scrollAnchors(e) {
   window.scrollBy({
     top: originalTop,
     left: 0,
-    behavior: 'smooth'
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth'
   });
+  // move keyboard/screen reader focus to the section we scrolled to
+  if (!targetAnchor.hasAttribute('tabindex')) targetAnchor.setAttribute('tabindex', '-1');
+  targetAnchor.focus({ preventScroll: true });
   var checkIfDone = setInterval(function () {
     var atBottom = window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2;
 
