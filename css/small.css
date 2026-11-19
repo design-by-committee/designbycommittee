@@ -259,7 +259,7 @@ img {
 }
 
 a {
-  color: #00bcb8;
+  color: #008482;
   text-decoration: none;
   transition: all 0.2s ease-in-out;
 }
@@ -292,6 +292,7 @@ main {
 
 .btn {
   color: #fff;
+  font-size: max(1.17rem, calc(1rem + 0.25vw));
   padding: 0.75em 0.75em 0.65em;
   border-radius: 30px;
   margin: 0.5em auto 0;
@@ -303,8 +304,8 @@ main {
 }
 
 .btn-prim {
-  background-color: #fd5f6b;
-  box-shadow: 0 15px 30px -15px #fd5f6b;
+  background-color: #fc5f6b;
+  box-shadow: 0 15px 30px -15px #fc5f6b;
 }
 
 .btn:hover,
@@ -352,7 +353,7 @@ ul li::before {
 }
 
 .arrow-right::after {
-  border-left-color: #00bcb8;
+  border-left-color: #008482;
   margin-left: 10px;
   bottom: 10px;
 }
@@ -382,7 +383,7 @@ header {
   font-size: 1rem;
   padding: 0.5em 0;
   text-transform: uppercase;
-  color: #00bcb8;
+  color: #008482;
   position: relative;
   padding-right: 1em;
 }
@@ -499,7 +500,7 @@ header {
   border-radius: 50%;
   border: none;
   box-shadow: none;
-  background: rgba(53, 57, 60, 0.25);
+  background: #8a8d90;
   padding: 5px;
   transition: all 0.2s ease-in-out;
   margin: 0 -50px;
@@ -522,7 +523,7 @@ span.optional {
 
 input.invalid,
 textarea.invalid {
-  border: 1px solid #fd5f6b;
+  border: 1px solid #fc5f6b;
 }
 
 input[type="url"],
@@ -605,7 +606,7 @@ input[type="checkbox"] {
   width: 100%;
   cursor: initial;
   pointer-events: none;
-  font-size: calc(1rem + 0.25vw);
+  font-size: max(1.17rem, calc(1rem + 0.25vw));
 }
 
 .step, .step a, .step__nr {
@@ -613,13 +614,17 @@ input[type="checkbox"] {
 }
 
 .step.active, .step.complete {
-  background-color: #00bcb8;
+  background-color: #00a6a3;
 }
 
 .step.active .step__title,
 .step.complete .step__title,
 .step.active .step__nr {
   color: #fff;
+}
+
+.step.active .step__nr {
+  font-weight: 700;
 }
 
 .step.active .step__title,
@@ -638,7 +643,7 @@ input[type="checkbox"] {
 .step .step__nr:after {
   counter-increment: step;
   content: counter(step);
-  font-size: 1.125rem;
+  font-size: 1.17rem;
   transition: border 0.2s ease-in-out;
 }
 
@@ -709,7 +714,7 @@ fieldset {
 input,
 textarea {
   padding: 1em;
-  border: 1px solid rgba(53, 57, 60, 0.2);
+  border: 1px solid #8a8d90;
   border-radius: 4px;
 }
 
@@ -836,12 +841,8 @@ footer,
     padding: 0 1em;
   }
 
-  .btn {
-    font-size: 0.9em;
-  }
-
   .step .step__link {
-    font-size: 0.875rem;
+    font-size: 1.17rem;
   }
 
   .step__nr {
@@ -884,7 +885,7 @@ button.btn {
   border: 0;
   width: 100%;
   font-family: inherit;
-  font-size: calc(1rem + 0.25vw);
+  font-size: max(1.17rem, calc(1rem + 0.25vw));
   line-height: 1.6;
 }
 

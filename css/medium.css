@@ -259,7 +259,7 @@ input#time {
 
 .step .step__link {
   min-height: 70px;
-  font-size: calc(1rem + 0.25vw);
+  font-size: max(1.17rem, calc(1rem + 0.25vw));
 }
 
 .step__nr {
