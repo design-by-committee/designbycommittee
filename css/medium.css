@@ -294,8 +294,8 @@ input#time {
 }
 
 /** footer **/
-footer, .footer__item {
-  padding: 0.5em 0; 
+footer {
+  padding: 0.5em 0;
 }
 .footer__logo {
   grid-column: 2 / 4;
@@ -304,11 +304,6 @@ footer, .footer__item {
 
 .footer__text {
   grid-column: 4 / 10;
-}
-
-.footer__nav {
-  grid-column: 10 / 12;
-  text-align: right;
 }
 
 .footer__logo {
@@ -323,7 +318,6 @@ footer, .footer__item {
   margin-right: 0;
 }
 
-.footer__item,
 .footer__text {
   font-size: 0.85em;
 }
