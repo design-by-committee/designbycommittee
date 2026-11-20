@@ -477,8 +477,12 @@ input#date {
   background-size: 16px;
 }
 
+/* sized to the label text and centred on the label's first line */
 input[type="checkbox"] {
-  margin: 5px 0.5em 0 0;
+  flex: none;
+  width: 1.125em;
+  height: 1.125em;
+  margin: calc((1lh - 1.125em) / 2) 0.75em 0 0;
 }
 
 .form {
@@ -657,6 +661,7 @@ textarea {
 .form__wrapper .check__wrapper {
   margin-bottom: 1em;
   display: flex;
+  align-items: flex-start;
 }
 
 .form__wrapper .btn {
@@ -673,17 +678,10 @@ footer {
   margin-top: 6em;
 }
 
-.footer__nav {
-  margin: 5px 0 0;
-  text-align: center;
-}
-
-footer,
-.footer__item {
+footer {
   padding: 1em 0.5em;
 }
 
-.footer__item,
 .footer__text {
   color: var(--color-text);
   font-family: Avenir, sans-serif;
