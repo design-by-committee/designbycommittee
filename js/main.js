@@ -39,10 +39,16 @@ function initReveal() {
 function initCarousel() {
   if (typeof tns !== 'function') return; // CDN blocked or failed its integrity check: keep the static layout
   const mobile = matchMedia('(width < 1000px)');
+  const host = document.querySelector('.carousel').parentElement;
   let slider = null;
 
+  // tiny-slider measures the carousel's parent on init and throws if the page has no layout width yet
+  // (e.g. loaded in a hidden iframe or a prerendered tab), so wait until the carousel has a width.
+  // Look the carousel up each time: destroy() rebuilds it from HTML, replacing the element.
+  const hasWidth = () => host.querySelector(':scope > .carousel').getBoundingClientRect().width > 0;
+
   const update = () => {
-    if (mobile.matches && !slider) {
+    if (mobile.matches && !slider && hasWidth()) {
       slider = tns({
         container: '.carousel',
         items: 1,
@@ -58,6 +64,7 @@ function initCarousel() {
 
   update();
   mobile.addEventListener('change', update);
+  new ResizeObserver(update).observe(host); // retry once a zero-width layout gets a real width
 }
 
 /* Two-step assessment form, submitted to Netlify Forms with fetch. */
