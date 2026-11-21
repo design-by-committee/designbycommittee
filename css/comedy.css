@@ -1,0 +1,1063 @@
+/* Comedy landing page (/comedy/). Loads after small.css and medium.css and only styles body.comedy. */
+
+.comedy {
+  --c-stage: #17191b;
+  --c-stage-2: #22262a;
+  --c-on-dark: #f6f3ee;
+  --c-on-dark-muted: #bfc3c7;    /* 9.6:1 on --c-stage */
+  --c-paper: #faf6f0;
+  --c-coral: #fc5f6b;            /* text on dark: 6.2:1 on --c-stage */
+  --c-coral-ink: #c42f3b;        /* coral text on light: 5.2:1 on white */
+  --c-teal: #00bcb8;
+  --c-pink: #ffb3b9;
+  --c-blue: #c1d4ee;
+  --c-wrap: 1180px;
+  --c-gutter: 16px;
+
+  background: var(--color-surface);
+
+  @media (width >= 40em) {
+    --c-gutter: 24px;
+  }
+}
+
+/* main is a plain block here: sections go full-bleed and .c-wrap handles the gutter */
+.comedy main {
+  padding: 0;
+  background: none;
+}
+
+.comedy .c-wrap {
+  max-width: calc(var(--c-wrap) + 2 * var(--c-gutter));
+  margin-inline: auto;
+  padding-inline: var(--c-gutter);
+}
+
+/** type **/
+.comedy :is(h1, h2, h3) {
+  text-align: left;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5em;
+  text-wrap: balance;
+}
+
+.comedy h1 {
+  font-size: clamp(2.75rem, 1.6rem + 4.6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.02;
+}
+
+.comedy h2 {
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.comedy h3 {
+  font-size: clamp(1.3rem, 1.1rem + 0.6vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* zero class specificity, so a component can opt out (e.g. the package badge) */
+:where(.comedy) p {
+  text-wrap: pretty;
+}
+
+.c-lead {
+  font-size: calc(1.05rem + 0.3vw);
+  line-height: 1.6;
+  max-width: 38em;
+  margin-bottom: 2em;
+}
+
+.c-lead--narrow {
+  max-width: 34em;
+}
+
+/** surfaces **/
+.c-section {
+  padding-block: clamp(4rem, 3rem + 5vw, 7rem);
+}
+
+.c-paper {
+  background: var(--c-paper);
+}
+
+.c-dark {
+  background: var(--c-stage);
+  color: var(--c-on-dark);
+
+  & :is(h1, h2, h3) {
+    color: var(--c-on-dark);
+  }
+
+  & a:not(.btn) {
+    color: var(--c-teal);
+  }
+
+  & :is(a, button, input, select, textarea, summary):focus-visible {
+    outline-color: var(--c-on-dark);
+  }
+}
+
+/** skip link **/
+.c-skip {
+  position: absolute;
+  left: 1rem;
+  top: -10rem;
+  z-index: 10;
+  padding: 0.5em 1em;
+  background: var(--c-on-dark);
+  color: var(--c-stage);
+  font-weight: 700;
+  border-radius: 4px;
+
+  &:focus-visible {
+    top: 1rem;
+  }
+}
+
+/** header **/
+.comedy .c-header {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.c-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.comedy .c-logo {
+  margin-right: auto;
+  display: flex;
+}
+
+.c-header .logo__text {
+  fill: #fff;
+  opacity: 0.9;
+}
+
+.c-nav {
+  display: none;
+  gap: 1.75rem;
+
+  @media (width >= 56em) {
+    display: flex;
+  }
+}
+
+.c-dark a.c-nav__link {
+  color: var(--c-on-dark-muted);
+  font-size: 1rem;
+  font-weight: 700;
+  transition: color var(--ease);
+
+  &:hover {
+    color: var(--c-on-dark);
+  }
+}
+
+.c-dark a.c-header__cta {
+  color: var(--c-on-dark);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.55em 1.1em 0.4em;
+  border: 2px solid var(--c-coral);
+  border-radius: 3em;
+  transition: background-color var(--ease);
+
+  &:hover {
+    background: rgb(252 95 107 / 0.18);
+  }
+}
+
+/** buttons **/
+.comedy .btn {
+  margin: 0;
+  display: inline-block;
+  padding: 0.85em 1.75em 0.65em;
+  border-radius: 3em;
+  max-width: none;
+}
+
+.comedy .btn-ghost {
+  color: var(--c-on-dark);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.55);
+
+  &:is(:hover, :focus-visible) {
+    background: rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 0 0 2px #fff;
+  }
+}
+
+.comedy .btn-outline {
+  color: var(--c-coral-ink);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--c-coral-ink);
+
+  &:is(:hover, :focus-visible) {
+    color: #fff;
+    background: var(--c-coral-ink);
+    box-shadow: inset 0 0 0 2px var(--c-coral-ink);
+  }
+}
+
+.c-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  & .btn {
+    flex: 1 1 auto;
+
+    @media (width >= 40em) {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+/** hero **/
+.c-hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 10%, rgb(0 188 184 / 0.14), transparent 70%),
+    radial-gradient(ellipse 70% 60% at 10% 110%, rgb(252 95 107 / 0.14), transparent 70%),
+    var(--c-stage);
+}
+
+.c-hero__inner {
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+
+  @media (width >= 56em) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 4rem;
+  }
+}
+
+.c-hero__lead {
+  color: var(--c-on-dark-muted);
+  font-size: calc(1.05rem + 0.35vw);
+  line-height: 1.6;
+  max-width: 32em;
+  margin-bottom: 2rem;
+}
+
+.c-dark .c-hero__proof {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--c-on-dark-muted);
+}
+
+/* screenshot of a client site in a browser frame, with a WordPress "Edit show" card */
+.c-shot {
+  margin: 0;
+}
+
+.c-shot__stage {
+  position: relative;
+
+  @media (width >= 40em) {
+    padding-bottom: 7rem;
+  }
+}
+
+.c-browser {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #2a2e31;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08), 0 40px 80px -30px rgb(0 0 0 / 0.8);
+
+  & img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+  }
+}
+
+.c-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.c-browser__dots {
+  display: flex;
+  gap: 0.35rem;
+
+  & i {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #5b6166;
+  }
+}
+
+.c-browser__url {
+  flex: 0 1 18rem;
+  margin-inline: auto;
+  padding: 0.2rem 0.75rem 0.1rem;
+  border-radius: 6px;
+  background: #1d2023;
+  color: var(--c-on-dark-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* plain system type, like the WordPress dashboard */
+.c-admin {
+  position: relative;
+  width: min(100% - 1.5rem, 15.5rem);
+  margin: -2.5rem 0 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  color: #1d2327;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08), 0 30px 60px -20px rgb(0 0 0 / 0.75);
+
+  @media (width >= 40em) {
+    position: absolute;
+    bottom: 0;
+    left: -1.5rem;
+    margin: 0;
+  }
+
+  @media (width >= 56em) {
+    left: -3rem;
+  }
+}
+
+.c-admin__bar {
+  padding: 0.55rem 0.85rem;
+  background: #1d2327;
+  color: #fff;
+  font-weight: 600;
+}
+
+.c-admin__body {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.c-admin__label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: #50575e;
+}
+
+.c-admin__input {
+  display: block;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c-admin__input--muted {
+  color: #50575e;
+}
+
+.c-admin__cols {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0.5rem;
+}
+
+.c-admin__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+
+  & span {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    background: #f0f0f1;
+    font-size: 11px;
+  }
+
+  & .c-admin__add {
+    border-style: dashed;
+    background: none;
+    color: #2271b1;
+  }
+}
+
+.c-admin__button {
+  justify-self: end;
+  padding: 0.3rem 0.9rem;
+  border-radius: 3px;
+  background: #2271b1;
+  color: #fff;
+  font-weight: 600;
+}
+
+.c-dark .c-shot__caption {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--c-on-dark-muted);
+
+  @media (width >= 40em) {
+    text-align: right;
+  }
+}
+
+/** audience cards **/
+.c-cards {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+
+  @media (width >= 48em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.c-card {
+  padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.1), 0 20px 40px -28px rgb(0 0 0 / 0.35);
+  border-top: 6px solid var(--card-accent, var(--c-teal));
+}
+
+.c-card--pink { --card-accent: var(--c-pink); }
+.c-card--teal { --card-accent: var(--c-teal); }
+.c-card--blue { --card-accent: var(--c-blue); }
+
+/** why **/
+.c-why {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2.5rem;
+
+  @media (width >= 48em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+}
+
+.c-why__item .arrow-right {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/** fringe **/
+.c-fringe {
+  background:
+    radial-gradient(ellipse 60% 60% at 90% 30%, rgb(0 188 184 / 0.16), transparent 70%),
+    var(--c-stage);
+}
+
+.c-fringe__inner {
+  display: grid;
+  gap: 3rem;
+  align-items: start;
+
+  @media (width >= 56em) {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 4rem;
+  }
+}
+
+.c-fringe .c-lead {
+  color: var(--c-on-dark-muted);
+}
+
+.c-timeline {
+  display: grid;
+  gap: 0;
+  border-left: 2px solid rgb(255 255 255 / 0.18);
+  margin-left: 0.4rem;
+
+  & li {
+    position: relative;
+    display: grid;
+    gap: 0.15rem;
+    padding: 0 0 1.5rem 1.5rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.45rem;
+      top: 0.35rem;
+      width: 0.8rem;
+      height: 0.8rem;
+      border-radius: 50%;
+      background: var(--c-coral);
+      box-shadow: 0 0 0 4px var(--c-stage);
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+}
+
+.c-timeline__when {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-teal);
+  line-height: 1.6;
+}
+
+.c-timeline__what {
+  color: var(--c-on-dark-muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+/* a paper flyer taped to the wall */
+.c-flyer {
+  position: relative;
+  background: var(--c-paper);
+  color: var(--color-text);
+  padding: 2.5rem 1.5rem 1.75rem;
+  border-radius: 4px;
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.6);
+
+  @media (width >= 40em) {
+    padding: 2.75rem 2.25rem 2rem;
+  }
+
+  @media (width >= 56em) {
+    transform: rotate(1.5deg);
+    margin-top: 1rem;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 110px;
+    height: 28px;
+    translate: -50% 0;
+    rotate: -3deg;
+    background: rgb(255 179 185 / 0.85);
+  }
+
+  & h3 {
+    color: var(--color-text);
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
+    line-height: 1.05;
+    margin-bottom: 0.8em;
+  }
+
+  & .btn {
+    display: block;
+    margin-top: 1.5rem;
+  }
+}
+
+.c-fringe__local {
+  margin-top: 3rem;
+  color: var(--c-on-dark-muted);
+  font-size: 1rem;
+}
+
+/** checklists (override the site's arrow bullets) **/
+/* The tick is a symmetric SVG, so its visual centre is its box centre. It is centred on the first
+   line using lh (half the line height), nudged up 0.1em to sit between the x-height and cap height
+   of Khula, so it stays aligned whatever the font size or line height. */
+.comedy .c-checks li {
+  --tick: 0.85em;
+  padding-left: 1.75em;
+  margin-bottom: 0.55em;
+  line-height: 1.45;
+
+  &::before {
+    content: '';
+    top: calc(0.5lh - 0.1em - var(--tick) / 2);
+    left: 0.15em;
+    width: var(--tick);
+    height: var(--tick);
+    border: 0;
+    background: var(--c-teal);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8.5l4 4 8-9' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+}
+
+/** process **/
+.c-steps {
+  display: grid;
+  gap: 1.25rem;
+  counter-reset: none;
+
+  @media (width >= 48em) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (width >= 72em) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Registered so it computes to px on the h3, using the heading's own lh and em, and the smaller
+   number circle inherits that length rather than re-resolving it against its own font size. */
+@property --c-cap-centre {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+.c-step {
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: var(--c-paper);
+
+  & h3 {
+    /* Khula's cap height is centred 0.145em above the middle of its line box */
+    --c-cap-centre: calc(0.5lh - 0.145em);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+}
+
+.c-step__nr {
+  --size: 2.1rem;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  /* centre the circle on the first line of the heading, however many lines it wraps to */
+  margin-top: calc(var(--c-cap-centre) - var(--size) / 2);
+  /* line-height 1 puts the digit's cap centre 0.145em above the box centre; this padding evens it out */
+  padding-top: 0.29em;
+  border-radius: 50%;
+  background: var(--c-stage);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/** packages **/
+.c-packages {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  align-items: stretch;
+
+  @media (width >= 60em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+  }
+}
+
+.c-package {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem 1.75rem;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.1);
+
+  @media (width >= 40em) {
+    padding: 2.25rem 2rem 2rem;
+  }
+
+  & h3 {
+    font-size: 1.75rem;
+    margin-bottom: 0.1em;
+  }
+
+  & .c-checks {
+    margin: 1.5rem 0 2rem;
+    flex: 1;
+  }
+
+  & .btn {
+    display: block;
+    text-align: center;
+  }
+}
+
+.c-package--featured {
+  position: relative;
+  background: var(--c-stage);
+  box-shadow: 0 0 0 3px var(--c-coral), 0 30px 60px -25px rgb(0 0 0 / 0.5);
+
+  @media (width >= 60em) {
+    padding-block: 3rem 2.5rem;
+  }
+
+  & .c-package__for,
+  & .c-package__time,
+  & .c-checks li {
+    color: var(--c-on-dark-muted);
+  }
+}
+
+.c-package__badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  padding: 0.45em 1em 0.3em;
+  border-radius: 3em;
+  background: var(--c-coral);
+  color: #1a1a1a;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-wrap: nowrap;
+}
+
+.c-package__for {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+.c-package__price {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  color: inherit;
+}
+
+.c-package__amount {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-right: 0.15em;
+}
+
+.c-package__from {
+  font-weight: 700;
+}
+
+.c-package__time {
+  margin-top: 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.c-fineprint {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  max-width: 44em;
+  margin-inline: auto;
+}
+
+/** work **/
+.c-work {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+
+  @media (width >= 48em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.c-work__item {
+  padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: 12px;
+  background: var(--c-paper);
+  border-top: 6px solid var(--card-accent);
+
+  & h3 {
+    margin-bottom: 0.25em;
+  }
+}
+
+.c-work__meta {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  margin-bottom: 0.9rem;
+}
+
+.c-quote-card {
+  margin-top: 3rem;
+  text-align: center;
+
+  & blockquote p {
+    font-size: calc(1.2rem + 0.6vw);
+    font-weight: 700;
+    line-height: 1.45;
+    max-width: 34em;
+    margin-inline: auto;
+  }
+
+  & figcaption {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-top: 1.5rem;
+    text-align: left;
+  }
+
+  & img {
+    flex: none;
+  }
+}
+
+.c-quote-card__name {
+  display: block;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.c-quote-card__role {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+/** faq **/
+.c-faq {
+  display: grid;
+  gap: 2rem;
+
+  @media (width >= 56em) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 4rem;
+  }
+}
+
+.c-faq__list details {
+  border-bottom: 1px solid rgb(53 57 60 / 0.15);
+
+  &:first-child {
+    border-top: 1px solid rgb(53 57 60 / 0.15);
+  }
+
+  & summary {
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+    padding: 1.15rem 2.5rem 1rem 0;
+    font-size: calc(1.05rem + 0.25vw);
+    font-weight: 700;
+    line-height: 1.35;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: '+';
+      position: absolute;
+      right: 0.25rem;
+      top: 50%;
+      translate: 0 -50%;
+      font-size: 1.75rem;
+      font-weight: 400;
+      color: var(--c-coral-ink);
+      transition: rotate var(--ease);
+    }
+  }
+
+  &[open] summary::after {
+    rotate: 45deg;
+  }
+
+  & p {
+    padding: 0 0 1.25rem;
+    max-width: 40em;
+  }
+}
+
+/** enquiry **/
+.c-enquiry .c-wrap {
+  display: grid;
+  gap: 2.5rem;
+
+  @media (width >= 60em) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 4rem;
+    align-items: start;
+  }
+}
+
+.c-enquiry .c-lead {
+  color: var(--c-on-dark-muted);
+}
+
+.c-form {
+  background: #fff;
+  color: var(--color-text);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 30px 60px -25px rgb(0 0 0 / 0.6);
+
+  @media (width >= 40em) {
+    padding: 2.25rem;
+  }
+
+  & :is(a, button, input, select, textarea, summary):focus-visible {
+    outline-color: var(--color-text);
+  }
+
+  & form > label,
+  & .c-form__row > label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+  }
+
+  & :is(input[type="text"], input[type="email"], select, textarea) {
+    margin-top: 0.4rem;
+    font-weight: 400;
+  }
+
+  & select {
+    display: block;
+    width: 100%;
+    padding: 0.9em 2.5em 0.9em 1em;
+    font: inherit;
+    font-size: calc(0.875rem + 0.25vw);
+    color: var(--color-text);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2335393c' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 1em center;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    appearance: none;
+  }
+
+  & .btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+.c-form__row {
+  @media (width >= 40em) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1rem;
+  }
+}
+
+.c-form__group {
+  margin-bottom: 1.25rem;
+  text-align: left;
+
+  & legend {
+    font-weight: 700;
+    font-size: calc(0.875rem + 0.25vw);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+
+  &.invalid .c-radio {
+    box-shadow: inset 0 0 0 1px var(--color-error);
+  }
+}
+
+.c-radios {
+  display: grid;
+  gap: 0.5rem;
+
+  @media (width >= 30em) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.c-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem 0.6rem;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  cursor: pointer;
+  transition: box-shadow var(--ease), background-color var(--ease);
+
+  &:has(:checked) {
+    background: rgb(0 188 184 / 0.08);
+    box-shadow: inset 0 0 0 2px #008482;
+    font-weight: 700;
+  }
+
+  & input {
+    flex: none;
+    width: 1.1em;
+    height: 1.1em;
+    margin: 0 0 0.15em;
+    padding: 0;
+    accent-color: #008482;
+  }
+}
+
+.c-form__error {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-error);
+  margin-bottom: 1rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.c-form__thanks {
+  padding: 2rem 0;
+  text-align: center;
+
+  & h3 {
+    text-align: center;
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
+  }
+}
+
+/* honeypot: hidden from people, visible to naive bots */
+.c-hidden-field {
+  position: absolute;
+  left: -9999px;
+}
+
+/** footer **/
+.comedy footer {
+  margin-top: 0;
+}
+
+/** medium.css sets a desktop font size on every h3; keep this page's scale **/
+@media (width >= 64em) {
+  .comedy h3 {
+    font-size: 1.6rem;
+  }
+
+  .comedy .c-package h3 {
+    font-size: 1.85rem;
+  }
+
+  .comedy .c-flyer h3 {
+    font-size: 2.2rem;
+  }
+
+  .comedy .btn {
+    padding: 0.85em 2em 0.65em;
+  }
+}
