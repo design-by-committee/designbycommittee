@@ -4,7 +4,9 @@ Static HTML site. No build step, no dependencies.
 
 ## Structure
 
-- `index.html` — the site (single page; includes the Netlify form)
+- `index.html` — the main site (single page; includes the `landing-page-assessment` Netlify form)
+- `comedy/index.html` — landing page for comedians, shows and clubs (`/comedy/`; includes the
+  `comedy-enquiry` Netlify form, styled by `css/comedy.css` and scripted by `js/comedy.js`)
 - `css/`, `js/`, `img/` — assets
 - `robots.txt`, `sitemap.xml`, `favicon.ico`
 
@@ -27,7 +29,7 @@ Netlify project `design-by-committee` deploys from
 - Pull requests against `main` → Deploy Preview
 - Other branches are not deployed (branch deploys are off)
 - Base and publish directory are the repo root (`/`); there is no build command
-- Netlify Forms is enabled (used by the form in `index.html`)
+- Netlify Forms is enabled (used by the forms in `index.html` and `comedy/index.html`)
 
 ## Workflow
 
