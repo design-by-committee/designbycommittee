@@ -110,30 +110,7 @@ AssessmentForm = build_form(
 
 # Comedy enquiry (/comedy/) -----------------------------------------------------------------------------------------
 
-CLIENT_TYPES = [
-    ("Comedian", "Comedian"),
-    ("Show or showrunner", "Show or showrunner"),
-    ("Club or venue", "Club or venue"),
-    ("Something else", "Something else"),
-]
-
-PACKAGES = [
-    ("not-sure", "Not sure yet"),
-    ("solo", "Solo (comedians)"),
-    ("show", "Show (shows and festival runs)"),
-    ("venue", "Venue (clubs and venues)"),
-]
-
-DEADLINES = [
-    (label, label)
-    for label in [
-        "As soon as possible",
-        "In the next two months",
-        "Before the Fringe programme launch (June 2027)",
-        "Before the Fringe (August 2027)",
-        "I’m flexible",
-    ]
-]
+CLIENT_TYPES = [(label, label) for label in ["Performer", "Showrunner", "Venue owner", "Something else"]]
 
 
 class ComedyEnquiryFormBase(LeadForm):
@@ -148,12 +125,10 @@ ComedyEnquiryForm = build_form(
     "ComedyEnquiryForm",
     ComedyEnquiryFormBase,
     {
-        "name": forms.CharField(label="Your name or act name", max_length=200),
+        "name": forms.CharField(label="Your name", max_length=200),
         "email": forms.EmailField(label="Email"),
         "client-type": forms.ChoiceField(label="I’m a…", choices=CLIENT_TYPES),
-        "package": forms.ChoiceField(label="Package", choices=PACKAGES, initial="not-sure"),
-        "deadline": forms.ChoiceField(label="I need it live", choices=DEADLINES),
-        "link": forms.CharField(label="Current website or socials", required=False, max_length=500),
+        "link": forms.CharField(label="Current website, if any", required=False, max_length=500),
         "details": forms.CharField(label="Tell us about your show, venue or act", required=False, max_length=5000),
     },
 )

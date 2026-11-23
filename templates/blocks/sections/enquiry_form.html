@@ -22,7 +22,7 @@
         </p>
 
         <div class="c-form__row">
-          <label for="c-name">Your name or act name
+          <label for="c-name">Your name
             <input type="text" id="c-name" name="name" autocomplete="name" required>
           </label>
           <label for="c-email">Email
@@ -40,25 +40,8 @@
           </div>
         </fieldset>
 
-        <div class="c-form__row">
-          <label for="c-package">Package
-            <select id="c-package" name="package">
-              {% for value_, label in packages %}
-                <option value="{{ value_ }}">{{ label }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label for="c-when">I need it live
-            <select id="c-when" name="deadline">
-              {% for value_, label in deadlines %}
-                <option>{{ label }}</option>
-              {% endfor %}
-            </select>
-          </label>
-        </div>
-
-        <label for="c-link">Current website or socials <span class="optional">(optional)</span>
-          <input type="text" id="c-link" name="link" placeholder="e.g. instagram.com/yourname"
+        <label for="c-link">Current website, if any
+          <input type="text" id="c-link" name="link" placeholder="e.g. yourname.com"
             autocapitalize="none" spellcheck="false">
         </label>
 

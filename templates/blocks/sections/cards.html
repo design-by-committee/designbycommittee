@@ -7,6 +7,12 @@
       <div class="c-work">
         {% for card in value.cards %}
           <article class="c-work__item c-card--{{ card.colour }}">
+            {% if card.image %}
+              <div class="c-browser c-browser--card">
+                <div class="c-browser__bar" aria-hidden="true"><span class="c-browser__dots"><i></i><i></i><i></i></span></div>
+                {% image card.image width-800 loading="lazy" decoding="async" %}
+              </div>
+            {% endif %}
             <h3>{{ card.title }}</h3>
             {% if card.meta %}<p class="c-work__meta">{{ card.meta }}</p>{% endif %}
             <p>{{ card.text }}</p>

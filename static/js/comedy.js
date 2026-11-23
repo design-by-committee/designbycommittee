@@ -1,23 +1,21 @@
-// Landing pages such as /comedy/: package pre-selection and the quote request form (handled by leads/views.py).
+// Landing pages such as /comedy/: links to the quote form and the quote request form (handled by leads/views.py).
 // Runs as a module, so it is deferred and the DOM is parsed by now.
 
 const form = document.getElementById('comedy-enquiry');
 
 if (form) {
-  initPackageLinks(form);
+  initQuoteLinks();
   initEnquiry(form);
 }
 
-/* "Choose Show" etc. preselect that package, scroll to the quote section and move focus there.
+/* "Choose Show" etc. scroll to the quote section and move focus there.
    A native hash jump would reset focus after this handler, so the scroll is done here instead. */
-function initPackageLinks(form) {
-  const select = form.elements.namedItem('package');
+function initQuoteLinks() {
   for (const link of document.querySelectorAll('a[data-package]')) {
     link.addEventListener('click', (event) => {
       const target = document.querySelector(link.hash);
       if (!target) return;
       event.preventDefault();
-      select.value = link.dataset.package;
       target.scrollIntoView(); // honours the stylesheet's smooth scrolling and reduced-motion setting
       history.pushState(null, '', link.hash);
       if (!target.hasAttribute('tabindex')) target.tabIndex = -1;

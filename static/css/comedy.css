@@ -606,6 +606,7 @@
 .c-steps {
   display: grid;
   gap: 1.25rem;
+  margin-top: 2.5rem; /* the same space as other card grids when there's no lead paragraph */
   counter-reset: none;
 
   @media (width >= 48em) {
@@ -655,6 +656,31 @@
   color: #fff;
   font-size: 1rem;
   line-height: 1;
+}
+
+/* a step outside the core process, set apart with a dashed outline */
+.c-step-extra {
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  border: 2px dashed rgb(53 57 60 / 0.22);
+  border-radius: 12px;
+
+  & h3 {
+    margin-bottom: 0.4em;
+  }
+
+  & p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.c-step-extra__label {
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 /** packages **/
@@ -787,6 +813,22 @@
 
   & h3 {
     margin-bottom: 0.25em;
+  }
+}
+
+/* a smaller browser frame for screenshots in work cards, on a light background */
+.c-browser--card {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.12), 0 16px 32px -20px rgb(0 0 0 / 0.45);
+
+  & .c-browser__bar {
+    padding: 0.4rem 0.6rem;
+  }
+
+  & .c-browser__dots i {
+    width: 0.45rem;
+    height: 0.45rem;
   }
 }
 

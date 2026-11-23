@@ -11,5 +11,13 @@
         </li>
       {% endfor %}
     </ol>
+
+    {% if value.extra_title and value.extra_text %}
+      <div class="c-step-extra">
+        <p class="c-step-extra__label">Optional extra</p>
+        <h3>{{ value.extra_title }}</h3>
+        <p>{{ value.extra_text }}</p>
+      </div>
+    {% endif %}
   </div>
 </section>
