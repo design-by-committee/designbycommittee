@@ -71,6 +71,34 @@ Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). 
 **Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
 printed to the terminal locally). A hidden honeypot field catches simple spam bots.
 
+## Editing content from the command line
+
+Page content can be read and changed without the admin, through Wagtail's own APIs, so every change is validated
+like the page editor does it and saved as a normal revision (shown in the page's **History**, revertible there).
+Claude uses this over SSH; you can too.
+
+```bash
+ops/remote-manage.sh show_page
+```
+
+```bash
+ops/remote-manage.sh show_page /comedy/
+```
+
+```bash
+ops/remote-manage.sh edit_page /comedy/ - < changes.json
+```
+
+- `show_page` lists the pages, or prints one page's fields and blocks (with block ids) as JSON.
+- `edit_page` takes a JSON list of operations (`set_field`, `set`, `insert`, `remove`, `move`; the format is
+  described at the top of `pages/content_ops.py`). On its own it's a **dry run**: it validates the changes and prints
+  a diff. Add `--draft` to save a draft for review in the admin, or `--publish` to publish.
+- Revisions are recorded under a `claude` user that can't sign in. `--publish` refuses when someone else has an
+  unpublished draft on the page, because it would publish that too.
+- Locally, run the same commands with `uv run manage.py …`.
+- `ops/remote-manage.sh` needs an SSH key on your Render account. The Render host key is pinned in
+  `ops/render_known_hosts`.
+
 ## Comparing with the original static site
 
 To check that a template change still matches the original design, extract the original site and serve it next to

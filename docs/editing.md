@@ -19,6 +19,8 @@ Open **Pages** in the left menu, then click a page title to edit it.
 3. Click **Preview** (top right) to check it, then **Publish**. **Save draft** keeps your changes unpublished.
 
 Every published version is kept: **History** (the clock icon) shows earlier versions, and you can compare or restore them.
+Changes Claude makes from the command line appear there as **Claude (command line)**, usually as drafts for you to
+review and publish.
 
 ### Add, move or remove a section
 
