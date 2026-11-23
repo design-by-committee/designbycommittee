@@ -60,7 +60,8 @@ def notify(request, form, submission):
     message = EmailMessage(
         subject=f"New {form.title.lower()} from {name}",
         body=(
-            f"{submission.answers}\n\n"
+            f"{form.email_answers()}\n\n"
+            "---\n\n"
             f"Sent from: {submission.page_title} ({request.build_absolute_uri()})\n"
             f"All leads: {request.build_absolute_uri(reverse('leads:index'))}\n"
         ),

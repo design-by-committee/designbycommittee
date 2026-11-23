@@ -56,7 +56,10 @@ class LeadFormTests(SiteTestCase):
         self.assertEqual(email.to, ["leads@example.com"])
         self.assertEqual(email.reply_to, ["Jo Comic <jo@example.com>"])
         self.assertEqual(email.subject, "New comedy enquiry from Jo Comic")
-        self.assertIn("I’m a…: Comedian", email.body)
+        # One field per paragraph in the email; the admin keeps the compact one-per-line version
+        self.assertIn("Email: jo@example.com\n\nI’m a…: Comedian\n\nPackage: Show (shows and festival runs)", email.body)
+        self.assertIn("Email: jo@example.com\nI’m a…: Comedian\n", submission.answers)
+        self.assertTrue(email.body.startswith("Your name or act name: Jo Comic\n\nEmail:"))
 
     def test_assessment_is_saved(self):
         response = self.client.post("/", ASSESSMENT, **JSON)

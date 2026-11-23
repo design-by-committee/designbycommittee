@@ -23,9 +23,10 @@ class LeadForm(forms.Form):
         """(name, email) for listing the submission."""
         raise NotImplementedError
 
-    def answers(self):
-        """Readable "Label: value" lines of the cleaned data, for emails, the admin and exports."""
-        lines = []
+    def answer_items(self):
+        """(label, value) pairs of what the visitor filled in, in form order. Empty fields and unticked boxes are
+        left out; ticked boxes read "Yes" and choices show their label."""
+        items = []
         for name, field in self.fields.items():
             if name == HONEYPOT:
                 continue
@@ -38,8 +39,16 @@ class LeadForm(forms.Form):
                 value = dict(field.choices).get(value, value)
             if value in (None, ""):
                 continue
-            lines.append(f"{field.label}: {value}")
-        return "\n".join(lines)
+            items.append((field.label, str(value).strip()))
+        return items
+
+    def answers(self):
+        """Compact "Label: value" lines, stored with the submission for the admin and exports."""
+        return "\n".join(f"{label}: {value}" for label, value in self.answer_items())
+
+    def email_answers(self):
+        """The answers for the notification email, with a blank line between fields so they're easy to tell apart."""
+        return "\n\n".join(f"{label}: {value}" for label, value in self.answer_items())
 
 
 def build_form(class_name, base, fields):
