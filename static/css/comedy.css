@@ -606,6 +606,7 @@
 .c-steps {
   display: grid;
   gap: 1.25rem;
+  margin-top: 2.5rem; /* the same space as other card grids when there's no lead paragraph */
   counter-reset: none;
 
   @media (width >= 48em) {
