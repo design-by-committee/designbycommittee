@@ -1,0 +1,43 @@
+{% load wagtailimages_tags %}
+<section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+
+    {% if value.layout == "work" %}
+      <div class="c-work">
+        {% for card in value.cards %}
+          <article class="c-work__item c-card--{{ card.colour }}">
+            <h3>{{ card.title }}</h3>
+            {% if card.meta %}<p class="c-work__meta">{{ card.meta }}</p>{% endif %}
+            <p>{{ card.text }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="c-cards">
+        {% for card in value.cards %}
+          <article class="c-card c-card--{{ card.colour }}">
+            <h3>{{ card.title }}</h3>
+            {% if card.meta %}<p class="c-work__meta">{{ card.meta }}</p>{% endif %}
+            <p>{{ card.text }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% with testimonial=value.testimonial %}{% if testimonial %}
+      <figure class="c-quote-card">
+        <blockquote>
+          <p>“{{ testimonial.card_quote }}”</p>
+        </blockquote>
+        <figcaption>
+          {% if testimonial.logo %}{% image testimonial.logo fill-112x112 alt="" width="56" height="56" loading="lazy" decoding="async" %}{% endif %}
+          <span>
+            <span class="c-quote-card__name">{{ testimonial.name }}</span>
+            <span class="c-quote-card__role">{{ testimonial.role }}, {{ testimonial.company }}</span>
+          </span>
+        </figcaption>
+      </figure>
+    {% endif %}{% endwith %}
+  </div>
+</section>

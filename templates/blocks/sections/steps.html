@@ -1,0 +1,15 @@
+<section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+    {% if value.lead %}<p class="c-lead c-lead--narrow">{{ value.lead }}</p>{% endif %}
+
+    <ol class="c-steps">
+      {% for step in value.steps %}
+        <li class="c-step">
+          <h3><span class="c-step__nr">{{ forloop.counter }}</span> {{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>

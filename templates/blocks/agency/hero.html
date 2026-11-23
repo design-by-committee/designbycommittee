@@ -1,0 +1,13 @@
+{% load static site_tags %}
+<div class="g__c6 overlay">
+  <h1>{{ value.heading|inline_richtext }}</h1>
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="949" height="670" viewBox="0 0 949 670" class="moped fade-in" aria-hidden="true" focusable="false">
+    <image class="wheel-1" data-name="Back wheel" x="243" y="445" width="195" height="193" href="{% static 'img/moped-wheel-back.png' %}"/>
+    <image class="wheel-2" data-name="Front wheel" x="708" y="441" width="196" height="197" href="{% static 'img/moped-wheel-front.png' %}"/>
+    <image data-name="Moped Piggy" x="44" y="18" width="850" height="560" href="{% static 'img/moped-piggy.png' %}"/>
+  </svg>
+
+  <p class="lead">{{ value.lead|inline_richtext }}</p>
+  <a href="{{ value.button.url }}" class="btn btn-prim"{% if value.button.url|is_anchor %} data-focus-target{% endif %}>{{ value.button.text }}</a>
+</div>

@@ -1,0 +1,79 @@
+{% load wagtailcore_tags %}
+{% comment %}
+  The quote request form. comedy.js validates it and posts it with fetch; the ids below are what it relies on.
+  Without JavaScript the form posts normally and the page comes back with ?sent= or ?error= (see leads/views.py).
+{% endcomment %}
+{% with sent=request.GET.sent error=request.GET.error %}
+<section class="c-section {{ background_class }} c-enquiry"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <div class="c-enquiry__intro">
+      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+      {% if value.lead %}<p class="c-lead">{{ value.lead }}</p>{% endif %}
+    </div>
+
+    <div class="c-form">
+      <p id="enquiryError" class="c-form__error" role="alert">{% if error == form_name %}Please add your name, a valid email address, and tell us what kind of act you are.{% endif %}</p>
+
+      <form action="{% pageurl page %}" method="POST" id="{{ form_name }}" name="{{ form_name }}" novalidate{% if sent == form_name %} hidden{% endif %}>
+        {% csrf_token %}
+        <input type="hidden" name="form-name" value="{{ form_name }}">
+        <p class="c-hidden-field">
+          <label>Leave this empty if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+        </p>
+
+        <div class="c-form__row">
+          <label for="c-name">Your name or act name
+            <input type="text" id="c-name" name="name" autocomplete="name" required>
+          </label>
+          <label for="c-email">Email
+            <input type="email" id="c-email" name="email" autocomplete="email" inputmode="email"
+              autocapitalize="none" spellcheck="false" required>
+          </label>
+        </div>
+
+        <fieldset class="c-form__group" id="c-type">
+          <legend>I’m a…</legend>
+          <div class="c-radios">
+            {% for value_, label in client_types %}
+              <label class="c-radio"><input type="radio" name="client-type" value="{{ value_ }}"{% if forloop.first %} required{% endif %}> {{ label }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <div class="c-form__row">
+          <label for="c-package">Package
+            <select id="c-package" name="package">
+              {% for value_, label in packages %}
+                <option value="{{ value_ }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label for="c-when">I need it live
+            <select id="c-when" name="deadline">
+              {% for value_, label in deadlines %}
+                <option>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <label for="c-link">Current website or socials <span class="optional">(optional)</span>
+          <input type="text" id="c-link" name="link" placeholder="e.g. instagram.com/yourname"
+            autocapitalize="none" spellcheck="false">
+        </label>
+
+        <label for="c-details">Tell us about your show, venue or act <span class="optional">(optional)</span>
+          <textarea id="c-details" name="details" rows="4"></textarea>
+        </label>
+
+        <button type="submit" class="btn btn-prim" id="enquirySubmit">{{ value.submit_label }}</button>
+      </form>
+
+      <div class="c-form__thanks" id="enquiryThanks"{% if sent != form_name %} hidden{% endif %}>
+        <h3 tabindex="-1" id="enquiryThanksTitle">Thanks<span data-name></span>.</h3>
+        <p>{{ value.thanks_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endwith %}

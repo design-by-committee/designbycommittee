@@ -1,43 +1,139 @@
 # Design by Committee
 
-Static HTML site. No build step, no dependencies.
+The designbycommitt.ee website, being relaunched on [Wagtail CMS](https://wagtail.org/) (Wagtail 7.4 LTS on
+Django 5.2 LTS, Python 3.13). The plan, decisions and progress are in
+[docs/wagtail-relaunch-plan.md](docs/wagtail-relaunch-plan.md).
 
-## Structure
+> **Transition period:** `main` still holds the static site, which Netlify serves at https://designbycommitt.ee.
+> The Wagtail project lives on the relaunch branch until cutover (plan, Phase 8). The original HTML is now in
+> `templates/` (markup) and `pages/management/commands/import_current_site.py` (copy).
 
-- `index.html` — the main site (single page; includes the `landing-page-assessment` Netlify form)
-- `comedy/index.html` — landing page for comedians, shows and clubs (`/comedy/`; includes the
-  `comedy-enquiry` Netlify form, styled by `css/comedy.css` and scripted by `js/comedy.js`)
-- `css/`, `js/`, `img/` — assets
-- `robots.txt`, `sitemap.xml`, `favicon.ico`
+## Local development
 
-## Local preview
-
-Open `index.html` directly, or serve the folder so paths behave like production:
+Requirements: Python 3.13 and [uv](https://docs.astral.sh/uv/). There's no database server to install: locally the site
+uses SQLite (`db.sqlite3`). To use Postgres instead, set `DATABASE_URL` in `.env`.
 
 ```bash
-python3 -m http.server 8000
+uv sync
 ```
 
-Netlify Forms only work on the deployed site, not locally.
+```bash
+cp .env.example .env    # then set LOCAL_ADMIN_PASSWORD to a password of your choice
+```
+
+```bash
+uv run manage.py migrate
+```
+
+```bash
+set -a; . ./.env; set +a; DJANGO_SUPERUSER_PASSWORD="$LOCAL_ADMIN_PASSWORD" uv run manage.py createsuperuser --noinput --username "$LOCAL_ADMIN_USERNAME" --email admin@localhost
+```
+
+```bash
+uv run manage.py import_current_site --hostname localhost --port 8000
+```
+
+```bash
+uv run manage.py runserver
+```
+
+- Site: http://localhost:8000/
+- Admin: http://localhost:8000/admin/ (sign in with the local admin account from `.env`)
+- Form emails print to the terminal instead of being sent.
+
+`.claude/launch.json` defines the same server for the Claude app's browser pane (`wagtail`).
+
+### Useful commands
+
+| Command | What it does |
+|---|---|
+| `uv run manage.py makemigrations` | Create migrations after changing models |
+| `uv run manage.py test` | Run the tests |
+| `uv add <package>` | Add a dependency (then `uv export --no-dev --no-hashes -o requirements.txt` for Render) |
+| `DJANGO_SETTINGS_MODULE=dbc.settings.production SECRET_KEY=x uv run manage.py check --deploy` | Check production settings |
+
+## Project layout
+
+| Path | What's in it |
+|---|---|
+| `dbc/settings/` | `base.py` (shared), `dev.py` (local, loads `.env`), `production.py` (Render, all config from env vars) |
+| `dbc/urls.py` | Admin at `/admin/`, `/sitemap.xml`, `/healthz/` health check, then Wagtail pages |
+| `core/` | Site settings (company name, lead email, default social image), Testimonial snippets, rich text styles, robots.txt, media serving |
+| `pages/` | `HomePage` (agency design, grid blocks) and `LandingPage` (section blocks, e.g. /comedy/), blocks in `blocks.py`, the `import_current_site` command |
+| `leads/` | The two lead forms, `FormSubmission` (admin: **Leads**, with CSV/XLSX export), notification emails |
+| `templates/` | `base.html`, page templates, one template per block in `blocks/agency/` and `blocks/sections/` |
+| `static/` | CSS, JS and images (collected to `staticfiles/` and served by WhiteNoise in production) |
+| `public/` | Files served at the site root (`/favicon.ico`) |
+
+## Forms
+
+Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). Each submission is saved under
+**Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
+printed to the terminal locally). A hidden honeypot field catches simple spam bots.
+
+## Managing the site from the command line
+
+`python manage.py cms` does what an editor or administrator does in the Wagtail admin, through Wagtail's own APIs
+and admin forms, so changes are validated the same way and appear in page **History** and **Reports → Site history**
+under "Claude (command line)" (a `claude` user that can't sign in). Claude uses it over SSH; you can too.
+
+```bash
+ops/remote-manage.sh cms pages list
+```
+
+| Area | Actions |
+|---|---|
+| `pages` | `list`, `show`, `edit` (content operations, see `pages/content_ops.py`), `create`, `publish`, `unpublish`, `delete`, `move`, `copy`, `revisions`, `revert`, `lock`, `unlock`, `references` |
+| `snippets` | `types`, then `list`/`show`/`create`/`update`/`delete <type>`, e.g. `testimonial` |
+| `settings` | `list`, `show sitesettings`, `update sitesettings` |
+| `images`, `documents` | `list`, `show`, `upload --file PATH` (or `--file - --filename x.jpg` from stdin), `update`, `delete` |
+| `leads` | `list` (`--unhandled`, `--form`, `--since`), `show`, `update` (`{"handled": true}`), `delete`, `export` (CSV) |
+| `redirects`, `sites` | `list`, `show`, `create`, `update` (and `delete` for redirects) |
+| `users` | `list`, `show`, `create`, `update` (profile, active, superuser, groups), `delete`, `groups` |
+
+Safety rules built in:
+
+- **Dry run by default.** Changes run inside a transaction that's rolled back, so every error a real run would hit
+  shows up, and nothing is saved until you add `--apply` (pages: `--draft` or `--publish`).
+- Data is JSON: `--data '{"role": "Founder"}'` or `--data-file changes.json` (`-` for stdin). Updates only change the
+  fields you give.
+- Deleting anything that's used elsewhere (a testimonial on a page, an image, a linked page) needs `--force`.
+- The home page can't be deleted, unpublished or moved. The last active superuser can't be demoted, deactivated or
+  deleted. `pages edit --publish` won't publish someone else's unpublished draft.
+- **Passwords are never set or shown.** New users get no password and set one with "Forgot password?".
+
+Run `python manage.py cms <area> --help` for details. Locally use `uv run manage.py cms …`.
+`ops/remote-manage.sh` needs an SSH key on your Render account; the Render host key is pinned in
+`ops/render_known_hosts`.
+
+## Comparing with the original static site
+
+To check that a template change still matches the original design, extract the original site and serve it next to
+the Wagtail server (the `.original-site/` folder is gitignored):
+
+```bash
+mkdir -p .original-site && git archive d6ab64d | tar -x -C .original-site
+```
+
+Then start `original-static-site` (port 8001) from `.claude/launch.json` alongside `wagtail` (port 8000).
+
+## Configuration (environment variables)
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Render (from the database) | Postgres connection. Defaults to local SQLite. |
+| `SECRET_KEY` | Render (generated) | Django secret key, required in production |
+| `ALLOWED_HOSTS` | Render | Comma-separated host names, e.g. `designbycommitt.ee,www.designbycommitt.ee` |
+| `MEDIA_ROOT` | Render | Upload folder on the persistent disk |
+| `WAGTAILADMIN_BASE_URL` | Render | Full site URL for links in admin emails |
+| `RESEND_API_KEY` | Render (entered by the site owner) | Sends form notification emails through Resend |
+| `INDEXABLE_HOSTS` | optional | Hosts search engines may index. Default `designbycommitt.ee,www.designbycommitt.ee`; everything else gets `noindex` |
+| `DEFAULT_FROM_EMAIL` | optional | Sender address for form emails |
 
 ## Deploys
 
-Netlify project `design-by-committee` deploys from
-`git@github.com:design-by-committee/designbycommittee.git`:
+Until cutover, Netlify deploys `main` (the static site). This branch carries a `netlify.toml` whose build `ignore`
+command stops Netlify building it, so the Python source is never published as a static site. After the merge it also
+stops rebuilding `main`, and Netlify keeps serving the last static deploy until DNS points at Render.
 
-- Push to `main` → production deploy to https://designbycommitt.ee
-- Pull requests against `main` → Deploy Preview
-- Other branches are not deployed (branch deploys are off)
-- Base and publish directory are the repo root (`/`); there is no build command
-- Netlify Forms is enabled (used by the forms in `index.html` and `comedy/index.html`)
-
-## Workflow
-
-1. Branch off `main`
-2. Make changes and preview locally
-3. Open a PR against `main` and check its Netlify Deploy Preview
-4. Merge to `main` to ship
-
-When more pages are added, add them to `sitemap.xml`. If a build step or
-generator is introduced later, add a `netlify.toml` with the build command and
-publish directory and update this README.
+Render deployment (`render.yaml`) is added in Phase 6 of the plan.

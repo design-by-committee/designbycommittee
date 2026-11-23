@@ -1,0 +1,64 @@
+{% load wagtailimages_tags %}
+<section class="c-hero c-dark" aria-labelledby="hero-title">
+  <div class="c-wrap c-hero__inner">
+    <div class="c-hero__copy">
+      <h1 id="hero-title">{{ value.heading }}</h1>
+      <p class="c-hero__lead">{{ value.lead }}</p>
+
+      <div class="c-actions">
+        <a href="{{ value.primary_button.url }}" class="btn btn-prim">{{ value.primary_button.text }}</a>
+        {% if value.secondary_button.text and value.secondary_button.url %}
+          <a href="{{ value.secondary_button.url }}" class="btn btn-ghost">{{ value.secondary_button.text }}</a>
+        {% endif %}
+      </div>
+
+      {% if value.proof %}<p class="c-hero__proof">{{ value.proof }}</p>{% endif %}
+    </div>
+
+    <figure class="c-shot">
+      <div class="c-shot__stage">
+      <div class="c-browser">
+        <div class="c-browser__bar" aria-hidden="true">
+          <span class="c-browser__dots"><i></i><i></i><i></i></span>
+          <span class="c-browser__url">{{ value.screenshot_address }}</span>
+        </div>
+        {% image value.screenshot width-1120 fetchpriority="high" decoding="async" %}
+      </div>
+
+      {% if value.show_editor_mockup %}
+      <!-- A mockup of the WordPress screen for editing a show -->
+      <div class="c-admin" aria-hidden="true">
+        <div class="c-admin__bar">Edit show</div>
+        <div class="c-admin__body">
+          <div class="c-admin__field">
+            <span class="c-admin__label">Show</span>
+            <span class="c-admin__input">Sunday Stand-up Showcase</span>
+          </div>
+          <div class="c-admin__cols">
+            <div class="c-admin__field">
+              <span class="c-admin__label">Date</span>
+              <span class="c-admin__input">13 Dec 2026</span>
+            </div>
+            <div class="c-admin__field">
+              <span class="c-admin__label">Doors</span>
+              <span class="c-admin__input">19:30</span>
+            </div>
+          </div>
+          <div class="c-admin__field">
+            <span class="c-admin__label">Lineup</span>
+            <span class="c-admin__chips"><span>MC</span><span>Opener</span><span>Middle</span><span>Headliner</span><span class="c-admin__add">+ Add</span></span>
+          </div>
+          <div class="c-admin__field">
+            <span class="c-admin__label">Ticket link</span>
+            <span class="c-admin__input c-admin__input--muted">https://tickets…/sunday-13-dec</span>
+          </div>
+          <span class="c-admin__button">Update</span>
+        </div>
+      </div>
+      {% endif %}
+      </div>
+
+      {% if value.caption %}<figcaption class="c-shot__caption">{{ value.caption }}</figcaption>{% endif %}
+    </figure>
+  </div>
+</section>

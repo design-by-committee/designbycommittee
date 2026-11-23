@@ -1,0 +1,51 @@
+{% load static wagtailcore_tags wagtailimages_tags %}<!DOCTYPE html>
+<html lang="{{ page.html_lang|default:'en' }}">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  {% if noindex %}<meta name="robots" content="noindex">{% endif %}
+
+  <title>{% block title %}{% firstof page.seo_title page.title %}{% endblock %}</title>
+  {% if page.search_description %}<meta name="description" content="{{ page.search_description }}">{% endif %}
+  {% if page.full_url %}<link rel="canonical" href="{{ page.full_url }}">{% endif %}
+
+  {% block social %}
+    <meta property="og:type" content="website">
+    {% if page.full_url %}<meta property="og:url" content="{{ page.full_url }}">{% endif %}
+    <meta property="og:title" content="{% firstof page.og_title page.seo_title page.title %}">
+    {% firstof page.og_description page.search_description as og_description %}
+    {% if og_description %}<meta property="og:description" content="{{ og_description }}">{% endif %}
+    {% with social_image=page.social_image %}{% if social_image %}
+      {% image social_image width-1200 as og_image %}
+      <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og_image.url }}">
+    {% endif %}{% endwith %}
+  {% endblock %}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Khula:wght@400;700;800&display=swap">
+
+  <link rel="stylesheet" href="{% static 'css/small.css' %}">
+  <link rel="stylesheet" href="{% static 'css/medium.css' %}" media="(width >= 64em)">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+  {% block content %}{% endblock %}
+
+  <footer>
+    <div class="grid">
+      <a href="/" class="footer__logo" aria-label="Design by Committee home">
+        {% include "includes/logo.html" %}
+      </a>
+
+      <p class="footer__text text-center">© {% now "Y" %} {{ settings.core.SiteSettings.company_name }}. <span class="hide-xs">All rights
+          reserved.</span></p>
+    </div>
+  </footer>
+
+</body>
+
+</html>

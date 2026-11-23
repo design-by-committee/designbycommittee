@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/comedy.css' %}">
+
+  <script type="module" src="{% static 'js/comedy.js' %}"></script>
+{% endblock %}
+
+{% block body_class %}comedy{% endblock %}
+
+{% block content %}
+  <a class="c-skip" href="#main">Skip to content</a>
+
+  <header class="c-header c-dark">
+    <div class="c-wrap c-header__inner">
+      <a href="/" class="logo c-logo" aria-label="Design by Committee home">
+        {% include "includes/logo.html" %}
+      </a>
+
+      {% if page.header_links %}
+        <nav class="c-nav" aria-label="{{ page.title }} page sections">
+          {% for link in page.header_links %}
+            <a class="c-nav__link" href="{{ link.value.url }}">{{ link.value.text }}</a>
+          {% endfor %}
+        </nav>
+      {% endif %}
+
+      {% for button in page.header_button %}
+        <a class="c-header__cta" href="{{ button.value.url }}">{{ button.value.text }}</a>
+      {% endfor %}
+    </div>
+  </header>
+
+  <main id="main">
+    {% for block in page.body %}
+      {% include_block block with block_id=block.id %}
+    {% endfor %}
+  </main>
+{% endblock %}

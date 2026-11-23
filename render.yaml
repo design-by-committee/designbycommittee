@@ -1,0 +1,56 @@
+# Render Blueprint for designbycommitt.ee (Wagtail). See docs/wagtail-relaunch-plan.md, Phase 6.
+#
+# One web service and one Postgres database, both in Frankfurt. Python comes from .python-version (3.13, latest patch).
+# Uploaded images and documents live on a persistent disk, which Render only allows on paid instances; with a disk,
+# each deploy has a few seconds of downtime (Render stops the old instance before starting the new one).
+
+services:
+  - type: web
+    name: designbycommittee
+    runtime: python
+    region: frankfurt
+    plan: 0.5c-512mb
+    # Staging deploys from the relaunch branch; switched to main at cutover (plan, Phase 8).
+    branch: claude/wagtail-cms-relaunch-70fbf1
+    autoDeployTrigger: commit
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    preDeployCommand: python manage.py migrate --noinput
+    # The disk is only available once the service runs, so the one-time content import happens here.
+    # --initial makes it a no-op as soon as the site has content.
+    startCommand: >-
+      python manage.py import_current_site --initial --hostname designbycommitt.ee --port 443
+      && gunicorn dbc.wsgi --bind 0.0.0.0:$PORT --access-logfile -
+    healthCheckPath: /healthz/
+    disk:
+      name: media
+      mountPath: /opt/render/project/src/storage
+      sizeGB: 1
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: dbc.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: designbycommittee-db
+          property: connectionString
+      # The service's own *.onrender.com host is added automatically (RENDER_EXTERNAL_HOSTNAME).
+      - key: ALLOWED_HOSTS
+        value: designbycommitt.ee,www.designbycommitt.ee
+      - key: MEDIA_ROOT
+        value: /opt/render/project/src/storage/media
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: DEFAULT_FROM_EMAIL
+        value: Design by Committee <forms@designbycommitt.ee>
+      # Entered by the site owner when the Blueprint is created (Resend → API Keys).
+      - key: RESEND_API_KEY
+        sync: false
+
+databases:
+  - name: designbycommittee-db
+    databaseName: designbycommittee
+    user: designbycommittee
+    plan: 0.1c-256mb
+    region: frankfurt
+    postgresMajorVersion: "17"

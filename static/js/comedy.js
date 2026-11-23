@@ -1,4 +1,4 @@
-// Comedy landing page (/comedy/): package pre-selection and the Netlify enquiry form.
+// Landing pages such as /comedy/: package pre-selection and the quote request form (handled by leads/views.py).
 // Runs as a module, so it is deferred and the DOM is parsed by now.
 
 const form = document.getElementById('comedy-enquiry');
@@ -61,7 +61,7 @@ function initEnquiry(form) {
     try {
       const response = await fetch(form.getAttribute('action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
         body: new URLSearchParams(new FormData(form)),
       });
       if (!response.ok) throw new Error(`Form submission failed with status ${response.status}`);

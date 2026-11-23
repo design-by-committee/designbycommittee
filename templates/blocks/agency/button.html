@@ -1,0 +1,4 @@
+{% load site_tags %}
+<div class="g__c10 text-center">
+  <a href="{{ value.button.url }}" class="btn btn-prim"{% if value.button.url|is_anchor %} data-focus-target{% endif %}>{{ value.button.text }}</a>
+</div>

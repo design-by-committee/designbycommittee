@@ -108,3 +108,20 @@ dist
 
 # Netlify CLI local state
 .netlify/
+
+# Python / Django
+__pycache__/
+*.py[cod]
+.venv/
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+.env.*
+!.env.example
+
+# Copy of the original static site for side-by-side comparison (see README)
+/.original-site/
+
+# Render persistent disk mount (uploads); never committed
+/storage/
