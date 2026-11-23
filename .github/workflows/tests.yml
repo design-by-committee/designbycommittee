@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: requirements.txt matches uv.lock (Render installs from requirements.txt)
+        run: |
+          uv export --frozen --no-dev --no-hashes --no-header -o /tmp/requirements.txt >/dev/null
+          diff -u <(grep -v '^#' requirements.txt) <(grep -v '^#' /tmp/requirements.txt) \
+            || { echo "::error::requirements.txt is out of date. Run: uv export --no-dev --no-hashes -o requirements.txt"; exit 1; }
+      - name: No missing migrations
+        run: uv run manage.py makemigrations --check --dry-run
+      - name: Production settings pass Django's deploy checks
+        env:
+          DJANGO_SETTINGS_MODULE: dbc.settings.production
+          SECRET_KEY: ci-only-not-a-real-secret-key-0123456789abcdefghijklmnopqrstuvwxyz
+          DATABASE_URL: sqlite:////tmp/ci.sqlite3
+          ALLOWED_HOSTS: designbycommitt.ee,www.designbycommitt.ee
+        run: uv run manage.py check --deploy --fail-level WARNING
+      - name: Tests
+        run: uv run manage.py test

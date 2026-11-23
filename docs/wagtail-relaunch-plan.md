@@ -195,8 +195,9 @@ Then Claude:
 
 ### Phase 8: Cutover *(Claude, with your go-ahead at each outward step)*
 
-1. **Day before:** Claude exports all past Netlify form submissions (CSV, stored outside the repo) and lowers the TTL on the
-   website DNS records to 5 minutes. Claude lists every record in the zone so nothing else changes.
+1. **Before the switch:** Claude exports all past Netlify form submissions (CSV, stored outside the repo; 11 assessment
+   submissions as of 23 Nov) and lists every record in the zone so nothing else changes. The apex and `www` records
+   already have a 2-minute TTL (checked 23 Nov), so no TTL change is needed.
 2. **Merge** the PR to `main` (your go-ahead). Netlify skips the build because of `netlify.toml`, so the old site stays up.
    Claude switches the Render service to the `main` branch and confirms it deployed.
 3. Add `designbycommitt.ee` and `www.designbycommitt.ee` as custom domains on Render. www redirects to the apex,
@@ -216,7 +217,8 @@ Then Claude:
    the Netlify **site**. The **DNS zone stays**. Deleting the site also deletes its stored form submissions, which is why
    they're exported in Phase 8.
 4. Raise the DNS TTL back to normal. Update the README to describe the Render-only deploy flow.
-5. Add a CI workflow (GitHub Actions) that runs the tests on every PR, and enable Dependabot for Python packages.
+5. ~~Add a CI workflow~~ (done before launch: `.github/workflows/tests.yml` runs the tests, a migrations check, Django's
+   deploy checks and a `requirements.txt`/`uv.lock` sync check). Enable Dependabot for Python packages.
    Before Wagtail 7.4's support ends in Nov 2027, upgrade to the next LTS.
 
 ## Your checklist
