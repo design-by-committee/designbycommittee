@@ -10,8 +10,7 @@ services:
     runtime: python
     region: frankfurt
     plan: 0.5c-512mb
-    # Staging deploys from the relaunch branch; switched to main at cutover (plan, Phase 8).
-    branch: claude/wagtail-cms-relaunch-70fbf1
+    branch: main
     autoDeployTrigger: commit
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     preDeployCommand: python manage.py migrate --noinput
