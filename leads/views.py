@@ -3,7 +3,9 @@ from email.utils import formataddr
 from urllib.parse import urlencode
 
 from django.core.mail import EmailMessage
-from django.http import HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
+from urllib.parse import urlsplit
+
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 
 from core.models import SiteSettings
@@ -23,6 +25,9 @@ def handle_submission(request, page):
     form_name = request.POST.get("form-name", "")
     if form_name not in FORMS or form_name not in page.form_names():
         return HttpResponseBadRequest("Unknown form")
+    if not is_same_origin(request):
+        logger.warning("Rejected a %s submission from another site (Origin %r)", form_name, request.headers.get("Origin"))
+        return HttpResponseForbidden("Forms can only be sent from this site.")
 
     wants_json = "application/json" in request.headers.get("Accept", "")
     form = FORMS[form_name](request.POST)
@@ -49,6 +54,20 @@ def handle_submission(request, page):
     )
     notify(request, form, submission)
     return _respond(page, form_name, ok=True, wants_json=wants_json)
+
+
+def is_same_origin(request):
+    """True if the form was posted from a page on this site.
+
+    Pages are served without Django's CSRF cookie so they can be cached (core/cache.py), so this takes the place of
+    Django's CSRF check: browsers send an Origin header with every form POST (Referer as a fallback), and another
+    site can't fake it. Requests with neither header are refused, as Django's CSRF check does over HTTPS.
+    """
+    source = request.headers.get("Origin") or request.headers.get("Referer")
+    if not source or source == "null":
+        return False
+    parts = urlsplit(source)
+    return parts.scheme == request.scheme and parts.netloc == request.get_host()
 
 
 def notify(request, form, submission):

@@ -4,6 +4,11 @@ from django.utils.cache import patch_cache_control
 from django.views.decorators.http import require_safe
 from django.views.static import serve
 
+from core.cache import cache_publicly
+from core.storage import is_hashed_rendition
+
+ONE_YEAR = 60 * 60 * 24 * 365
+
 
 def is_indexable_host(request):
     """Only the live domain is indexed; staging (*.onrender.com) and local hosts are not."""
@@ -16,16 +21,27 @@ def robots_txt(request):
         lines = ["User-agent: *", "Disallow:", "", f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}"]
     else:
         lines = ["User-agent: *", "Disallow: /"]
-    return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
+    return cache_publicly(HttpResponse("\n".join(lines) + "\n", content_type="text/plain"))
 
 
 @require_safe
 def media(request, path):
     """Serve uploaded images and documents from the media folder (the persistent disk on Render).
 
-    Fine for this site's traffic. Wagtail gives every image rendition a unique file name, so they can be cached for
-    a long time; move media to object storage behind a CDN if traffic grows.
+    Image renditions have a content hash in their names (core/storage.py), so browsers and Render's edge cache can
+    keep them for a year. Other files (originals, documents) can change under the same name: an hour at most.
     """
     response = serve(request, path, document_root=settings.MEDIA_ROOT)
-    patch_cache_control(response, public=True, max_age=60 * 60 * 24 * 30)
+    if is_hashed_rendition(path):
+        patch_cache_control(response, public=True, max_age=ONE_YEAR, immutable=True)
+    else:
+        patch_cache_control(response, public=True, max_age=60 * 60)
     return response
+
+
+def sitemap(request, *args, **kwargs):
+    from wagtail.contrib.sitemaps.views import sitemap as wagtail_sitemap
+
+    response = wagtail_sitemap(request, *args, **kwargs)
+    response.render()
+    return cache_publicly(response)

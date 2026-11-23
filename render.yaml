@@ -16,8 +16,10 @@ services:
     preDeployCommand: python manage.py migrate --noinput
     # The disk is only available once the service runs, so the one-time content import happens here.
     # --initial makes it a no-op as soon as the site has content.
+    # hash_renditions gives older image renditions hashed (cacheable) file names; a no-op once done.
     startCommand: >-
       python manage.py import_current_site --initial --hostname designbycommitt.ee --port 443
+      && python manage.py hash_renditions
       && gunicorn dbc.wsgi --bind 0.0.0.0:$PORT --access-logfile -
     healthCheckPath: /healthz/
     disk:

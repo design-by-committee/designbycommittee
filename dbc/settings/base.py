@@ -36,11 +36,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "core.middleware.HealthCheckMiddleware",
+    # Outermost after the health check, so it sees every response (core/cache.py)
+    "core.middleware.PrivateByDefaultMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serves the collected, hashed static files in production (and with runserver_nostatic)
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # ETags, so browsers revalidating a cached page get a short 304 instead of the whole page
+    "django.middleware.http.ConditionalGetMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -121,7 +125,8 @@ MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 MEDIA_URL = "/media/"
 
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # Image renditions get a content hash in their file names, so they can be cached for a year (core/storage.py)
+    "default": {"BACKEND": "core.storage.HashedRenditionStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
@@ -149,3 +154,10 @@ WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 # Email: console output unless overridden by an environment's settings.
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Design by Committee <forms@designbycommitt.ee>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
+# Edge caching (core/cache.py). With RENDER_API_KEY set, the site purges Render's edge cache when content changes.
+# RENDER_SERVICE_ID is set by Render. EDGE_HTML_MAX_AGE overrides how long the edge keeps pages, in seconds.
+RENDER_API_KEY = os.environ.get("RENDER_API_KEY", "")
+RENDER_SERVICE_ID = os.environ.get("RENDER_SERVICE_ID", "")
+EDGE_HTML_MAX_AGE = int(os.environ["EDGE_HTML_MAX_AGE"]) if os.environ.get("EDGE_HTML_MAX_AGE") else None

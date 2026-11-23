@@ -37,7 +37,6 @@
      <p id="errorMessage" role="alert">{% if error == form_name %}Please check the landing page URL, choose at least one interest and fill in your name, email, date and time.{% endif %}</p>
 
       <form action="{% pageurl page %}" method="POST" id="{{ form_name }}" name="{{ form_name }}" novalidate>
-        {% csrf_token %}
         <input type="hidden" name="form-name" value="{{ form_name }}">
         <p hidden>
           <label>Leave this empty if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
