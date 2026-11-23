@@ -26,4 +26,5 @@ done
 
 exec ssh -o BatchMode=yes -o ConnectTimeout=20 \
   -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HERE/render_known_hosts" \
-  "$RENDER_SSH" "cd /opt/render/project/src && python manage.py$remote_args"
+  "$RENDER_SSH" "cd /opt/render/project/src && python manage.py$remote_args 2>&1"
+# (2>&1 on the remote side: Render's SSH doesn't pass the remote stderr back, which would hide error messages.)
