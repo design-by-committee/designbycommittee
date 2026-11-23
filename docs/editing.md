@@ -109,8 +109,8 @@ that email to answer the person directly. If the email ever fails, the lead is s
 
 ## Things to know
 
-- The package codes (`solo`, `show`, `venue`) connect the pricing buttons to the **Package** dropdown in the quote
-  form. The dropdown's options are part of the site's code; ask for a change if you add or rename packages.
+- The pricing buttons (and the timeline panel's button) scroll to the quote form. Their package codes (`solo`, `show`,
+  `venue`) are no longer used by the form, which doesn't ask about packages.
 - The form fields themselves (questions and options) are also in the code, so they stay in step with the
   validation and the notification emails.
 - Images you upload are resized automatically; upload at least 1120 pixels wide for the hero screenshot.

@@ -12,9 +12,7 @@ ENQUIRY = {
     "form-name": "comedy-enquiry",
     "name": "Jo Comic",
     "email": "jo@example.com",
-    "client-type": "Comedian",
-    "package": "show",
-    "deadline": "As soon as possible",
+    "client-type": "Performer",
     "link": "instagram.com/jocomic",
     "details": "A Fringe hour",
     "bot-field": "",
@@ -48,8 +46,9 @@ class LeadFormTests(SiteTestCase):
         submission = FormSubmission.objects.get()
         self.assertEqual((submission.form_name, submission.name, submission.email), ("comedy-enquiry", "Jo Comic", "jo@example.com"))
         self.assertEqual(submission.page.specific, self.comedy)
-        self.assertIn("Package: Show (shows and festival runs)", submission.answers)
-        self.assertEqual(submission.data["client-type"], "Comedian")
+        self.assertIn("I’m a…: Performer", submission.answers)
+        self.assertNotIn("Package", submission.answers)
+        self.assertEqual(submission.data["client-type"], "Performer")
 
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
@@ -57,9 +56,9 @@ class LeadFormTests(SiteTestCase):
         self.assertEqual(email.reply_to, ["Jo Comic <jo@example.com>"])
         self.assertEqual(email.subject, "New comedy enquiry from Jo Comic")
         # One field per paragraph in the email; the admin keeps the compact one-per-line version
-        self.assertIn("Email: jo@example.com\n\nI’m a…: Comedian\n\nPackage: Show (shows and festival runs)", email.body)
-        self.assertIn("Email: jo@example.com\nI’m a…: Comedian\n", submission.answers)
-        self.assertTrue(email.body.startswith("Your name or act name: Jo Comic\n\nEmail:"))
+        self.assertIn("Email: jo@example.com\n\nI’m a…: Performer\n\nCurrent website, if any: instagram.com/jocomic", email.body)
+        self.assertIn("Email: jo@example.com\nI’m a…: Performer\n", submission.answers)
+        self.assertTrue(email.body.startswith("Your name: Jo Comic\n\nEmail:"))
 
     def test_assessment_is_saved(self):
         response = self.client.post("/", ASSESSMENT, **JSON)

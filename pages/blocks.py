@@ -364,8 +364,6 @@ class EnquiryFormBlock(SectionBlock):
         context = super().get_context(value, parent_context)
         context["form_name"] = forms.ComedyEnquiryForm.form_name
         context["client_types"] = forms.CLIENT_TYPES
-        context["packages"] = forms.PACKAGES
-        context["deadlines"] = forms.DEADLINES
         return context
 
 
