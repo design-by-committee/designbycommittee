@@ -81,6 +81,24 @@ class PageEditTests(SiteTestCase):
             self.edit("/comedy/", [{"op": "set_field", "field": "live", "value": False}])
         self.assertFalse(LandingPage.objects.get(slug="comedy").has_unpublished_changes)
 
+    def test_sets_a_field_added_after_the_content_was_saved(self):
+        # The imported work cards were saved before cards had a screenshot field, so their stored data has no "image" key
+        image = self.any_image()
+        out = self.edit("/comedy/", [{
+            "op": "set", "block": "cards:2", "path": "cards.0.image",
+            "value": {"image": image.pk, "alt_text": "The Fallout Theater homepage", "decorative": False},
+        }], "--publish")
+
+        self.assertNotIn('-                "colour"', out)  # only the new field shows up in the diff
+        card = LandingPage.objects.get(slug="comedy").body[6].value["cards"][0]
+        self.assertEqual(card["image"].pk, image.pk)
+        self.assertContains(self.client.get("/comedy/"), 'alt="The Fallout Theater homepage"')
+
+    def any_image(self):
+        from wagtail.images import get_image_model
+
+        return get_image_model().objects.first()
+
     def test_publish_refuses_to_publish_someone_elses_draft(self):
         editor = get_user_model().objects.create_superuser("andres", "a@example.com", "x")
         comedy = LandingPage.objects.get(slug="comedy")

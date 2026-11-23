@@ -63,11 +63,22 @@ def stream_field_names(page):
     return [field.name for field in page._meta.get_fields() if isinstance(field, StreamField)]
 
 
+def stream_data(stream_value):
+    """A StreamField's value as raw JSON data, with every field the blocks currently define.
+
+    Blocks saved before a field was added to their definition don't store that field. Iterating the StreamValue
+    converts each block through its definition first, which fills in missing fields with their defaults, so they
+    show up in `show` and can be set by a path.
+    """
+    list(stream_value)
+    return stream_value.get_prep_value()
+
+
 def snapshot(page):
     """The page's editable content as plain JSON-ready data."""
     data = {"fields": {name: getattr(page, name) for name in sorted(EDITABLE_FIELDS)}}
     for name in stream_field_names(page):
-        data[name] = getattr(page, name).get_prep_value()
+        data[name] = stream_data(getattr(page, name))
     return data
 
 
@@ -189,7 +200,7 @@ def apply_changes(page, changes, validate_page=True):
     """Apply a list of operations to `page` (an unsaved copy) and validate the result like the page editor does."""
     if not isinstance(changes, list) or not changes:
         raise ContentError("Changes must be a non-empty JSON list of operations.")
-    streams = {name: copy.deepcopy(getattr(page, name).get_prep_value()) for name in stream_field_names(page)}
+    streams = {name: copy.deepcopy(stream_data(getattr(page, name))) for name in stream_field_names(page)}
     touched = set()
 
     for number, change in enumerate(changes, start=1):

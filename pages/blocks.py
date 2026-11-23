@@ -221,6 +221,11 @@ class CardBlock(blocks.StructBlock):
     meta = blocks.CharBlock(required=False, help_text="Small line under the title (used in the “work” layout).")
     text = blocks.TextBlock()
     colour = blocks.ChoiceBlock(choices=CARD_COLOURS, default="pink")
+    image = ImageBlock(
+        required=False,
+        label="Screenshot",
+        help_text="Optional. Shown in a browser frame at the top of the card (“work” layout). A 1280×800 screenshot works best.",
+    )
 
     class Meta:
         icon = "doc-full"
@@ -292,6 +297,12 @@ class StepBlock(blocks.StructBlock):
 class StepsBlock(SectionBlock):
     lead = blocks.TextBlock(required=False)
     steps = blocks.ListBlock(StepBlock())
+    extra_title = blocks.CharBlock(
+        required=False,
+        label="Optional extra step: title",
+        help_text="A separate, unnumbered step below the others, labelled “Optional extra”, e.g. Hosting and launch.",
+    )
+    extra_text = blocks.TextBlock(required=False, label="Optional extra step: text")
 
     class Meta:
         icon = "list-ol"
