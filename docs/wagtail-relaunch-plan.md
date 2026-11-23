@@ -1,6 +1,6 @@
 # Relaunch designbycommitt.ee on Wagtail
 
-Status: **approved 2026-11-23** · Phases 0–5 done, Phase 6 in progress
+Status: **approved 2026-11-23** · Phases 0–6 done (staging: https://designbycommittee.onrender.com), Phase 7 in progress
 
 This plan moves the site from static HTML on Netlify to Wagtail CMS on Render. It keeps the current
 design, URLs and form behaviour, and makes every section editable in the Wagtail admin. Claude does the
