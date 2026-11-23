@@ -1,6 +1,6 @@
 # Relaunch designbycommitt.ee on Wagtail
 
-Status: **approved 2026-11-23** · Phases 0–7 done (staging: https://designbycommittee.onrender.com), Phase 8 next
+Status: **approved 2026-11-23** · **launched 2026-11-23**: Phases 0–8 done, https://designbycommitt.ee runs on Render. Phase 9 (after launch) in progress
 
 This plan moves the site from static HTML on Netlify to Wagtail CMS on Render. It keeps the current
 design, URLs and form behaviour, and makes every section editable in the Wagtail admin. Claude does the
@@ -193,7 +193,15 @@ Then Claude:
 3. Claude fixes the list. The comedy page's prices (€495, €795, from €1,950) and the "reply within one working day"
    promise were confirmed on 23 Nov.
 
-### Phase 8: Cutover *(Claude, with your go-ahead at each outward step)*
+### Phase 8: Cutover *(Claude, with your go-ahead at each outward step)* ✅ 23 Nov 2026
+
+Done: PR merged; Render Blueprint and service switched to `main`; custom domains added (www → apex redirect);
+apex `A 216.24.57.1` and `www CNAME designbycommittee.onrender.com` (TTL 300) replaced the two NETLIFY records;
+certificate issued by Google Trust Services; pages, assets, sitemap, robots.txt, admin and both forms verified
+(notification emails delivered, test leads deleted). The other 10 zone records are unchanged.
+
+**Rollback:** in Netlify DNS, delete the two records above and re-add the domain on the Netlify project's Domain
+management page (that recreates its NETLIFY records), or add `A 75.2.60.5` and `www CNAME design-by-committee.netlify.app`.
 
 1. **Before the switch:** Claude lists every record in the zone so nothing else changes. (The past Netlify form
    submissions aren't needed, so they aren't exported; you decided this on 23 Nov.) The apex and `www` records
