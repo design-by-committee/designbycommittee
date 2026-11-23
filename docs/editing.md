@@ -20,7 +20,8 @@ Open **Pages** in the left menu, then click a page title to edit it.
 
 Every published version is kept: **History** (the clock icon) shows earlier versions, and you can compare or restore them.
 Changes Claude makes from the command line appear there as **Claude (command line)**, usually as drafts for you to
-review and publish.
+review and publish. Its changes to testimonials, settings, images, users and other records are listed under
+**Reports → Site history**.
 
 ### Add, move or remove a section
 

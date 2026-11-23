@@ -10,12 +10,12 @@ from pages.models import HomePage, LandingPage
 from pages.tests import SiteTestCase
 
 
-class EditPageCommandTests(SiteTestCase):
+class PageEditTests(SiteTestCase):
     def edit(self, page, changes, *flags):
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump(changes, f)
         out = io.StringIO()
-        call_command("edit_page", page, f.name, *flags, stdout=out, stderr=io.StringIO())
+        call_command("cms", "pages", "edit", page, "--data-file", f.name, *flags, stdout=out, stderr=io.StringIO())
         return out.getvalue()
 
     def live_home(self):
@@ -96,14 +96,14 @@ class EditPageCommandTests(SiteTestCase):
         self.assertEqual((latest.title, latest.seo_title), ("Their draft", "Mine"))
 
 
-class ShowPageCommandTests(SiteTestCase):
+class PageShowTests(SiteTestCase):
     def test_lists_pages_and_shows_block_ids(self):
         out = io.StringIO()
-        call_command("show_page", stdout=out)
+        call_command("cms", "pages", "list", stdout=out)
         self.assertEqual([page["url"] for page in json.loads(out.getvalue())], ["/", "/comedy/"])
 
         out = io.StringIO()
-        call_command("show_page", "/comedy/", stdout=out)
+        call_command("cms", "pages", "show", "/comedy/", stdout=out)
         data = json.loads(out.getvalue())
         self.assertEqual(data["page"]["type"], "LandingPage")
         self.assertTrue(all(block["id"] for block in data["body"]))

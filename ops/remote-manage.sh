@@ -1,10 +1,11 @@
 #!/bin/bash
 # Run a Django management command on the Render web service over SSH, e.g.:
 #
-#   ops/remote-manage.sh show_page /comedy/
-#   ops/remote-manage.sh edit_page /comedy/ - --draft < changes.json
+#   ops/remote-manage.sh cms pages show /comedy/
+#   ops/remote-manage.sh cms pages edit /comedy/ --data-file - --draft < changes.json
+#   ops/remote-manage.sh cms images upload --file - --filename photo.jpg --apply < photo.jpg
 #
-# Standard input is passed through, so `edit_page ... -` can read changes from a local file.
+# Standard input is passed through, so `--data-file -` and `--file -` can read local files.
 # Needs an SSH key added to your Render account (Account Settings → SSH Public Keys).
 # The host key is pinned in ops/render_known_hosts (Render's published Frankfurt fingerprint:
 # SHA256:dBRrCEA0tBkvaYLzzDw/mzaANw6nUJO961Zx806spZs).

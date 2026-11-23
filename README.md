@@ -71,33 +71,40 @@ Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). 
 **Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
 printed to the terminal locally). A hidden honeypot field catches simple spam bots.
 
-## Editing content from the command line
+## Managing the site from the command line
 
-Page content can be read and changed without the admin, through Wagtail's own APIs, so every change is validated
-like the page editor does it and saved as a normal revision (shown in the page's **History**, revertible there).
-Claude uses this over SSH; you can too.
-
-```bash
-ops/remote-manage.sh show_page
-```
+`python manage.py cms` does what an editor or administrator does in the Wagtail admin, through Wagtail's own APIs
+and admin forms, so changes are validated the same way and appear in page **History** and **Reports → Site history**
+under "Claude (command line)" (a `claude` user that can't sign in). Claude uses it over SSH; you can too.
 
 ```bash
-ops/remote-manage.sh show_page /comedy/
+ops/remote-manage.sh cms pages list
 ```
 
-```bash
-ops/remote-manage.sh edit_page /comedy/ - < changes.json
-```
+| Area | Actions |
+|---|---|
+| `pages` | `list`, `show`, `edit` (content operations, see `pages/content_ops.py`), `create`, `publish`, `unpublish`, `delete`, `move`, `copy`, `revisions`, `revert`, `lock`, `unlock`, `references` |
+| `snippets` | `types`, then `list`/`show`/`create`/`update`/`delete <type>`, e.g. `testimonial` |
+| `settings` | `list`, `show sitesettings`, `update sitesettings` |
+| `images`, `documents` | `list`, `show`, `upload --file PATH` (or `--file - --filename x.jpg` from stdin), `update`, `delete` |
+| `leads` | `list` (`--unhandled`, `--form`, `--since`), `show`, `update` (`{"handled": true}`), `delete`, `export` (CSV) |
+| `redirects`, `sites` | `list`, `show`, `create`, `update` (and `delete` for redirects) |
+| `users` | `list`, `show`, `create`, `update` (profile, active, superuser, groups), `delete`, `groups` |
 
-- `show_page` lists the pages, or prints one page's fields and blocks (with block ids) as JSON.
-- `edit_page` takes a JSON list of operations (`set_field`, `set`, `insert`, `remove`, `move`; the format is
-  described at the top of `pages/content_ops.py`). On its own it's a **dry run**: it validates the changes and prints
-  a diff. Add `--draft` to save a draft for review in the admin, or `--publish` to publish.
-- Revisions are recorded under a `claude` user that can't sign in. `--publish` refuses when someone else has an
-  unpublished draft on the page, because it would publish that too.
-- Locally, run the same commands with `uv run manage.py …`.
-- `ops/remote-manage.sh` needs an SSH key on your Render account. The Render host key is pinned in
-  `ops/render_known_hosts`.
+Safety rules built in:
+
+- **Dry run by default.** Changes run inside a transaction that's rolled back, so every error a real run would hit
+  shows up, and nothing is saved until you add `--apply` (pages: `--draft` or `--publish`).
+- Data is JSON: `--data '{"role": "Founder"}'` or `--data-file changes.json` (`-` for stdin). Updates only change the
+  fields you give.
+- Deleting anything that's used elsewhere (a testimonial on a page, an image, a linked page) needs `--force`.
+- The home page can't be deleted, unpublished or moved. The last active superuser can't be demoted, deactivated or
+  deleted. `pages edit --publish` won't publish someone else's unpublished draft.
+- **Passwords are never set or shown.** New users get no password and set one with "Forgot password?".
+
+Run `python manage.py cms <area> --help` for details. Locally use `uv run manage.py cms …`.
+`ops/remote-manage.sh` needs an SSH key on your Render account; the Render host key is pinned in
+`ops/render_known_hosts`.
 
 ## Comparing with the original static site
 

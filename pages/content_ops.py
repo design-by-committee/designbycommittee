@@ -1,6 +1,6 @@
 """Read and change page content from the command line, through Wagtail's own APIs.
 
-Used by the `show_page` and `edit_page` management commands, so content can be edited without the admin
+Used by `cms pages show` and `cms pages edit` (core/management/commands/cms.py), so content can be edited without the admin
 (e.g. by Claude over SSH). Every change is validated like the page editor validates it, and saved as a normal
 page revision (a draft unless publishing is asked for), so it shows in the page's History and can be reverted.
 
@@ -29,13 +29,10 @@ import copy
 import difflib
 import json
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from wagtail.models import Page, Site
 
 EDITABLE_FIELDS = {"title", "slug", "seo_title", "search_description", "og_title", "og_description"}
-REVISION_USERNAME = "claude"
 
 
 class ContentError(Exception):
@@ -188,7 +185,7 @@ def set_path(value, path, new_value):
 # Applying changes ---------------------------------------------------------------------------------------------------
 
 
-def apply_changes(page, changes):
+def apply_changes(page, changes, validate_page=True):
     """Apply a list of operations to `page` (an unsaved copy) and validate the result like the page editor does."""
     if not isinstance(changes, list) or not changes:
         raise ContentError("Changes must be a non-empty JSON list of operations.")
@@ -209,10 +206,11 @@ def apply_changes(page, changes):
             raise ContentError(f"The new {name} isn't valid: {_flatten_errors(error)}") from None
         setattr(page, name, value)
 
-    try:
-        page.full_clean()
-    except ValidationError as error:
-        raise ContentError(f"The page isn't valid: {_flatten_errors(error)}") from None
+    if validate_page:
+        try:
+            page.full_clean()
+        except ValidationError as error:
+            raise ContentError(f"The page isn't valid: {_flatten_errors(error)}") from None
     return page
 
 
@@ -278,27 +276,3 @@ def diff(before, after):
     """A unified diff of two snapshots."""
     dump = lambda data: json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True).splitlines()  # noqa: E731
     return "\n".join(difflib.unified_diff(dump(before), dump(after), "current", "proposed", lineterm=""))
-
-
-def revision_user():
-    """The admin user Claude's revisions are recorded under. It can't sign in."""
-    user, created = get_user_model().objects.get_or_create(
-        username=REVISION_USERNAME,
-        defaults={"first_name": "Claude", "last_name": "(command line)", "is_active": False},
-    )
-    if created:
-        user.set_unusable_password()
-        user.save(update_fields=["password"])
-    return user
-
-
-@transaction.atomic
-def save(page, *, publish):
-    """Save the edited page as a new revision (a draft unless `publish`). Returns the revision."""
-    user = revision_user()
-    revision = page.save_revision(user=user, log_action=True)
-    if publish:
-        # The "claude" user has no admin permissions (and can't sign in). Running this command already needs
-        # shell access to the server, which is the real authorisation, so Wagtail's own check is skipped.
-        revision.publish(user=user, skip_permission_checks=True)
-    return revision
