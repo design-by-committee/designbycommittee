@@ -108,3 +108,14 @@ dist
 
 # Netlify CLI local state
 .netlify/
+
+# Python / Django
+__pycache__/
+*.py[cod]
+.venv/
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+.env.*
+!.env.example
