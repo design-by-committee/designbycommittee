@@ -119,3 +119,6 @@ db.sqlite3-journal
 /staticfiles/
 .env.*
 !.env.example
+
+# Copy of the original static site for side-by-side comparison (see README)
+/.original-site/

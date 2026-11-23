@@ -37,9 +37,11 @@ function initReveal() {
 
 /* Testimonials become a slider below 1000px and a static row above it. */
 function initCarousel() {
+  const carousel = document.querySelector('.carousel');
+  if (!carousel) return; // the page has no testimonial carousel
   if (typeof tns !== 'function') return; // CDN blocked or failed its integrity check: keep the static layout
   const mobile = matchMedia('(width < 1000px)');
-  const host = document.querySelector('.carousel').parentElement;
+  const host = carousel.parentElement;
   let slider = null;
 
   // tiny-slider measures the carousel's parent on init and throws if the page has no layout width yet
@@ -67,9 +69,10 @@ function initCarousel() {
   new ResizeObserver(update).observe(host); // retry once a zero-width layout gets a real width
 }
 
-/* Two-step assessment form, submitted to Netlify Forms with fetch. */
+/* Two-step assessment form, posted to the page with fetch (handled by leads/views.py). */
 function initForm() {
   const form = document.getElementById('landing-page-assessment');
+  if (!form) return; // the page has no assessment form
   const container = document.getElementById('contactForm');
   const errorMessage = document.getElementById('errorMessage');
   const continueButton = document.getElementById('submitS1');
@@ -145,7 +148,7 @@ function initForm() {
     try {
       const response = await fetch(form.action, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
         body: new URLSearchParams(new FormData(form)),
       });
       if (!response.ok) throw new Error(`Form submission failed with status ${response.status}`);

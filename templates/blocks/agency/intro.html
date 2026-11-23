@@ -1,0 +1,6 @@
+{% load site_tags %}
+<div class="g__c10 text-center committed"{% if value.anchor %} id="{{ value.anchor }}"{% endif %}>
+  <h2 class="text-center">{{ value.heading|inline_richtext }}</h2>
+  <p class="lead width-sixty">{{ value.lead|inline_richtext }}{% if value.link.text and value.link.url %}
+    <a href="{{ value.link.url }}"{% if value.link.new_tab %} target="_blank" rel="noreferrer"{% endif %} class="arrow-right text-bold">{{ value.link.text }}{% if value.link.new_tab %}<span class="sr-only"> (opens in a new tab)</span>{% endif %} </a>{% endif %}</p>
+</div>

@@ -1,0 +1,117 @@
+{% load wagtailcore_tags site_tags %}
+{% comment %}
+  The two-step landing page assessment form. main.js validates each step and posts it with fetch; the ids and classes
+  below are what it relies on. Without JavaScript the form posts normally and the page comes back with ?sent= or
+  ?error= (see leads/views.py), which switches the states below.
+{% endcomment %}
+{% with sent=request.GET.sent error=request.GET.error %}
+<div class="g__c10 text-center"{% if value.anchor %} id="{{ value.anchor }}"{% endif %}>
+  <h2 class="text-center">{{ value.heading|inline_richtext }}</h2>
+  <p class="lead width-sixty">{{ value.lead|inline_richtext }}</p>
+  <div class="form" id="contactForm">
+    <ol class="form__steps" aria-label="Form progress">
+      <li class="step step__one{% if sent == form_name %} complete{% else %} active{% endif %}"{% if sent != form_name %} aria-current="step"{% endif %}>
+        <span class="step__link">
+          <span class="step__nr">1</span>
+          <span class="step__title">Project details</span>
+        </span>
+      </li>
+
+      <li class="step step__two{% if sent == form_name %} complete{% endif %}">
+        <span class="step__link">
+          <span class="step__nr">2</span>
+          <span class="step__title">Book Appointment</span>
+        </span>
+      </li>
+
+      <li class="step step__three{% if sent == form_name %} active{% endif %}"{% if sent == form_name %} aria-current="step"{% endif %}>
+        <span class="step__link">
+          <span class="step__nr">3</span>
+          <span class="step__title">Appointment Confirmed</span>
+        </span>
+      </li>
+    </ol>
+
+    <div class="form__wrapper">
+
+     <p id="errorMessage" role="alert">{% if error == form_name %}Please check the landing page URL, choose at least one interest and fill in your name, email, date and time.{% endif %}</p>
+
+      <form action="{% pageurl page %}" method="POST" id="{{ form_name }}" name="{{ form_name }}" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form-name" value="{{ form_name }}">
+        <p hidden>
+          <label>Leave this empty if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+        </p>
+
+        <section class="step__one"{% if sent == form_name %} hidden{% endif %}>
+          <fieldset>
+            <label for="url" class="text-bold">
+              My landing page URL:
+              <input type="url" id="url" name="url" placeholder="https://" pattern="https?://.+\..+" autocomplete="url" inputmode="url" autocapitalize="none" spellcheck="false" enterkeyhint="next" required>
+            </label>
+
+            <p class="text-bold" id="interestsLabel">I want to...</p>
+
+            <div role="group" aria-labelledby="interestsLabel">
+            {% for name, label, checked in interests %}
+            <div class="check__wrapper">
+              <input type="checkbox" id="check__{{ name }}" name="{{ name }}" value="YES"{% if checked %} checked{% endif %}>
+              <label for="check__{{ name }}">{{ label }}</label>
+            </div>
+            {% endfor %}
+            </div>
+
+            <label for="moreDetails" class="text-bold">Additional details about my project <span class="optional">(optional)</span></label>
+            <textarea id="moreDetails" name="details" rows="5" cols="33"></textarea>
+
+
+            <button type="button" class="btn btn-prim" id="submitS1">Continue to Next Step</button>
+          </fieldset>
+        </section>
+
+        <section class="step__two" hidden>
+          <fieldset>
+
+            <div class="text-left">
+                <p class="text-bold" id="nameLabel">My name</p>
+                <label for="firstName" class="sr-only">First name</label>
+                <input class="col-2" type="text" id="firstName" name="first-name" placeholder="First Name" autocomplete="given-name" required>
+                <label for="lastName" class="sr-only">Last name</label>
+                <input class="col-2" type="text" id="lastName" name="last-name" placeholder="Last Name" autocomplete="family-name" required>
+            </div>
+
+            <label for="email" class="text-bold">
+                My email
+                <input type="email" id="email" name="email" placeholder="Email address" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" required>
+            </label>
+
+            <div class="text-left">
+              <p class="text-bold">Best time to discuss my project</p>
+              <label for="date" class="sr-only">Date, a weekday within the next two weeks (MM-DD-YYYY)</label>
+              <input type="text" id="date" name="date" placeholder="MM - DD - YY">
+              <label for="time" class="sr-only">Time, between 09:00 and 18:00 (24-hour, HH:MM)</label>
+              <input type="text" id="time" name="time" placeholder="00:00">
+              <input type="hidden" id="timezone" name="timezone">
+            </div>
+
+
+
+            <button type="submit" class="btn btn-prim" id="submitForm">Send My Request</button>
+
+          </fieldset>
+        </section>
+
+        <section class="step__three"{% if sent != form_name %} hidden{% endif %}>
+          <fieldset>
+            <h3 class="text-bold" id="thanksHeading" tabindex="-1">Thanks <span class="firstName">stranger</span>!</h3>
+            <img alt="T.Hanks for contacting us!" class="thx-gif">
+            <p class="text-center">{{ value.thanks_text }}</p>
+          </fieldset>
+        </section>
+      </form>
+    </div>
+  </div>
+
+
+</div>
+{% endwith %}

@@ -1,0 +1,29 @@
+{% load static site_tags %}
+{% comment %}
+  Two copies of the illustration, as in the original design: one in its own column on large screens (hidden-xs),
+  one under the heading on phones (hidden-md).
+{% endcomment %}
+{% if value.illustration_side == "left" %}
+  <div class="g__c4 left hidden-xs">
+    <img src="{% static illustration.src %}" width="{{ illustration.width }}" height="{{ illustration.height }}" class="{{ illustration.name }} reveal" alt="{{ illustration.alt }}" loading="lazy" decoding="async">
+  </div>
+{% endif %}
+
+<div class="g__c6{% if value.illustration_side == 'right' %} left{% endif %}">
+  <h3 class="text-bold">{{ value.heading }}</h3>
+
+  <img src="{% static illustration.src %}" width="{{ illustration.width }}" height="{{ illustration.height }}" class="{{ illustration.name }} reveal hidden-md" alt="{{ illustration.alt }}" loading="lazy" decoding="async">
+
+  <p class="lead">{{ value.lead|inline_richtext }}</p>
+  <ul>
+    {% for point in value.points %}
+      <li>{{ point }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% if value.illustration_side == "right" %}
+  <div class="g__c4 hidden-xs">
+    <img src="{% static illustration.src %}" width="{{ illustration.width }}" height="{{ illustration.height }}" class="{{ illustration.name }} reveal" alt="{{ illustration.alt }}" loading="lazy" decoding="async">
+  </div>
+{% endif %}

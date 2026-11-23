@@ -1,0 +1,15 @@
+<section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+
+    <div class="c-why">
+      {% for column in value.columns %}
+        <div class="c-why__item">
+          <h3>{{ column.title }}</h3>
+          <p>{{ column.text }}</p>
+          {% if column.link.text and column.link.url %}<a href="{{ column.link.url }}" class="arrow-right">{{ column.link.text }}</a>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

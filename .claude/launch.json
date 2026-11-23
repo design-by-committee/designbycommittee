@@ -4,8 +4,27 @@
     {
       "name": "wagtail",
       "runtimeExecutable": "uv",
-      "runtimeArgs": ["run", "manage.py", "runserver", "8000"],
+      "runtimeArgs": [
+        "run",
+        "manage.py",
+        "runserver",
+        "8000"
+      ],
       "port": 8000
+    },
+    {
+      "name": "original-static-site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8001",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        ".original-site"
+      ],
+      "port": 8001
     }
   ]
 }

@@ -1,0 +1,29 @@
+<section class="c-section {{ background_class }} c-fringe"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap c-fringe__inner">
+    <div>
+      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+      {% if value.lead %}<p class="c-lead">{{ value.lead }}</p>{% endif %}
+
+      <ol class="c-timeline">
+        {% for step in value.timeline %}
+          <li>
+            <span class="c-timeline__when">{{ step.when }}</span>
+            <span class="c-timeline__what">{{ step.what }}</span>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="c-flyer">
+      <h3>{{ value.panel_heading }}</h3>
+      <ul class="c-checks">
+        {% for item in value.panel_items %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ value.panel_button.url }}" class="btn btn-prim"{% if value.panel_button_package %} data-package="{{ value.panel_button_package }}"{% endif %}>{{ value.panel_button.text }}</a>
+    </div>
+  </div>
+
+  {% if value.footnote %}<p class="c-wrap c-fringe__local">{{ value.footnote }}</p>{% endif %}
+</section>

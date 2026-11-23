@@ -5,9 +5,8 @@ Django 5.2 LTS, Python 3.13). The plan, decisions and progress are in
 [docs/wagtail-relaunch-plan.md](docs/wagtail-relaunch-plan.md).
 
 > **Transition period:** `main` still holds the static site, which Netlify serves at https://designbycommitt.ee.
-> The Wagtail project lives on the relaunch branch until cutover (plan, Phase 8). The static `index.html`,
-> `comedy/`, `css/`, `js/` and `img/` at the repo root are the design source and move into `static/` and
-> `templates/` in Phase 3.
+> The Wagtail project lives on the relaunch branch until cutover (plan, Phase 8). The original HTML is now in
+> `templates/` (markup) and `pages/management/commands/import_current_site.py` (copy).
 
 ## Local development
 
@@ -28,6 +27,10 @@ uv run manage.py migrate
 
 ```bash
 set -a; . ./.env; set +a; DJANGO_SUPERUSER_PASSWORD="$LOCAL_ADMIN_PASSWORD" uv run manage.py createsuperuser --noinput --username "$LOCAL_ADMIN_USERNAME" --email admin@localhost
+```
+
+```bash
+uv run manage.py import_current_site --hostname localhost --port 8000
 ```
 
 ```bash
@@ -55,9 +58,29 @@ uv run manage.py runserver
 |---|---|
 | `dbc/settings/` | `base.py` (shared), `dev.py` (local, loads `.env`), `production.py` (Render, all config from env vars) |
 | `dbc/urls.py` | Admin at `/admin/`, `/sitemap.xml`, `/healthz/` health check, then Wagtail pages |
-| `pages/` | `LandingPage`, the page type used for the home page and landing pages |
-| `templates/` | Site templates |
+| `core/` | Site settings (company name, lead email, default social image), Testimonial snippets, rich text styles, robots.txt, media serving |
+| `pages/` | `HomePage` (agency design, grid blocks) and `LandingPage` (section blocks, e.g. /comedy/), blocks in `blocks.py`, the `import_current_site` command |
+| `leads/` | The two lead forms, `FormSubmission` (admin: **Leads**, with CSV/XLSX export), notification emails |
+| `templates/` | `base.html`, page templates, one template per block in `blocks/agency/` and `blocks/sections/` |
 | `static/` | CSS, JS and images (collected to `staticfiles/` and served by WhiteNoise in production) |
+| `public/` | Files served at the site root (`/favicon.ico`) |
+
+## Forms
+
+Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). Each submission is saved under
+**Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
+printed to the terminal locally). A hidden honeypot field catches simple spam bots.
+
+## Comparing with the original static site
+
+To check that a template change still matches the original design, extract the original site and serve it next to
+the Wagtail server (the `.original-site/` folder is gitignored):
+
+```bash
+mkdir -p .original-site && git archive d6ab64d | tar -x -C .original-site
+```
+
+Then start `original-static-site` (port 8001) from `.claude/launch.json` alongside `wagtail` (port 8000).
 
 ## Configuration (environment variables)
 
@@ -69,6 +92,7 @@ uv run manage.py runserver
 | `MEDIA_ROOT` | Render | Upload folder on the persistent disk |
 | `WAGTAILADMIN_BASE_URL` | Render | Full site URL for links in admin emails |
 | `RESEND_API_KEY` | Render (entered by the site owner) | Sends form notification emails through Resend |
+| `INDEXABLE_HOSTS` | optional | Hosts search engines may index. Default `designbycommitt.ee,www.designbycommitt.ee`; everything else gets `noindex` |
 | `DEFAULT_FROM_EMAIL` | optional | Sender address for form emails |
 
 ## Deploys

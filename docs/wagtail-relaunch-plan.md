@@ -1,6 +1,6 @@
 # Relaunch designbycommitt.ee on Wagtail
 
-Status: **draft, awaiting approval** · Written 2026-11-23
+Status: **approved 2026-11-23** · Phases 0–5 done
 
 This plan moves the site from static HTML on Netlify to Wagtail CMS on Render. It keeps the current
 design, URLs and form behaviour, and makes every section editable in the Wagtail admin. Claude does the
@@ -43,12 +43,16 @@ designbycommittee/
 
 ### Page model
 
-One flexible page type, **`LandingPage`**, is used for both `/` (the site root) and `/comedy/`:
+Two page types share a base with the SEO and social-sharing fields:
 
-- `body`: a StreamField of the section blocks below
-- `theme`: *Agency* (current home page styling, `body.home`) or *Comedy* (`body.comedy`, adds `comedy.css`/`comedy.js`)
-- `header_links` + `header_cta`: optional in-page nav and button (the comedy header has them, the home header doesn't)
-- Promote tab: SEO title, meta description, social image (`og:*`) and canonical URL, generated per page
+- **`HomePage`** (`/`, one only): the original agency design. Its blocks render as columns of the home page's
+  12-column grid, which can't be mixed with full-width sections.
+- **`LandingPage`** (`/comedy/` and future landing pages, under the home page): full-width section blocks
+  (`comedy.css`), plus optional header links and a header button.
+- Promote tab: SEO title, meta description, social title/description/image (`og:*`); canonical URL generated per page
+
+(Changed during Phase 2 from one page type with a theme switch: the two designs' blocks don't work inside each
+other's layouts, so separate page types stop editors from combining them.)
 
 Site-wide **SiteSettings** hold the footer company name, the lead notification email and default social image.
 The copyright year updates by itself (today it's hard-coded "© 2026").

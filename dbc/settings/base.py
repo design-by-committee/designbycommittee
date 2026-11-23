@@ -9,7 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 INSTALLED_APPS = [
+    "core",
     "pages",
+    "leads",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
     "wagtail.contrib.sitemaps",
@@ -59,6 +61,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "wagtail.contrib.settings.context_processors.settings",
+                "core.context_processors.indexing",
             ],
         },
     },
@@ -102,6 +105,16 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "/static/"
 
+# Files served at the site root, such as /favicon.ico
+WHITENOISE_ROOT = BASE_DIR / "public"
+
+# Host names search engines may index (robots.txt and <meta name="robots">). Everything else is noindex.
+INDEXABLE_HOSTS = [
+    host.strip()
+    for host in os.environ.get("INDEXABLE_HOSTS", "designbycommitt.ee,www.designbycommitt.ee").split(",")
+    if host.strip()
+]
+
 # Uploaded images and documents. On Render this points at the persistent disk.
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 MEDIA_URL = "/media/"
@@ -126,6 +139,9 @@ WAGTAILSEARCH_BACKENDS = {
 WAGTAILADMIN_BASE_URL = os.environ.get("WAGTAILADMIN_BASE_URL", "http://localhost:8000")
 
 WAGTAILDOCS_EXTENSIONS = ["csv", "docx", "key", "odt", "pdf", "pptx", "rtf", "txt", "xlsx", "zip"]
+# SVG is allowed for logos (testimonials). SVGs can contain scripts, so only give trusted editors image upload rights.
+WAGTAILIMAGES_EXTENSIONS = ["avif", "gif", "jpg", "jpeg", "png", "webp", "svg"]
+
 WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 

@@ -2,12 +2,15 @@ from django.db import migrations
 
 
 def create_home_page(apps, schema_editor):
-    """Replace Wagtail's default "Welcome" page (a plain Page) with a LandingPage as the site root."""
+    """Replace Wagtail's default "Welcome" page (a plain Page) with an empty HomePage as the site root.
+
+    Content is added by `manage.py import_current_site`.
+    """
     ContentType = apps.get_model("contenttypes.ContentType")
     Page = apps.get_model("wagtailcore.Page")
     Site = apps.get_model("wagtailcore.Site")
-    LandingPage = apps.get_model("pages.LandingPage")
     Locale = apps.get_model("wagtailcore.Locale")
+    HomePage = apps.get_model("pages.HomePage")
 
     page_content_type = ContentType.objects.get(model="page", app_label="wagtailcore")
     welcome = Page.objects.filter(content_type=page_content_type, slug="home", depth=2).first()
@@ -16,13 +19,13 @@ def create_home_page(apps, schema_editor):
     if welcome:
         welcome.delete()  # also deletes the default Site that points at it
 
-    landing_page_content_type, __ = ContentType.objects.get_or_create(model="landingpage", app_label="pages")
+    home_page_content_type, __ = ContentType.objects.get_or_create(model="homepage", app_label="pages")
 
-    home = LandingPage.objects.create(
+    home = HomePage.objects.create(
         title="Home",
         draft_title="Home",
         slug="home",
-        content_type=landing_page_content_type,
+        content_type=home_page_content_type,
         path="00010001",
         depth=2,
         numchild=0,
@@ -35,10 +38,10 @@ def create_home_page(apps, schema_editor):
 
 def remove_home_page(apps, schema_editor):
     ContentType = apps.get_model("contenttypes.ContentType")
-    LandingPage = apps.get_model("pages.LandingPage")
+    HomePage = apps.get_model("pages.HomePage")
 
-    LandingPage.objects.filter(slug="home", depth=2).delete()  # the Site cascades
-    ContentType.objects.filter(model="landingpage", app_label="pages").delete()
+    HomePage.objects.filter(slug="home", depth=2).delete()  # the Site cascades
+    ContentType.objects.filter(model="homepage", app_label="pages").delete()
 
 
 class Migration(migrations.Migration):
