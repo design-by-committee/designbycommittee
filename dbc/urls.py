@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.http import HttpResponse
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from wagtail import urls as wagtail_urls
@@ -10,13 +9,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from core.views import media, robots_txt
 
 
-def healthz(request):
-    """Render's health check: answers without touching the database or Wagtail's page tree."""
-    return HttpResponse("ok", content_type="text/plain")
-
-
 urlpatterns = [
-    path("healthz/", healthz),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("sitemap.xml", sitemap),

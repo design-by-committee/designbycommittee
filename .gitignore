@@ -122,3 +122,6 @@ db.sqlite3-journal
 
 # Copy of the original static site for side-by-side comparison (see README)
 /.original-site/
+
+# Render persistent disk mount (uploads); never committed
+/storage/

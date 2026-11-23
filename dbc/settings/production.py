@@ -26,7 +26,6 @@ STORAGES = {
 # HTTPS: Render terminates TLS and forwards the original scheme in X-Forwarded-Proto.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
-SECURE_REDIRECT_EXEMPT = [r"^healthz/$"]  # Render's health check calls the app over plain HTTP
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 # Start with a short HSTS max-age; raise it once the site has run on Render for a while.
@@ -36,6 +35,11 @@ SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", 60 * 60 * 24))
 SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W021"]
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# Full site URL for links in admin emails. Until the domain moves, Render's own URL (RENDER_EXTERNAL_URL).
+WAGTAILADMIN_BASE_URL = os.environ.get("WAGTAILADMIN_BASE_URL") or os.environ.get(
+    "RENDER_EXTERNAL_URL", WAGTAILADMIN_BASE_URL  # noqa: F405
+)
 
 # Form notification emails go out through Resend's SMTP relay; the password is the Resend API key.
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

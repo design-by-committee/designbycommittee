@@ -486,14 +486,23 @@ class Command(BaseCommand):
         parser.add_argument("--hostname", default="localhost", help="The site's host name, e.g. designbycommitt.ee")
         parser.add_argument("--port", type=int, default=80, help="443 for an HTTPS site")
         parser.add_argument(
+            "--initial",
+            action="store_true",
+            help="Do nothing if the home page already has content. Safe to run on every deploy.",
+        )
+        parser.add_argument(
             "--force",
             action="store_true",
             help="Replace page content even if the pages already have content (overwrites admin edits).",
         )
 
     @transaction.atomic
-    def handle(self, *args, hostname, port, force, **options):
+    def handle(self, *args, hostname, port, force, initial, **options):
         site = Site.objects.get(is_default_site=True)
+        if initial and len(site.root_page.specific.body):
+            self.stdout.write("The site already has content; nothing to import.")
+            return
+
         site.hostname, site.port, site.site_name = hostname, port, "Design by Committee"
         site.save()
         self.stdout.write(f"Site: {hostname}:{port}")

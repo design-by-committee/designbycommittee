@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "core.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serves the collected, hashed static files in production (and with runserver_nostatic)
     "whitenoise.middleware.WhiteNoiseMiddleware",

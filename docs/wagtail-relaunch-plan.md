@@ -1,6 +1,6 @@
 # Relaunch designbycommitt.ee on Wagtail
 
-Status: **approved 2026-11-23** · Phases 0–5 done
+Status: **approved 2026-11-23** · Phases 0–5 done, Phase 6 in progress
 
 This plan moves the site from static HTML on Netlify to Wagtail CMS on Render. It keeps the current
 design, URLs and form behaviour, and makes every section editable in the Wagtail admin. Claude does the
@@ -12,7 +12,7 @@ work in this repo. Your part is limited to the steps marked **You**, collected i
 | Topic | Decision | Why |
 |---|---|---|
 | CMS | **Wagtail 7.4 LTS** on **Django 5.2 LTS**, Python 3.13 | 7.4 has security support until Nov 2027. Wagtail 8.0 isn't an LTS release. |
-| Hosting | **Render**, Frankfurt region: Starter web service, Postgres Basic-256mb, 1 GB disk for uploads | Fixed monthly price, the whole setup lives in a `render.yaml` file in the repo, and pushes deploy automatically like Netlify does now. EU region for an EU audience. |
+| Hosting | **Render**, Frankfurt region: web service `0.5c-512mb`, Postgres `0.1c-256mb`, 1 GB disk for uploads | Fixed monthly price, the whole setup lives in a `render.yaml` file in the repo, and pushes deploy automatically like Netlify does now. EU region for an EU audience. |
 | Editing | **Rearrangeable sections.** Pages are built from StreamField blocks that match the current design. | You can edit, reorder, add or remove sections and build new landing pages from the same blocks. |
 | Forms | **Saved in the Wagtail admin and emailed to you** through **Resend** (free tier: 3,000 emails/month) | Leads show up in your inbox and stay listed in the admin, with CSV export. |
 | DNS | **Stays on Netlify DNS.** Only the website records change. | No nameserver move, and your email (MX/SPF) records aren't touched. |
@@ -158,15 +158,15 @@ Manual run in the browser pane: both forms submit and the thank-you states appea
 
 Claude first:
 1. Writes `render.yaml`:
-   - **Web service:** Python 3.13, region Frankfurt, Starter plan, branch = this branch
+   - **Web service:** Python 3.13 (from `.python-version`), region Frankfurt, plan `0.5c-512mb`, branch = this branch
    - Build: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
    - Pre-deploy: `python manage.py migrate --noinput`
-   - Start: `gunicorn dbc.wsgi`, with a health check path
-   - 1 GB disk at `/var/data` for uploaded images and documents (served by the app with cache headers; can
+   - Start: `import_current_site --initial` (a no-op once the site has content; the disk isn't available earlier), then `gunicorn`; health check at `/healthz/`
+   - 1 GB disk at `/opt/render/project/src/storage` for uploaded images and documents (served by the app with cache headers; can
      move to object storage later if traffic grows)
    - Env vars: `DATABASE_URL` from the database, `SECRET_KEY` generated, `ALLOWED_HOSTS`, `DJANGO_SETTINGS_MODULE`,
      and `RESEND_API_KEY` left for you to fill in
-   - **Postgres:** Basic-256mb, Frankfurt
+   - **Postgres:** `0.1c-256mb`, version 17, Frankfurt
 2. Validates the Blueprint and gives you the exact clicks for the steps below.
 
 **You:**
@@ -180,7 +180,7 @@ Claude first:
 6. Create your own admin account: in Render's **Shell** tab run `python manage.py createsuperuser` and choose your password.
 
 Then Claude:
-- Runs `import_current_site` on staging and repeats the parity, form and email checks on the `*.onrender.com` URL,
+- Confirms the start command imported the content on staging, and repeats the parity, form and email checks on the `*.onrender.com` URL,
   this time against Postgres.
 - Confirms what backups Render takes of the database and the disk, and writes the restore steps in the README.
 - Adds `noindex` on the staging hostname so search engines don't index it.
