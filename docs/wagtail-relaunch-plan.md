@@ -1,6 +1,6 @@
 # Relaunch designbycommitt.ee on Wagtail
 
-Status: **approved 2026-11-23** · Phases 0–6 done (staging: https://designbycommittee.onrender.com), Phase 7 in progress
+Status: **approved 2026-11-23** · Phases 0–7 done (staging: https://designbycommittee.onrender.com), Phase 8 next
 
 This plan moves the site from static HTML on Netlify to Wagtail CMS on Render. It keeps the current
 design, URLs and form behaviour, and makes every section editable in the Wagtail admin. Claude does the
@@ -190,13 +190,13 @@ Then Claude:
 1. Claude writes `docs/editing.md`: how to edit a section, add a page from blocks, manage testimonials, find leads,
    and change the notification email.
 2. **You** spend about 30 minutes on staging: edit something, add a test section, submit both forms, and send Claude a list of changes.
-3. Claude fixes the list. Reminder: the comedy page's prices are marked as draft in the HTML (a placeholder comment);
-   confirm them before launch.
+3. Claude fixes the list. The comedy page's prices (€495, €795, from €1,950) and the "reply within one working day"
+   promise were confirmed on 23 Nov.
 
 ### Phase 8: Cutover *(Claude, with your go-ahead at each outward step)*
 
-1. **Before the switch:** Claude exports all past Netlify form submissions (CSV, stored outside the repo; 11 assessment
-   submissions as of 23 Nov) and lists every record in the zone so nothing else changes. The apex and `www` records
+1. **Before the switch:** Claude lists every record in the zone so nothing else changes. (The past Netlify form
+   submissions aren't needed, so they aren't exported; you decided this on 23 Nov.) The apex and `www` records
    already have a 2-minute TTL (checked 23 Nov), so no TTL change is needed.
 2. **Merge** the PR to `main` (your go-ahead). Netlify skips the build because of `netlify.toml`, so the old site stays up.
    Claude switches the Render service to the `main` branch and confirms it deployed.
@@ -214,8 +214,7 @@ Then Claude:
 1. Watch Render logs and form email delivery for 48 hours.
 2. **You** (only if you use Google Search Console): resubmit `/sitemap.xml`.
 3. After two weeks without problems, remove the custom domain from the Netlify site and, with your confirmation, delete
-   the Netlify **site**. The **DNS zone stays**. Deleting the site also deletes its stored form submissions, which is why
-   they're exported in Phase 8.
+   the Netlify **site**. The **DNS zone stays**. Deleting the site also deletes its stored form submissions (not needed).
 4. Raise the DNS TTL back to normal. Update the README to describe the Render-only deploy flow.
 5. ~~Add a CI workflow~~ (done before launch: `.github/workflows/tests.yml` runs the tests, a migrations check, Django's
    deploy checks and a `requirements.txt`/`uv.lock` sync check). Enable Dependabot for Python packages.
@@ -230,7 +229,7 @@ Then Claude:
 | Phase 6 | Sign up for Render, connect GitHub, add a payment method, create the Blueprint | 10 min |
 | Phase 6 | Sign up for Resend, add the domain, paste the API key into Render, add its DNS records (or let Claude) | 10 min |
 | Phase 6 | `render login`; create your admin account in Render's shell | 3 min |
-| Phase 7 | Review staging, send a list of changes, confirm comedy prices | 30 min |
+| Phase 7 | Review staging, send a list of changes, confirm comedy prices (done) | 30 min |
 | Phase 8 | Go-ahead to merge, and go-ahead to change the 2 website DNS records | 2 min |
 | Phase 9 | Confirm deleting the Netlify site after two weeks | 1 min |
 
@@ -239,7 +238,7 @@ Then Claude:
 | Risk | Mitigation |
 |---|---|
 | The design changes during the port | The templates keep the existing markup and CSS. Phase 5 compares screenshots at three widths before staging. |
-| Leads lost during the switch | Netlify submissions are exported first. New submissions are saved even if the email fails. Forms are tested on staging and again after the DNS switch. |
+| Leads lost during the switch | New submissions are saved even if the email fails. Forms are tested on staging and again after the DNS switch. |
 | Email for the domain breaks | Only the apex/www website records and Resend's `send.` subdomain records change. Claude lists the zone before and after to confirm. |
 | Downtime at cutover | A low TTL set the day before, the Render domains added before the DNS change, and the old site kept running as a rollback. |
 | Python source exposed through a Netlify preview | `netlify.toml` build ignore is added in Phase 0, before any Python code is pushed. |
