@@ -6,7 +6,9 @@ from core.models import SiteSettings
 from leads.models import FormSubmission
 from pages.tests import SiteTestCase
 
-JSON = {"HTTP_ACCEPT": "application/json"}
+# Browsers send Origin with every form POST; the lead forms check it (leads.views.is_same_origin)
+ORIGIN = {"HTTP_ORIGIN": "http://testserver"}
+JSON = {"HTTP_ACCEPT": "application/json", **ORIGIN}
 
 ENQUIRY = {
     "form-name": "comedy-enquiry",
@@ -97,13 +99,13 @@ class LeadFormTests(SiteTestCase):
         self.assertFalse(FormSubmission.objects.exists())
 
     def test_without_javascript_the_visitor_returns_to_the_page(self):
-        response = self.client.post("/comedy/", ENQUIRY)
+        response = self.client.post("/comedy/", ENQUIRY, **ORIGIN)
         self.assertRedirects(response, "/comedy/?sent=comedy-enquiry#comedy-enquiry", fetch_redirect_response=False)
 
         page = self.client.get("/comedy/?sent=comedy-enquiry")
         self.assertContains(page, '<div class="c-form__thanks" id="enquiryThanks">')  # no longer hidden
 
-        response = self.client.post("/comedy/", {**ENQUIRY, "email": ""})
+        response = self.client.post("/comedy/", {**ENQUIRY, "email": ""}, **ORIGIN)
         self.assertRedirects(response, "/comedy/?error=comedy-enquiry#comedy-enquiry", fetch_redirect_response=False)
 
     def test_no_notification_address_still_saves(self):
@@ -113,18 +115,25 @@ class LeadFormTests(SiteTestCase):
         self.assertEqual(FormSubmission.objects.count(), 1)
         self.assertEqual(mail.outbox, [])
 
-    def test_form_needs_a_csrf_token(self):
+    def test_forms_only_accept_posts_from_this_site(self):
         from django.test import Client
 
+        # No CSRF token is needed (pages are cacheable), but the Origin (or Referer) must be this site
         client = Client(enforce_csrf_checks=True)
-        self.assertEqual(client.post("/comedy/", ENQUIRY, **JSON).status_code, 403)
+        accept = {"HTTP_ACCEPT": "application/json"}
+        self.assertEqual(client.post("/comedy/", ENQUIRY, **JSON).status_code, 200)
+        self.assertEqual(client.post("/comedy/", ENQUIRY, **accept, HTTP_REFERER="http://testserver/comedy/").status_code, 200)
+        self.assertEqual(client.post("/comedy/", ENQUIRY, **accept, HTTP_ORIGIN="https://evil.example").status_code, 403)
+        self.assertEqual(client.post("/comedy/", ENQUIRY, **accept, HTTP_ORIGIN="null").status_code, 403)
+        self.assertEqual(client.post("/comedy/", ENQUIRY, **accept).status_code, 403)
+        self.assertEqual(FormSubmission.objects.count(), 2)
 
 
 class LeadAdminTests(SiteTestCase):
     def setUp(self):
         self.admin = get_user_model().objects.create_superuser("admin", "admin@example.com", "test-password")
         self.client.force_login(self.admin)
-        self.client.post("/comedy/", ENQUIRY, HTTP_ACCEPT="application/json")
+        self.client.post("/comedy/", ENQUIRY, **JSON)
 
     def test_leads_are_listed_and_exportable(self):
         response = self.client.get("/admin/leads/")

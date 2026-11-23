@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView
 from wagtail import urls as wagtail_urls
+from wagtail import views as wagtail_views
 from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.documents import urls as wagtaildocs_urls
 
-from core.views import media, robots_txt
+from core.views import media, robots_txt, sitemap
 
 
 urlpatterns = [
@@ -29,5 +30,8 @@ else:
 
 urlpatterns += [
     # Everything else is a Wagtail page. Keep this last.
+    # Pages are served without Django's CSRF cookie, so the edge can cache them (core/cache.py). The only thing that
+    # posts to a page is a lead form, which checks the request's Origin instead (leads/views.py).
+    re_path(wagtail_urls.serve_pattern, csrf_exempt(wagtail_views.serve), name="wagtail_serve"),
     path("", include(wagtail_urls)),
 ]

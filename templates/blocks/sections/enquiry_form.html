@@ -15,7 +15,6 @@
       <p id="enquiryError" class="c-form__error" role="alert">{% if error == form_name %}Please add your name, a valid email address, and tell us what kind of act you are.{% endif %}</p>
 
       <form action="{% pageurl page %}" method="POST" id="{{ form_name }}" name="{{ form_name }}" novalidate{% if sent == form_name %} hidden{% endif %}>
-        {% csrf_token %}
         <input type="hidden" name="form-name" value="{{ form_name }}">
         <p class="c-hidden-field">
           <label>Leave this empty if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>

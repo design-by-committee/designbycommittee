@@ -71,6 +71,34 @@ Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). 
 **Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
 printed to the terminal locally). A hidden honeypot field catches simple spam bots.
 
+The forms have no CSRF token, so the pages they're on can be cached (see Caching). Instead, a submission is only
+accepted if the browser's `Origin` (or `Referer`) header is this site, which another site can't fake.
+
+## Caching
+
+Everything visitors load can be cached by browsers and by Render's edge cache (Cloudflare, in front of the service):
+
+| What | Cache-Control | How changes show up |
+|---|---|---|
+| Static files (`/static/`) | 1 year, immutable | WhiteNoise puts a content hash in each file name; a deploy changes the names |
+| Image renditions (`/media/images/`) | 1 year, immutable | `core/storage.py` puts a content hash in each file name; a changed image gets new URLs |
+| Other media (original images, documents) | 1 hour | |
+| Pages, `sitemap.xml`, `robots.txt` | edge: `s-maxage` (5 min, or 1 day with purging); browsers: `max-age=0` | Browsers revalidate on every visit (a quick 304 thanks to ETags), so they see whatever the edge has |
+| Everything else (admin, previews, form responses, logged-in visitors, URLs with `?query`) | `private, no-cache` | Never stored at the edge |
+
+**Purging.** With `RENDER_API_KEY` set, the site asks Render to purge the whole edge cache whenever something that
+appears on pages changes: publishing, unpublishing, moving or deleting a page, and saving testimonials, Site
+settings, images, redirects or sites. That's why pages can stay cached for a day. Drafts and `cms` dry runs don't
+purge. Without the key, pages are cached for 5 minutes, so an edit is live within 5 minutes. Every deploy also
+purges the edge cache, and there's a manual **Purge cache** button under the service's Settings in Render.
+
+**Render settings.** Edge caching is a dashboard setting (Settings → Edge Caching): **All files** caches pages as well
+as images, CSS and JS; **Common static files** caches only images, CSS and JS. Check a response's `CF-Cache-Status`
+header: `HIT` came from the edge, `MISS`/`EXPIRED` from the service, `BYPASS`/`DYNAMIC` isn't cached.
+
+`python manage.py hash_renditions` (run at startup by `render.yaml`) replaces renditions from before hashed names
+existed; it does nothing once they're all hashed.
+
 ## Managing the site from the command line
 
 `python manage.py cms` does what an editor or administrator does in the Wagtail admin, through Wagtail's own APIs
@@ -129,6 +157,9 @@ Then start `original-static-site` (port 8001) from `.claude/launch.json` alongsi
 | `RESEND_API_KEY` | Render (entered by the site owner) | Sends form notification emails through Resend |
 | `INDEXABLE_HOSTS` | optional | Hosts search engines may index. Default `designbycommitt.ee,www.designbycommitt.ee`; everything else gets `noindex` |
 | `DEFAULT_FROM_EMAIL` | optional | Sender address for form emails |
+| `RENDER_API_KEY` | Render (entered by the site owner, optional) | Lets the site purge Render's edge cache when content changes (see Caching) |
+| `RENDER_SERVICE_ID` | Render (automatic) | The service whose edge cache is purged |
+| `EDGE_HTML_MAX_AGE` | optional | Seconds the edge keeps pages. Default 300, or 86400 with `RENDER_API_KEY` |
 
 ## Deploys
 

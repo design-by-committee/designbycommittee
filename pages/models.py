@@ -4,6 +4,8 @@ from wagtail.fields import StreamField
 from wagtail.models import Page
 from wagtail.search import index
 
+from core.cache import cache_privately, cache_publicly, is_public_request
+
 from .blocks import AGENCY_BLOCKS, FORM_BLOCK_TYPES, SECTION_BLOCKS, LinkBlock
 
 
@@ -65,7 +67,11 @@ class BasePage(Page):
             from leads.views import handle_submission
 
             return handle_submission(request, self)
-        return super().serve(request, *args, **kwargs)
+        response = super().serve(request, *args, **kwargs)
+        if is_public_request(request) and not self.get_view_restrictions().exists():
+            response.render()  # TemplateResponse: render now so the cache headers see the final response
+            return cache_publicly(response)
+        return cache_privately(response)
 
 
 class HomePage(BasePage):
