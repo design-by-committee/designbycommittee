@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils.cache import patch_cache_control
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_safe
 from django.views.static import serve
 
 
@@ -10,7 +10,7 @@ def is_indexable_host(request):
     return request.get_host().split(":")[0] in settings.INDEXABLE_HOSTS
 
 
-@require_GET
+@require_safe
 def robots_txt(request):
     if is_indexable_host(request):
         lines = ["User-agent: *", "Disallow:", "", f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}"]
@@ -19,7 +19,7 @@ def robots_txt(request):
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
 
 
-@require_GET
+@require_safe
 def media(request, path):
     """Serve uploaded images and documents from the media folder (the persistent disk on Render).
 
