@@ -257,7 +257,6 @@ input#date,
 input#time {
   display: inline-block;
   width: auto;
-  min-height: 60px;
 }
 
 .step {
@@ -273,7 +272,7 @@ input#time {
   font-size: 1.5rem;
 }
 
-.step .step__nr::after {
+.step .step__nr {
   font-size: 1.3125rem;
 }
 

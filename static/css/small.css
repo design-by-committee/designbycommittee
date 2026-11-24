@@ -120,7 +120,6 @@ html {
 body {
   line-height: 1;
   overflow-x: clip;
-  counter-reset: step;
   font-family: var(--font-body);
   color: var(--color-text);
 }
@@ -555,6 +554,19 @@ input#time {
   width: 100%;
   font-size: calc(0.875rem + 0.25vw);
   margin-bottom: 1em;
+  /* iOS Safari draws date and time fields its own way: a fixed minimum width (wider than the form on phones), centred
+     text and a shorter box. Match the text fields instead: line height + padding + border. */
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  height: calc(1lh + 2em + 2px);
+  text-align: left;
+}
+
+input#date::-webkit-date-and-time-value,
+input#time::-webkit-date-and-time-value {
+  margin: 0;
+  text-align: left;
 }
 
 /* sized to the label text and centred on the label's first line */
@@ -642,15 +654,13 @@ input[type="checkbox"] {
   display: none;
 }
 
+/* the step's number is in the HTML; a completed step swaps it for a tick */
 .step .step__nr {
-  font-size: 0;
+  font-size: 1.17rem;
 }
 
-.step .step__nr::after {
-  counter-increment: step;
-  content: counter(step);
-  font-size: 1.17rem;
-  transition: border-color var(--ease);
+.step.complete .step__nr {
+  font-size: 0;
 }
 
 .step.complete .step__nr::after {
