@@ -166,6 +166,7 @@ class Command(BaseCommand):
         p.add_argument("--form", choices=["comedy-enquiry", "landing-page-assessment"])
         p.add_argument("--unhandled", action="store_true")
         p.add_argument("--since", help="YYYY-MM-DD")
+        p.add_argument("--spam", action="store_true", help="List the submissions flagged as spam instead")
         lead_actions.add_parser("show").add_argument("id", type=int)
         p = lead_actions.add_parser("update", help='e.g. --data \'{"handled": true}\'')
         p.add_argument("id", type=int)
@@ -267,7 +268,7 @@ class Command(BaseCommand):
         if area == "leads":
             resource = records.leads_resource()
             if action == "list":
-                return records.leads_list(o["form"], o["unhandled"], o["since"])
+                return records.leads_list(o["form"], o["unhandled"], o["since"], o["spam"])
             if action == "export":
                 return records.leads_export(o["form"])
             if action == "delete":

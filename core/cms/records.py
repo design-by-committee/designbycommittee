@@ -156,7 +156,7 @@ def _leads():
     class LeadForm(forms.ModelForm):
         class Meta:
             model = FormSubmission
-            fields = ["handled"]  # what the admin lets you change; the rest is what the visitor sent
+            fields = ["handled", "is_spam"]  # what the admin lets you change; the rest is what the visitor sent
 
     return Resource(
         FormSubmission,
@@ -170,9 +170,12 @@ def leads_resource():
     return _leads()
 
 
-def leads_list(form_name=None, unhandled=False, since=None, limit=50):
+def leads_list(form_name=None, unhandled=False, since=None, spam=False, limit=50):
+    """Real leads, or with spam=True the ones the spam checks flagged (leads/spam.py)."""
     resource = _leads()
-    queryset = resource.model.objects.all()
+    queryset = resource.model.objects.filter(is_spam=spam)
+    if spam:
+        resource.list_fields = [*resource.list_fields, "spam_reason"]
     if form_name:
         queryset = queryset.filter(form_name=form_name)
     if unhandled:
@@ -184,7 +187,7 @@ def leads_list(form_name=None, unhandled=False, since=None, limit=50):
 
 def leads_export(form_name=None):
     resource = _leads()
-    queryset = resource.model.objects.order_by("submitted_at")
+    queryset = resource.model.objects.filter(is_spam=False).order_by("submitted_at")
     if form_name:
         queryset = queryset.filter(form_name=form_name)
     out = io.StringIO()

@@ -23,6 +23,20 @@ class FormSubmission(models.Model):
     data = models.JSONField(default=dict, help_text="The raw form values, keyed by field name.")
     submitted_at = models.DateTimeField("Received", auto_now_add=True, db_index=True)
     handled = models.BooleanField(default=False, help_text="Tick once you’ve replied.")
+    is_spam = models.BooleanField(
+        "Spam",
+        default=False,
+        db_index=True,
+        help_text="Set by the spam checks (leads/spam.py). Untick to move a real lead back to Leads.",
+    )
+    spam_reason = models.CharField(max_length=500, blank=True, help_text="Why the spam checks flagged it.")
+    ip_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        db_index=True,
+        editable=False,
+        help_text="A keyed hash of the sender’s IP address, for rate limiting. The address itself isn’t stored.",
+    )
 
     class Meta:
         ordering = ["-submitted_at"]

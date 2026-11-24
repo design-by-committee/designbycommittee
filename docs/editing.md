@@ -90,7 +90,7 @@ Each landing page section can have a **Light**, **Paper** or **Dark** background
 
 ## Leads (form submissions)
 
-**Leads** in the left menu lists every form submission, newest first.
+**Leads → Inbox** in the left menu lists form submissions, newest first.
 
 - Filter by form, or by whether it's handled. Search by name, email or any answer.
 - Open a lead to read everything the person filled in. Tick **Handled** once you've replied, and save.
@@ -98,6 +98,12 @@ Each landing page section can have a **Light**, **Paper** or **Dark** background
 
 Each new lead is also emailed to the address in **Settings → Site settings → Lead notification email**. Reply to
 that email to answer the person directly. If the email ever fails, the lead is still saved here.
+
+**Leads → Spam** holds submissions that look like spam, each with the reason. You get no email for these, and the
+sender sees the usual thank-you message. If a real lead ends up there, open it, untick **Spam** and save: it moves
+back to the inbox. Reasons include sending the form within a few seconds of opening the page, HTML or lots of links
+in the answers, a call time the date and time pickers wouldn't allow, and more than five sends an hour from one
+address. People with JavaScript turned off also land here, so glance at the list now and then.
 
 ## Site settings
 

@@ -5,7 +5,10 @@ the JavaScript and exported submissions keep the same keys. Labels and choices a
 the templates, the notification email and the admin.
 """
 
+from datetime import date, time
+
 from django import forms
+from django.utils import timezone
 
 HONEYPOT = "bot-field"
 
@@ -17,7 +20,12 @@ class LeadForm(forms.Form):
     title = ""
 
     def is_spam(self):
+        """True if the honeypot is filled in: certainly a bot, so the submission is dropped."""
         return bool(self.data.get(HONEYPOT))
+
+    def spam_reasons(self):
+        """Form-specific signs of spam in the cleaned data (see leads/spam.py for the checks shared by all forms)."""
+        return []
 
     def submitter(self):
         """(name, email) for listing the submission."""
@@ -86,6 +94,37 @@ class AssessmentFormBase(LeadForm):
     def submitter(self):
         name = f"{self.cleaned_data['first-name']} {self.cleaned_data['last-name']}".strip()
         return name, self.cleaned_data["email"]
+
+    # The page's date and time fields only allow a weekday from tomorrow to two weeks ahead, 09:00 to 18:00
+    # (assessment_form.html and main.js). Anything else was sent without them. A day of slack covers time zones.
+    EARLIEST_DAY, LATEST_DAY = -1, 15
+    OPENS, CLOSES = time(9), time(18)
+
+    def spam_reasons(self):
+        reasons = []
+        data = self.cleaned_data
+        if data["first-name"].strip().casefold() == data["last-name"].strip().casefold():
+            reasons.append("same first and last name")
+
+        try:
+            day = date.fromisoformat(data["date"])
+        except ValueError:
+            reasons.append("date isn’t a date")
+        else:
+            offset = (day - timezone.localdate()).days
+            if not self.EARLIEST_DAY <= offset <= self.LATEST_DAY:
+                reasons.append(f"date {day.isoformat()} is outside the next two weeks")
+            elif day.weekday() >= 5:
+                reasons.append("date is a weekend")
+
+        try:
+            at = time.fromisoformat(data["time"])
+        except ValueError:
+            reasons.append("time isn’t a time")
+        else:
+            if not self.OPENS <= at <= self.CLOSES:
+                reasons.append(f"time {at:%H:%M} is outside 09:00–18:00")
+        return reasons
 
 
 AssessmentForm = build_form(

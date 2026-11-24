@@ -69,7 +69,17 @@ uv run manage.py runserver
 
 Both forms post back to their own page (`BasePage.serve` → `leads/views.py`). Each submission is saved under
 **Leads** in the admin and emailed to the address in **Settings → Site settings** (through Resend in production;
-printed to the terminal locally). A hidden honeypot field catches simple spam bots.
+printed to the terminal locally).
+
+Spam is handled without anything visitors have to do:
+
+- A hidden honeypot field: anything that fills it in is dropped.
+- `leads/spam.py` flags the rest: no `fill-time` from the page's script (seconds since the page opened) or under 3
+  seconds; HTML or more than two links in an answer; anything the form itself rejects as impossible
+  (`LeadForm.spam_reasons`, e.g. an assessment call outside weekdays 09:00–18:00 in the next two weeks, or the same
+  first and last name); more than 5 sends an hour from one IP address. Flagged submissions get the normal success
+  response but are saved with `is_spam` under **Leads → Spam**, with no email. Only a keyed hash of the IP address is
+  stored, for the rate limit. `cms leads list --spam` lists them.
 
 The forms have no CSRF token, so the pages they're on can be cached (see Caching). Instead, a submission is only
 accepted if the browser's `Origin` (or `Referer`) header is this site, which another site can't fake.
