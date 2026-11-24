@@ -115,8 +115,8 @@ address. People with JavaScript turned off also land here, so glance at the list
 
 ## Things to know
 
-- The pricing buttons (and the timeline panel's button) scroll to the quote form. Their package codes (`solo`, `show`,
-  `venue`) are no longer used by the form, which doesn't ask about packages.
+- The pricing buttons (and the timeline panel's button) scroll to the quote form and select its **I'm a…** option:
+  package code `solo` selects Performer, `show` Showrunner and `venue` Venue owner. Visitors can still change it.
 - The form fields themselves (questions and options) are also in the code, so they stay in step with the
   validation and the notification emails.
 - Images you upload are resized automatically; upload at least 1120 pixels wide for the hero screenshot.

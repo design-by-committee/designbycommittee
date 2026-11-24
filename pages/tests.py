@@ -70,6 +70,15 @@ class RenderTests(SiteTestCase):
         self.assertContains(self.client.get("/"), f"© {timezone.now().year} Design by Committee BV.")
 
 
+class PricingButtonTests(SiteTestCase):
+    def test_pricing_buttons_name_the_quote_form_option_they_select(self):
+        response = self.client.get("/comedy/")
+        for code, client_type in (("solo", "Performer"), ("show", "Showrunner"), ("venue", "Venue owner")):
+            self.assertContains(response, f'data-package="{code}" data-client-type="{client_type}"')
+            # comedy.js checks the radio with this value
+            self.assertContains(response, f'name="client-type" value="{client_type}"')
+
+
 class PageSpeedTests(SiteTestCase):
     def test_pages_only_load_files_from_this_site(self):
         # Fonts and scripts from other hosts block the first render while a new connection is set up
