@@ -65,7 +65,7 @@ function initEnquiry(form) {
     }
     errorMessage.textContent = '';
 
-    submitButton.disabled = true;
+    setSending(submitButton, true);
     try {
       const response = await fetch(form.getAttribute('action'), {
         method: 'POST',
@@ -81,9 +81,11 @@ function initEnquiry(form) {
       document.getElementById('enquiryThanksTitle').focus();
     } catch (error) {
       console.error(error);
-      submitButton.disabled = false;
+      setSending(submitButton, false); // before focusing it: a disabled button can't take focus
       errorMessage.textContent = 'Something went wrong sending your enquiry. Please try again.';
       submitButton.focus();
+    } finally {
+      setSending(submitButton, false);
     }
   });
 }
@@ -101,4 +103,17 @@ function formBody(form) {
   const body = new URLSearchParams(new FormData(form));
   body.set('fill-time', String(Math.floor(performance.now() / 1000)));
   return body;
+}
+
+/* While the form is being sent: the button says "Sending…" with a spinner (small.css) and can't be pressed twice. */
+function setSending(button, sending) {
+  if (sending) {
+    button.dataset.label = button.textContent;
+    button.textContent = 'Sending…';
+  } else if (button.dataset.label) {
+    button.textContent = button.dataset.label;
+  }
+  button.disabled = sending;
+  button.classList.toggle('is-sending', sending);
+  button.form.setAttribute('aria-busy', String(sending));
 }

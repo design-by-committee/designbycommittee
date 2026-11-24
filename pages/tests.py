@@ -79,6 +79,39 @@ class PricingButtonTests(SiteTestCase):
             self.assertContains(response, f'name="client-type" value="{client_type}"')
 
 
+class FaqTests(SiteTestCase):
+    def test_blank_lines_in_an_answer_start_new_paragraphs(self):
+        body = self.comedy.body
+        faq = next(block for block in body if block.block_type == "faq")
+        faq.value["questions"][0]["answer"] = "First paragraph.\r\n\r\nSecond paragraph."
+        self.comedy.body = body
+        self.comedy.save_revision().publish()
+        response = self.client.get("/comedy/")
+        self.assertContains(response, "<p>First paragraph.</p>")
+        self.assertContains(response, "<p>Second paragraph.</p>")
+
+
+class MobileFieldTests(SiteTestCase):
+    """Fields bring up the right phone keyboard and offer autofill."""
+
+    def field_attrs(self, url, name):
+        html = self.client.get(url).content.decode()
+        tag = re.search(rf'<input[^>]*name="{name}"[^>]*>', html, re.DOTALL).group(0)
+        return dict(re.findall(r'([a-z-]+)="([^"]*)"', tag))
+
+    def test_comedy_form(self):
+        self.assertEqual(self.field_attrs("/comedy/", "link")["inputmode"], "url")
+        self.assertEqual(self.field_attrs("/comedy/", "link")["autocomplete"], "url")
+        self.assertEqual(self.field_attrs("/comedy/", "name")["autocomplete"], "name")
+        self.assertEqual(self.field_attrs("/comedy/", "email")["type"], "email")
+
+    def test_assessment_form(self):
+        self.assertEqual(self.field_attrs("/", "url")["inputmode"], "url")
+        self.assertEqual(self.field_attrs("/", "first-name")["autocomplete"], "given-name")
+        self.assertEqual(self.field_attrs("/", "last-name")["autocomplete"], "family-name")
+        self.assertEqual(self.field_attrs("/", "email")["autocomplete"], "email")
+
+
 class PageSpeedTests(SiteTestCase):
     def test_pages_only_load_files_from_this_site(self):
         # Fonts and scripts from other hosts block the first render while a new connection is set up

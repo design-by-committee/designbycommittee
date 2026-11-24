@@ -154,6 +154,8 @@ WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 # Email: console output unless overridden by an environment's settings.
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Design by Committee <forms@designbycommitt.ee>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Lead notification emails are sent after the visitor gets their reply (leads/views.py send_in_background)
+LEAD_EMAILS_IN_BACKGROUND = True
 
 
 # Edge caching (core/cache.py). With RENDER_API_KEY set, the site purges Render's edge cache when content changes.

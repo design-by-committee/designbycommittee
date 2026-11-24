@@ -65,7 +65,7 @@ buttons and header links. Keep the existing anchors in place:
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
 | Packages and prices | Pricing cards; mark one as featured and give it a badge |
-| Questions (FAQ) | Expandable questions and answers |
+| Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
 | Quote request form | The enquiry form |
 | Text | Free text with headings, lists and links |
 

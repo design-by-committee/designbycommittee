@@ -1,7 +1,10 @@
+import threading
 from datetime import timedelta
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.test import override_settings
 from django.utils import timezone
 from wagtail.models import Site
 
@@ -50,6 +53,7 @@ ASSESSMENT = {
 }
 
 
+@override_settings(LEAD_EMAILS_IN_BACKGROUND=False)  # so mail.outbox is filled before the response
 class LeadFormTests(SiteTestCase):
     def setUp(self):
         settings = SiteSettings.for_site(Site.objects.get(is_default_site=True))
@@ -144,6 +148,7 @@ class LeadFormTests(SiteTestCase):
         self.assertEqual(FormSubmission.objects.count(), 2)
 
 
+@override_settings(LEAD_EMAILS_IN_BACKGROUND=False)  # so mail.outbox is filled before the response
 class LeadAdminTests(SiteTestCase):
     def setUp(self):
         self.admin = get_user_model().objects.create_superuser("admin", "admin@example.com", "test-password")
@@ -171,6 +176,7 @@ class LeadAdminTests(SiteTestCase):
         self.assertTrue(submission.handled)
 
 
+@override_settings(LEAD_EMAILS_IN_BACKGROUND=False)  # so mail.outbox is filled before the response
 class SpamTests(SiteTestCase):
     """Likely spam is saved under Leads → Spam with no email, and the sender sees the usual success response."""
 
@@ -264,4 +270,45 @@ class SpamTests(SiteTestCase):
         self.assertNotIn("Spammy", records.leads_list())
         self.assertIn("Spammy", records.leads_list(spam=True))
         self.assertNotIn("Spammy", records.leads_export())
+
+
+class BackgroundEmailTests(SiteTestCase):
+    """The visitor's reply doesn't wait for the notification email (LEAD_EMAILS_IN_BACKGROUND, on by default)."""
+
+    def setUp(self):
+        SiteSettings.objects.update(lead_notification_email="leads@example.com")
+
+    def test_reply_comes_before_the_email_is_sent(self):
+        release = threading.Event()
+        started = []
+        real_send = mail.EmailMessage.send
+
+        def slow_send(message, *args, **kwargs):
+            release.wait(5)  # stands in for a slow SMTP relay
+            return real_send(message, *args, **kwargs)
+
+        real_thread = threading.Thread
+
+        def record_thread(*args, **kwargs):
+            thread = real_thread(*args, **kwargs)
+            started.append(thread)
+            return thread
+
+        with mock.patch("leads.views.EmailMessage.send", slow_send), mock.patch("leads.views.threading.Thread", record_thread):
+            response = self.client.post("/comedy/", ENQUIRY, **JSON)
+            self.assertEqual(response.json(), {"ok": True})
+            self.assertEqual(mail.outbox, [])  # replied while the email was still waiting
+            release.set()
+            started[0].join(5)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, "New comedy enquiry from Jo Comic")
+        self.assertFalse(started[0].daemon)  # a deploy's shutdown waits for it
+
+    def test_a_failed_email_is_logged_and_the_lead_kept(self):
+        with mock.patch("leads.views.EmailMessage.send", side_effect=OSError("relay down")):
+            with self.assertLogs("leads.views", "ERROR"):
+                with override_settings(LEAD_EMAILS_IN_BACKGROUND=False):
+                    self.client.post("/comedy/", ENQUIRY, **JSON)
+        self.assertEqual(FormSubmission.objects.count(), 1)
 

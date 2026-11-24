@@ -1,7 +1,9 @@
 import logging
+import threading
 from email.utils import formataddr
 from urllib.parse import urlencode, urlsplit
 
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
@@ -94,10 +96,29 @@ def notify(request, form, submission):
         to=[recipient],
         reply_to=[formataddr((name, submission.email))],
     )
-    try:
-        message.send()
-    except Exception:
-        logger.exception("Could not email lead %s; it is saved in the admin", submission.pk)
+    send_in_background(message, submission.pk)
+
+
+def send_in_background(message, lead_pk):
+    """Send `message` without making the visitor wait for it (sending through Resend's SMTP relay takes a few
+    seconds). The lead is already saved, so a failed email only means a log entry.
+
+    A normal (non-daemon) thread: when the server process is told to stop, e.g. during a deploy, Python waits for
+    the email to finish (EMAIL_TIMEOUT caps how long). LEAD_EMAILS_IN_BACKGROUND = False sends in the request instead.
+    """
+
+    def send():
+        try:
+            message.send()
+        except Exception:
+            logger.exception("Could not email lead %s; it is saved in the admin", lead_pk)
+
+    if not getattr(settings, "LEAD_EMAILS_IN_BACKGROUND", True):
+        send()
+        return None
+    thread = threading.Thread(target=send, name=f"lead-email-{lead_pk}")
+    thread.start()
+    return thread
 
 
 def _respond(page, form_name, *, ok, wants_json):

@@ -10,7 +10,8 @@
       {% for item in value.questions %}
         <details>
           <summary>{{ item.question }}</summary>
-          <p>{{ item.answer }}</p>
+          {# A blank line in an answer starts a new paragraph; a single line break becomes <br>. #}
+          {{ item.answer|linebreaks }}
         </details>
       {% endfor %}
     </div>
