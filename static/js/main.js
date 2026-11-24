@@ -1,4 +1,4 @@
-// Loaded as a deferred ES module after tiny-slider and flatpickr (see <head>), so both globals exist here.
+// Loaded as an ES module, so it runs after the page has been parsed.
 
 const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -35,38 +35,36 @@ function initReveal() {
   document.documentElement.classList.add('has-reveal');
 }
 
-/* Testimonials become a slider below 1000px and a static row above it. */
+/* Testimonials: on small screens CSS turns them into a swipeable row; add a dot for each one to jump to it. */
 function initCarousel() {
   const carousel = document.querySelector('.carousel');
-  if (!carousel) return; // the page has no testimonial carousel
-  if (typeof tns !== 'function') return; // CDN blocked or failed its integrity check: keep the static layout
-  const mobile = matchMedia('(width < 1000px)');
-  const host = carousel.parentElement;
-  let slider = null;
+  const dots = carousel?.parentElement.querySelector('.carousel__dots');
+  if (!dots) return; // the page has no testimonial carousel
+  const slides = [...carousel.children];
+  if (slides.length < 2) return;
 
-  // tiny-slider measures the carousel's parent on init and throws if the page has no layout width yet
-  // (e.g. loaded in a hidden iframe or a prerendered tab), so wait until the carousel has a width.
-  // Look the carousel up each time: destroy() rebuilds it from HTML, replacing the element.
-  const hasWidth = () => host.querySelector(':scope > .carousel').getBoundingClientRect().width > 0;
+  const buttons = slides.map((slide, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('aria-label', `Show testimonial ${index + 1} of ${slides.length}`);
+    // CSS sets scroll-behavior: smooth unless the visitor prefers reduced motion
+    button.addEventListener('click', () => carousel.scrollTo({ left: slide.offsetLeft }));
+    dots.append(button);
+    return button;
+  });
 
-  const update = () => {
-    if (mobile.matches && !slider && hasWidth()) {
-      slider = tns({
-        container: '.carousel',
-        items: 1,
-        slideBy: 'page',
-        navPosition: 'bottom',
-        controls: false,
-      });
-    } else if (!mobile.matches && slider) {
-      slider.destroy();
-      slider = null;
-    }
+  const setCurrent = (current) => {
+    buttons.forEach((button, index) => button.setAttribute('aria-current', String(index === current)));
   };
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) setCurrent(slides.indexOf(entry.target));
+    }
+  }, { root: carousel, threshold: 0.6 });
+  slides.forEach((slide) => observer.observe(slide));
 
-  update();
-  mobile.addEventListener('change', update);
-  new ResizeObserver(update).observe(host); // retry once a zero-width layout gets a real width
+  setCurrent(0);
+  dots.hidden = false; // medium.css hides the dots on large screens, where the quotes sit side by side
 }
 
 /* Two-step assessment form, posted to the page with fetch (handled by leads/views.py). */
@@ -86,30 +84,27 @@ function initForm() {
 
   field('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  // Without flatpickr (CDN blocked) the date and time fields still accept typed values
-  if (typeof flatpickr === 'function') initPickers();
+  initSchedule();
 
-  function initPickers() {
-    flatpickr('#date', {
-      disableMobile: true,
-      allowInput: true, // keyboard and screen reader users can type instead of using the popup
-      dateFormat: 'm-d-Y',
-      minDate: new Date().fp_incr(1), // tomorrow
-      maxDate: new Date().fp_incr(14), // two weeks ahead
-      disable: [(date) => date.getDay() === 0 || date.getDay() === 6], // weekdays only
-      locale: { firstDayOfWeek: 1 },
-    });
+  // Native date and time fields: a weekday from tomorrow to two weeks ahead, between 09:00 and 18:00 (see the HTML)
+  function initSchedule() {
+    const date = field('date');
+    const isoDate = (days) => {
+      const day = new Date();
+      day.setDate(day.getDate() + days);
+      // en-CA formats as YYYY-MM-DD in local time, which is what <input type="date"> uses
+      return day.toLocaleDateString('en-CA');
+    };
+    date.min = isoDate(1);
+    date.max = isoDate(14);
 
-    flatpickr('#time', {
-      disableMobile: true,
-      allowInput: true,
-      enableTime: true,
-      noCalendar: true,
-      dateFormat: 'H:i',
-      minTime: '09:00',
-      maxTime: '18:00',
-      time_24hr: false,
-    });
+    // Native date pickers can't grey out weekends, so flag them when one is chosen
+    const checkWeekday = () => {
+      const day = date.valueAsDate?.getUTCDay();
+      date.setCustomValidity(day === 0 || day === 6 ? 'Please choose a weekday.' : '');
+    };
+    date.addEventListener('input', checkWeekday);
+    checkWeekday();
   }
 
   // Clear a field's error state as soon as the visitor edits it
@@ -139,7 +134,10 @@ function initForm() {
 
     const invalid = validate(['first-name', 'last-name', 'email', 'date', 'time'].map(field));
     if (invalid.length) {
-      showError('Please complete all the fields below before moving on to the next step.', invalid[0]);
+      // A filled-in field that's still invalid (a weekend, a time outside office hours...) explains itself
+      const [first] = invalid;
+      const message = first.value.trim() && first.validationMessage;
+      showError(message || 'Please complete all the fields below before moving on to the next step.', first);
       return;
     }
     clearError();

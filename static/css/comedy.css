@@ -6,6 +6,7 @@
   --c-on-dark: #f6f3ee;
   --c-on-dark-muted: #bfc3c7;    /* 9.6:1 on --c-stage */
   --c-paper: #faf6f0;
+  --color-link: #007a78;          /* 4.8:1 on --c-paper (small.css's #008482 is 4.2:1 there) */
   --c-coral: #fc5f6b;            /* text on dark: 6.2:1 on --c-stage */
   --c-coral-ink: #c42f3b;        /* coral text on light: 5.2:1 on white */
   --c-teal: #00bcb8;
@@ -862,6 +863,8 @@
 
   & img {
     flex: none;
+    width: 56px; /* the logo renditions are 2x */
+    height: 56px;
   }
 }
 

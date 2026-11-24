@@ -22,7 +22,7 @@
           <span class="c-browser__dots"><i></i><i></i><i></i></span>
           <span class="c-browser__url">{{ value.screenshot_address }}</span>
         </div>
-        {% image value.screenshot width-1120 fetchpriority="high" decoding="async" %}
+        {% srcset_image value.screenshot width-{480,800,1120} format-webp sizes="(min-width: 56em) min(610px, 52vw), calc(100vw - 48px)" fetchpriority="high" decoding="async" %}
       </div>
 
       {% if value.show_editor_mockup %}

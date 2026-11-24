@@ -23,9 +23,10 @@
     {% endif %}{% endwith %}
   {% endblock %}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Khula:wght@400;700;800&display=swap">
+  {# Start the font downloads alongside the CSS rather than after it (the @font-face rules are in small.css) #}
+  <link rel="preload" href="{% static 'fonts/khula-400-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/khula-700-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/khula-800-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
 
   <link rel="stylesheet" href="{% static 'css/small.css' %}">
   <link rel="stylesheet" href="{% static 'css/medium.css' %}" media="(width >= 64em)">

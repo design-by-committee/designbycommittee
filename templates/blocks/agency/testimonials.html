@@ -1,18 +1,25 @@
 {% load wagtailimages_tags %}
-<div class="carousel g__c10">
-  {% for testimonial in value.testimonials %}{% if testimonial %}
-    <figure class="carousel__item">
-      <blockquote>
-        <p>{{ testimonial.quote }}</p>
-      </blockquote>
-      <figcaption class="carousel__card {{ testimonial.card_colour }}">
-        {% if testimonial.logo %}{% image testimonial.logo fill-120x120 class="carousel__logo" alt="" width="60" height="60" loading="lazy" decoding="async" %}{% endif %}
-        <div class="carousel__info">
-          <p class="carousel__name">{{ testimonial.name }}</p>
-          <p class="title">{{ testimonial.role }}</p>
-          <p class="company">{{ testimonial.company }}</p>
-        </div>
-      </figcaption>
-    </figure>
-  {% endif %}{% endfor %}
+{% comment %}
+  On small screens the quotes are a swipeable row (CSS scroll snap) with dots that main.js adds; on large screens
+  (medium.css) they sit side by side.
+{% endcomment %}
+<div class="carousel-wrap g__c10" role="region" aria-label="Testimonials">
+  <div class="carousel">
+    {% for testimonial in value.testimonials %}{% if testimonial %}
+      <figure class="carousel__item">
+        <blockquote>
+          <p>{{ testimonial.quote }}</p>
+        </blockquote>
+        <figcaption class="carousel__card {{ testimonial.card_colour }}">
+          {% if testimonial.logo %}{% image testimonial.logo fill-120x120 format-webp preserve-svg class="carousel__logo" alt="" width="60" height="60" loading="lazy" decoding="async" %}{% endif %}
+          <div class="carousel__info">
+            <p class="carousel__name">{{ testimonial.name }}</p>
+            <p class="title">{{ testimonial.role }}</p>
+            <p class="company">{{ testimonial.company }}</p>
+          </div>
+        </figcaption>
+      </figure>
+    {% endif %}{% endfor %}
+  </div>
+  <div class="carousel__dots" hidden></div>
 </div>

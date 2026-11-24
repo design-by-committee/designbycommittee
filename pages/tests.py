@@ -1,3 +1,4 @@
+import re
 import shutil
 import tempfile
 
@@ -67,6 +68,30 @@ class RenderTests(SiteTestCase):
         from django.utils import timezone
 
         self.assertContains(self.client.get("/"), f"© {timezone.now().year} Design by Committee BV.")
+
+
+class PageSpeedTests(SiteTestCase):
+    def test_pages_only_load_files_from_this_site(self):
+        # Fonts and scripts from other hosts block the first render while a new connection is set up
+        for url in ("/", "/comedy/"):
+            html = self.client.get(url).content.decode()
+            sources = re.findall(r'<(?:link|script)[^>]+(?:href|src)="([^"]+)"', html)
+            external = [s for s in sources if s.startswith(("http:", "https:", "//")) and "testserver" not in s]
+            self.assertEqual(external, [], url)
+
+    def test_fonts_are_preloaded(self):
+        self.assertContains(self.client.get("/"), 'as="font" type="font/woff2" crossorigin', count=3)
+
+    def test_assessment_form_uses_native_date_and_time_fields(self):
+        response = self.client.get("/")
+        self.assertContains(response, '<input type="date" id="date" name="date" required>')
+        self.assertContains(response, 'type="time" id="time" name="time" min="09:00" max="18:00"')
+
+    def test_screenshots_are_responsive_webp(self):
+        html = self.client.get("/comedy/").content.decode()
+        hero = re.search(r'<img[^>]*fetchpriority="high"[^>]*>', html).group(0)
+        self.assertIn("sizes=", hero)
+        self.assertEqual(len(re.findall(r"\.webp \d+w", hero)), 3, hero)
 
 
 class SiteFilesTests(SiteTestCase):
