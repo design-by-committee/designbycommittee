@@ -16,6 +16,64 @@
   --ease: 0.2s ease-in-out;
 }
 
+/** fonts **/
+/* Khula, served from this site (static/fonts, SIL Open Font License: static/fonts/OFL.txt). base.html preloads the
+   latin files; the latin-ext ones only download if a page uses one of their characters. */
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/khula-400-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/khula-400-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/khula-700-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/khula-700-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/khula-800-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Khula;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/khula-800-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /** reset (zero specificity so any rule below wins) **/
 :where(html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, cite, code, del, dfn, em,
   img, ins, kbd, q, s, samp, small, strong, sub, sup, var, b, u, i, dl, dt, dd, ol, ul, li, fieldset, form,
@@ -384,6 +442,8 @@ header {
 }
 
 .carousel__logo {
+  width: 60px; /* `main img` sets width: auto, which would show a 2x raster logo at twice the size */
+  height: 60px;
   margin-right: 1em;
 }
 
@@ -409,31 +469,58 @@ header {
   flex: 1 0 auto;
 }
 
-.tns-outer {
+.carousel-wrap {
   margin: -2em 0 2em;
 }
 
-.tns-nav {
+/* a row of full-width slides that snap into place as you swipe */
+.carousel {
+  position: relative; /* so each slide's offsetLeft is measured from here (main.js) */
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+  gap: 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    scroll-behavior: smooth;
+  }
+}
+
+.carousel > .carousel__item {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.25em;
   margin-top: 1em;
 }
 
-.tns-nav button {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: none;
-  box-shadow: none;
-  background: var(--color-border);
-  padding: 5px;
-  transition: background-color var(--ease);
-  margin: 0 -50px;
+.carousel__dots[hidden] {
+  display: none;
 }
 
-.tns-nav button.tns-nav-active {
-  background: var(--color-text);
+/* 10px dots inside 30px tap targets */
+.carousel__dots button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  background: radial-gradient(circle, var(--color-border) 5px, transparent 5.5px);
+  cursor: pointer;
+  transition: background var(--ease);
+
+  &[aria-current="true"] {
+    background: radial-gradient(circle, var(--color-text) 5px, transparent 5.5px);
+  }
 }
 
 /** form **/
@@ -468,13 +555,6 @@ input#time {
   width: 100%;
   font-size: calc(0.875rem + 0.25vw);
   margin-bottom: 1em;
-}
-
-input#date {
-  background-image: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 17 17'%3E%3Cg%3E%3C/g%3E%3Cpath d='M14 2v-1h-3v1h-5v-1h-3v1h-3v15h17v-15h-3zM12 2h1v2h-1v-2zM4 2h1v2h-1v-2zM16 16h-15v-8.921h15v8.921zM1 6.079v-3.079h2v2h3v-2h5v2h3v-2h2v3.079h-15z' fill='%23000000'%3E%3C/path%3E%3C/svg%3E");
-  background-position: calc(100% - 1em) 50%;
-  background-repeat: no-repeat;
-  background-size: 16px;
 }
 
 /* sized to the label text and centred on the label's first line */

@@ -157,20 +157,28 @@ main .moped {
   max-width: none;
 }
 
-/* carousel */
-.carousel {
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: row;
-  flex-wrap: wrap;
+/* carousel: a static row of quotes */
+.carousel-wrap {
+  margin: 0;
 }
 
-.carousel__item {
+.carousel {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0;
+  overflow: visible;
+  scroll-snap-type: none;
+}
+
+.carousel > .carousel__item {
   display: flex;
   flex-direction: column;
-  flex-basis: 100%;
   flex: 1;
   margin: 0;
+}
+
+.carousel__dots {
+  display: none;
 }
 
 .carousel__item::before {
@@ -240,9 +248,9 @@ input#date {
   margin: 0 4% 0 0;
 }
 
-input#date {
+input#date,
+input#time {
   min-width: calc(48% - 4px);
-  background-size: 20px;
 }
 
 input#date,

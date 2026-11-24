@@ -86,10 +86,11 @@
 
             <div class="text-left">
               <p class="text-bold">Best time to discuss my project</p>
-              <label for="date" class="sr-only">Date, a weekday within the next two weeks (MM-DD-YYYY)</label>
-              <input type="text" id="date" name="date" placeholder="MM - DD - YY">
-              <label for="time" class="sr-only">Time, between 09:00 and 18:00 (24-hour, HH:MM)</label>
-              <input type="text" id="time" name="time" placeholder="00:00">
+              {# main.js sets the date range (tomorrow to two weeks ahead) and rejects weekends #}
+              <label for="date" class="sr-only">Date, a weekday within the next two weeks</label>
+              <input type="date" id="date" name="date" required>
+              <label for="time" class="sr-only">Time, between 9 am and 6 pm</label>
+              <input type="time" id="time" name="time" min="09:00" max="18:00" step="900" required>
               <input type="hidden" id="timezone" name="timezone">
             </div>
 

@@ -41,7 +41,7 @@ def rich(html):
 IMAGES = {
     # key: (file in static/img, title)
     "mad_cow": ("work-mad-cow-comedy.jpg", "Mad Cow Comedy homepage"),
-    "logo_old_santa_fe": ("testimonial-old-santa-fe-trail.svg", "Old Santa Fe Trail Beef Jerky logo"),
+    "logo_old_santa_fe": ("testimonial-old-santa-fe-trail.png", "Old Santa Fe Trail Beef Jerky logo"),
     "logo_fallout": ("testimonial-fallout-theater.svg", "Fallout Theater logo"),
     "logo_madhouse": ("testimonial-madhouse-development.svg", "Madhouse Development Services logo"),
 }

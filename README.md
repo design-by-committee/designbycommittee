@@ -99,6 +99,21 @@ header: `HIT` came from the edge, `MISS`/`EXPIRED` from the service, `BYPASS`/`D
 `python manage.py hash_renditions` (run at startup by `render.yaml`) replaces renditions from before hashed names
 existed; it does nothing once they're all hashed.
 
+## Page speed
+
+Pages load nothing from other sites: a new connection to another host holds up the first paint on phones.
+`pages/tests.py` (`PageSpeedTests`) checks this.
+
+- **Fonts.** Khula is in `static/fonts/` (SIL Open Font License, `OFL.txt`). `small.css` has the `@font-face` rules
+  and `base.html` preloads the latin files. To add a weight, download its woff2 files from Google Fonts and add
+  matching rules.
+- **No libraries.** The testimonial carousel is CSS scroll snap plus a few lines in `main.js` for the dots. The
+  assessment form uses the browser's own date and time fields (dates are sent as `YYYY-MM-DD`).
+- **Images.** Screenshots use `{% srcset_image ... format-webp sizes=... %}` so phones get smaller WebP files. Write
+  `sizes` media queries as `(min-width: 48em)`: Wagtail's tag parser can't handle the `=` in `(width >= 48em)`. Logos
+  use `format-webp preserve-svg`, which converts raster logos and leaves SVGs alone. Keep static PNGs small (256
+  colours is usually enough for the illustrations).
+
 ## Managing the site from the command line
 
 `python manage.py cms` does what an editor or administrator does in the Wagtail admin, through Wagtail's own APIs
