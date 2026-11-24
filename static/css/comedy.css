@@ -13,12 +13,12 @@
   --c-pink: #ffb3b9;
   --c-blue: #c1d4ee;
   --c-wrap: 1180px;
-  --c-gutter: 16px;
+  --c-gutter: 24px;
 
   background: var(--color-surface);
 
   @media (width >= 40em) {
-    --c-gutter: 24px;
+    --c-gutter: 32px;
   }
 }
 
@@ -953,6 +953,16 @@
 .c-form {
   background: #fff;
   color: var(--color-text);
+
+  /* the form card is white inside a .c-dark section: undo the light heading and link colours */
+  .c-dark & :is(h1, h2, h3) {
+    color: var(--color-text);
+  }
+
+  .c-dark & a:not(.btn) {
+    color: var(--color-link);
+  }
+
   border-radius: 14px;
   padding: 1.5rem;
   box-shadow: 0 30px 60px -25px rgb(0 0 0 / 0.6);
@@ -1086,6 +1096,7 @@
 /** footer **/
 .comedy footer {
   margin-top: 0;
+  padding-inline: var(--c-gutter);
 }
 
 /** medium.css sets a desktop font size on every h3; keep this page's scale **/

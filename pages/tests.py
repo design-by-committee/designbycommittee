@@ -85,7 +85,7 @@ class PageSpeedTests(SiteTestCase):
     def test_assessment_form_uses_native_date_and_time_fields(self):
         response = self.client.get("/")
         self.assertContains(response, '<input type="date" id="date" name="date" required>')
-        self.assertContains(response, 'type="time" id="time" name="time" min="09:00" max="18:00"')
+        self.assertContains(response, 'type="time" id="time" name="time" min="09:00" max="18:00" required>')  # any minute
 
     def test_screenshots_are_responsive_webp(self):
         html = self.client.get("/comedy/").content.decode()
