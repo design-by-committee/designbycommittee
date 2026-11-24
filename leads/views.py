@@ -1,10 +1,8 @@
 import logging
 from email.utils import formataddr
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django.core.mail import EmailMessage
-from urllib.parse import urlsplit
-
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 
@@ -12,6 +10,7 @@ from core.models import SiteSettings
 
 from .forms import FORMS
 from .models import FormSubmission
+from .spam import client_ip, hash_ip, spam_reasons
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +41,8 @@ def handle_submission(request, page):
             return JsonResponse({"ok": False, "errors": form.errors.get_json_data()}, status=400)
         return _respond(page, form_name, ok=False, wants_json=False)
 
+    # Likely spam is saved under Leads → Spam without an email, and the sender sees the usual thanks (leads/spam.py)
+    reasons = spam_reasons(request, form)
     name, email = form.submitter()
     submission = FormSubmission.objects.create(
         form_name=form_name,
@@ -51,8 +52,14 @@ def handle_submission(request, page):
         email=email,
         answers=form.answers(),
         data={key: value for key, value in form.cleaned_data.items() if key != "bot-field"},
+        is_spam=bool(reasons),
+        spam_reason="; ".join(reasons)[:500],
+        ip_hash=hash_ip(client_ip(request)),
     )
-    notify(request, form, submission)
+    if reasons:
+        logger.info("Saved %s submission %s as spam: %s", form_name, submission.pk, submission.spam_reason)
+    else:
+        notify(request, form, submission)
     return _respond(page, form_name, ok=True, wants_json=wants_json)
 
 

@@ -147,7 +147,7 @@ function initForm() {
       const response = await fetch(form.action, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
-        body: new URLSearchParams(new FormData(form)),
+        body: formBody(form),
       });
       if (!response.ok) throw new Error(`Form submission failed with status ${response.status}`);
 
@@ -200,4 +200,12 @@ function initForm() {
   function clearError() {
     errorMessage.textContent = '';
   }
+}
+
+/* The form's fields plus "fill-time": whole seconds since the page opened. The server treats a missing or very short
+   time as a sign of a bot (leads/spam.py); people take longer than a few seconds to fill in a form. */
+function formBody(form) {
+  const body = new URLSearchParams(new FormData(form));
+  body.set('fill-time', String(Math.floor(performance.now() / 1000)));
+  return body;
 }

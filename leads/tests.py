@@ -1,9 +1,14 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.utils import timezone
 from wagtail.models import Site
 
 from core.models import SiteSettings
+from core.cms import records
 from leads.models import FormSubmission
+from leads.spam import RATE_LIMIT, hash_ip
 from pages.tests import SiteTestCase
 
 # Browsers send Origin with every form POST; the lead forms check it (leads.views.is_same_origin)
@@ -18,7 +23,16 @@ ENQUIRY = {
     "link": "instagram.com/jocomic",
     "details": "A Fringe hour",
     "bot-field": "",
+    "fill-time": "40",  # added by comedy.js: seconds since the page opened
 }
+
+def weekday_ahead(days):
+    """The first weekday at least `days` from today, as the date field sends it (YYYY-MM-DD)."""
+    day = timezone.localdate() + timedelta(days=days)
+    while day.weekday() >= 5:
+        day += timedelta(days=1)
+    return day.isoformat()
+
 
 ASSESSMENT = {
     "form-name": "landing-page-assessment",
@@ -29,9 +43,10 @@ ASSESSMENT = {
     "first-name": "Sam",
     "last-name": "Visitor",
     "email": "sam@example.com",
-    "date": "11-26-2026",
+    "date": weekday_ahead(2),
     "time": "10:00",
     "timezone": "Europe/Amsterdam",
+    "fill-time": "95",
 }
 
 
@@ -154,3 +169,99 @@ class LeadAdminTests(SiteTestCase):
         self.client.post(f"/admin/leads/edit/{submission.pk}/", {"handled": "on"})
         submission.refresh_from_db()
         self.assertTrue(submission.handled)
+
+
+class SpamTests(SiteTestCase):
+    """Likely spam is saved under Leads → Spam with no email, and the sender sees the usual success response."""
+
+    def setUp(self):
+        SiteSettings.objects.update(lead_notification_email="leads@example.com")
+
+    def assertSpam(self, url, data, reason):
+        response = self.client.post(url, data, **JSON)
+        self.assertEqual(response.json(), {"ok": True})
+        submission = FormSubmission.objects.latest("submitted_at")
+        self.assertTrue(submission.is_spam, data)
+        self.assertIn(reason, submission.spam_reason)
+        self.assertEqual(mail.outbox, [])
+        submission.delete()
+
+    def test_real_leads_are_not_flagged(self):
+        self.client.post("/comedy/", ENQUIRY, **JSON)
+        self.client.post("/", ASSESSMENT, **JSON)
+        self.assertFalse(FormSubmission.objects.filter(is_spam=True).exists())
+        self.assertEqual(len(mail.outbox), 2)
+
+    def test_sent_without_javascript_or_too_fast(self):
+        without = {key: value for key, value in ENQUIRY.items() if key != "fill-time"}
+        self.assertSpam("/comedy/", without, "without the page’s JavaScript")
+        self.assertSpam("/comedy/", {**ENQUIRY, "fill-time": "1"}, "sent 1s after the page opened")
+
+    def test_html_or_lots_of_links(self):
+        self.assertSpam("/comedy/", {**ENQUIRY, "details": "great app <a href=spam.shop>spam</a>"}, "HTML in")
+        links = "https://a.example https://b.example www.c.example"
+        self.assertSpam("/comedy/", {**ENQUIRY, "details": links}, "more than 2 links")
+
+        self.client.post("/comedy/", {**ENQUIRY, "details": "Our site is https://jocomic.example"}, **JSON)
+        self.assertFalse(FormSubmission.objects.get().is_spam)
+
+    def test_assessment_dates_and_times_the_page_wouldnt_allow(self):
+        self.assertSpam("/", {**ASSESSMENT, "date": "1983-01-02"}, "outside the next two weeks")
+        saturday = timezone.localdate() + timedelta(days=(5 - timezone.localdate().weekday()) % 7 or 7)
+        self.assertSpam("/", {**ASSESSMENT, "date": saturday.isoformat()}, "weekend")
+        self.assertSpam("/", {**ASSESSMENT, "date": "soon"}, "date isn’t a date")
+        self.assertSpam("/", {**ASSESSMENT, "time": "02:41"}, "outside 09:00–18:00")
+        self.assertSpam("/", {**ASSESSMENT, "first-name": "pinco_x", "last-name": "Pinco_X"}, "same first and last name")
+
+    def test_the_spam_that_got_through(self):
+        # Lead 11 on the live site, which only the honeypot was there to stop
+        spam = {
+            **ASSESSMENT,
+            "url": "https://spam.example",
+            "details": "установить приложение <a href=spam.example>установить приложение</a>",
+            "first-name": "pinco_izpl",
+            "last-name": "pinco_izpl",
+            "date": "1983-01-02",
+            "time": "02:41",
+            "timezone": "",
+        }
+        del spam["fill-time"]
+        self.assertSpam("/", spam, "without the page’s JavaScript")
+
+    def test_rate_limit_per_address(self):
+        for _ in range(RATE_LIMIT):
+            self.client.post("/comedy/", ENQUIRY, **JSON, HTTP_CF_CONNECTING_IP="203.0.113.7")
+        self.assertFalse(FormSubmission.objects.filter(is_spam=True).exists())
+        self.client.post("/comedy/", ENQUIRY, **JSON, HTTP_CF_CONNECTING_IP="198.51.100.2")  # another address is fine
+        self.assertFalse(FormSubmission.objects.filter(is_spam=True).exists())
+
+        self.client.post("/comedy/", ENQUIRY, **JSON, HTTP_CF_CONNECTING_IP="203.0.113.7")
+        flagged = FormSubmission.objects.get(is_spam=True)
+        self.assertIn(f"{RATE_LIMIT + 1} submissions from one address within an hour", flagged.spam_reason)
+
+    def test_only_a_hash_of_the_address_is_stored(self):
+        self.client.post("/comedy/", ENQUIRY, **JSON, HTTP_CF_CONNECTING_IP="203.0.113.7")
+        submission = FormSubmission.objects.get()
+        self.assertEqual(submission.ip_hash, hash_ip("203.0.113.7"))
+        self.assertNotIn("203.0.113.7", str(submission.data) + submission.answers + submission.ip_hash)
+
+    def test_spam_has_its_own_admin_list_and_can_be_moved_back(self):
+        admin = get_user_model().objects.create_superuser("admin", "admin@example.com", "test-password")
+        self.client.force_login(admin)
+        self.client.post("/comedy/", {**ENQUIRY, "fill-time": "0", "name": "Spammy McSpam"}, **JSON)
+        spam = FormSubmission.objects.get()
+
+        self.assertNotContains(self.client.get("/admin/leads/"), "Spammy McSpam")
+        self.assertContains(self.client.get("/admin/spam/"), "Spammy McSpam")
+        self.assertContains(self.client.get(f"/admin/spam/inspect/{spam.pk}/"), "sent 0s after the page opened")
+
+        self.client.post(f"/admin/spam/edit/{spam.pk}/", {})  # untick Spam
+        self.assertContains(self.client.get("/admin/leads/"), "Spammy McSpam")
+
+    def test_cms_lists_spam_separately(self):
+        self.client.post("/comedy/", ENQUIRY, **JSON)
+        self.client.post("/comedy/", {**ENQUIRY, "fill-time": "0", "name": "Spammy McSpam"}, **JSON)
+        self.assertNotIn("Spammy", records.leads_list())
+        self.assertIn("Spammy", records.leads_list(spam=True))
+        self.assertNotIn("Spammy", records.leads_export())
+
