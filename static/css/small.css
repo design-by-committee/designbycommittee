@@ -522,6 +522,27 @@ header {
   }
 }
 
+/* a submit button while its form is being sent (setSending in main.js and comedy.js) */
+.btn.is-sending {
+  cursor: progress;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn.is-sending::before {
+    content: '';
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    margin-right: 0.6em;
+    vertical-align: -0.1em;
+    border: 0.15em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
 /** form **/
 input::placeholder,
 span.optional {

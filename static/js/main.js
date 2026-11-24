@@ -84,6 +84,14 @@ function initForm() {
 
   field('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  // Phones' URL keyboards don't type "https://", and type="url" needs it: add it to "example.com" for the visitor
+  const url = field('url');
+  const addScheme = () => {
+    const value = url.value.trim();
+    if (value && !/^[a-z][a-z\d+.-]*:\/\//i.test(value)) url.value = `https://${value}`;
+  };
+  url.addEventListener('change', addScheme);
+
   initSchedule();
 
   // Native date and time fields: a weekday from tomorrow to two weeks ahead, between 09:00 and 18:00 (see the HTML)
@@ -112,7 +120,8 @@ function initForm() {
 
   continueButton.addEventListener('click', () => {
     const interests = [...form.querySelectorAll('input[type="checkbox"]')];
-    const invalid = validate([field('url')]);
+    addScheme(); // in case Continue is tapped straight from the field, before its change event
+    const invalid = validate([url]);
     if (!interests.some((box) => box.checked)) invalid.push(interests[0]);
 
     if (invalid.length) {
@@ -142,7 +151,7 @@ function initForm() {
     }
     clearError();
 
-    submitButton.disabled = true; // prevent double submissions
+    setSending(submitButton, true);
     try {
       const response = await fetch(form.action, {
         method: 'POST',
@@ -156,8 +165,10 @@ function initForm() {
       goToStep(2, document.getElementById('thanksHeading'));
     } catch (error) {
       console.error(error);
-      submitButton.disabled = false;
+      setSending(submitButton, false); // before focusing it: a disabled button can't take focus
       showError('Oops, something went wrong sending your request. Please try again.', submitButton);
+    } finally {
+      setSending(submitButton, false);
     }
   });
 
@@ -208,4 +219,17 @@ function formBody(form) {
   const body = new URLSearchParams(new FormData(form));
   body.set('fill-time', String(Math.floor(performance.now() / 1000)));
   return body;
+}
+
+/* While the form is being sent: the button says "Sending…" with a spinner (small.css) and can't be pressed twice. */
+function setSending(button, sending) {
+  if (sending) {
+    button.dataset.label = button.textContent;
+    button.textContent = 'Sending…';
+  } else if (button.dataset.label) {
+    button.textContent = button.dataset.label;
+  }
+  button.disabled = sending;
+  button.classList.toggle('is-sending', sending);
+  button.form.setAttribute('aria-busy', String(sending));
 }
