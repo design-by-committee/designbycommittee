@@ -1,3 +1,4 @@
+{% load site_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap">
     <h2 id="{{ title_id }}">{{ value.heading }}</h2>
@@ -15,7 +16,7 @@
               <li>{{ feature }}</li>
             {% endfor %}
           </ul>
-          <a href="{{ package.button_link }}" class="btn {% if package.featured %}btn-prim{% else %}btn-outline{% endif %}" data-package="{{ package.code }}">{{ package.button_text }}</a>
+          <a href="{{ package.button_link }}" class="btn {% if package.featured %}btn-prim{% else %}btn-outline{% endif %}" data-package="{{ package.code }}"{% with type=package.code|client_type %}{% if type %} data-client-type="{{ type }}"{% endif %}{% endwith %}>{{ package.button_text }}</a>
         </article>
       {% endfor %}
     </div>

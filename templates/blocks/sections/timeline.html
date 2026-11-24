@@ -1,3 +1,4 @@
+{% load site_tags %}
 <section class="c-section {{ background_class }} c-fringe"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap c-fringe__inner">
     <div>
@@ -21,7 +22,7 @@
           <li>{{ item }}</li>
         {% endfor %}
       </ul>
-      <a href="{{ value.panel_button.url }}" class="btn btn-prim"{% if value.panel_button_package %} data-package="{{ value.panel_button_package }}"{% endif %}>{{ value.panel_button.text }}</a>
+      <a href="{{ value.panel_button.url }}" class="btn btn-prim"{% if value.panel_button_package %} data-package="{{ value.panel_button_package }}"{% with type=value.panel_button_package|client_type %}{% if type %} data-client-type="{{ type }}"{% endif %}{% endwith %}{% endif %}>{{ value.panel_button.text }}</a>
     </div>
   </div>
 

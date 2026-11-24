@@ -8,11 +8,13 @@ if (form) {
   initEnquiry(form);
 }
 
-/* "Choose Show" etc. scroll to the quote section and move focus there.
-   A native hash jump would reset focus after this handler, so the scroll is done here instead. */
+/* "Choose Show" etc. scroll to the quote section and move focus there, and select the matching "I'm a…" option
+   (data-client-type, set from the package code in the template). A native hash jump would reset focus after this
+   handler, so the scroll is done here instead. */
 function initQuoteLinks() {
   for (const link of document.querySelectorAll('a[data-package]')) {
     link.addEventListener('click', (event) => {
+      selectClientType(link.dataset.clientType);
       const target = document.querySelector(link.hash);
       if (!target) return;
       event.preventDefault();
@@ -22,6 +24,14 @@ function initQuoteLinks() {
       target.focus({ preventScroll: true });
     });
   }
+}
+
+function selectClientType(value) {
+  if (!value) return;
+  const radio = form.querySelector(`input[name="client-type"][value="${CSS.escape(value)}"]`);
+  if (!radio || radio.checked) return;
+  radio.checked = true;
+  radio.dispatchEvent(new Event('input', { bubbles: true })); // clears a "choose one" error (initEnquiry)
 }
 
 function initEnquiry(form) {

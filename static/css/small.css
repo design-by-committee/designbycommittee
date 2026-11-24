@@ -552,7 +552,7 @@ input#time {
   margin: 0;
   display: inline-block;
   width: 100%;
-  font-size: calc(0.875rem + 0.25vw);
+  font-size: max(1rem, calc(0.875rem + 0.25vw)); /* 16px or more: see the input rule below */
   margin-bottom: 1em;
   /* iOS Safari draws date and time fields its own way: a fixed minimum width (wider than the form on phones), centred
      text and a shorter box. Match the text fields instead: line height + padding + border. */
@@ -719,6 +719,14 @@ textarea {
   font-size: calc(0.875rem + 0.25vw);
   line-height: 1.5;
   text-align: left;
+}
+
+/* iOS Safari zooms the page in when a field whose text is under 16px gets focus, and the page then slides
+   sideways. 16px or more keeps the page at its normal size (and pinch-zoom still works). */
+input,
+select,
+textarea {
+  font-size: max(1rem, calc(0.875rem + 0.25vw));
 }
 
 fieldset {

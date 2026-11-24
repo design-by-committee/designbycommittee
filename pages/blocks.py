@@ -279,7 +279,7 @@ class TimelineBlock(SectionBlock):
     panel_button_package = blocks.CharBlock(
         required=False,
         label="Package the panel button preselects",
-        help_text="The package code in the quote form, e.g. solo, show or venue. Optional.",
+        help_text="solo, show or venue: selects Performer, Showrunner or Venue owner in the quote form. Optional.",
     )
     footnote = blocks.TextBlock(required=False)
 
@@ -313,8 +313,8 @@ class StepsBlock(SectionBlock):
 class PackageBlock(blocks.StructBlock):
     name = blocks.CharBlock()
     code = blocks.ChoiceBlock(
-        choices=[("solo", "solo"), ("show", "show"), ("venue", "venue")],
-        help_text="Which option the quote form preselects when someone clicks this package’s button.",
+        choices=[("solo", "solo (Performer)"), ("show", "show (Showrunner)"), ("venue", "venue (Venue owner)")],
+        help_text="The “I’m a…” option the quote form selects when someone clicks this package’s button.",
     )
     audience = blocks.CharBlock(help_text="E.g. For comedians")
     price_prefix = blocks.CharBlock(required=False, help_text="E.g. from")

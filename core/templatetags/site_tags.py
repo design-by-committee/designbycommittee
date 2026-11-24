@@ -28,3 +28,11 @@ def inline_richtext(value):
 def is_anchor(url):
     """True for in-page links such as "#quote"."""
     return str(url or "").startswith("#")
+
+
+@register.filter
+def client_type(package_code):
+    """The quote form's "I’m a…" option for a pricing package code (solo, show, venue), or "" if there's none."""
+    from leads.forms import PACKAGE_CLIENT_TYPES
+
+    return PACKAGE_CLIENT_TYPES.get(package_code, "")
