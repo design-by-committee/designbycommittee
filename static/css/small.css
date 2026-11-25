@@ -793,6 +793,7 @@ textarea {
 
 /** footer **/
 .site-footer {
+  --color-link: #007a78;  /* 4.8:1 on #f6f7f8 (#008482 is 4.2:1 there) */
   margin-top: 6em;
   padding: 3em 1.5em 1.5em;
   background: #f6f7f8;
@@ -834,7 +835,8 @@ textarea {
   display: inline-block;
   margin: 1.5em 0 0;
   padding: 0.75em 1.6em 0.6em;
-  font-size: 1rem;
+  /* white on coral is 3:1, enough only for large text: at least 18.66px bold (WCAG 1.4.3) */
+  font-size: 1.2rem;
 }
 
 .footer__columns {
