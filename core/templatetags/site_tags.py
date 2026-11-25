@@ -61,3 +61,11 @@ def og_locale(lang):
 def without_final_full_stop(text):
     """"Design by Committee B.V." → "Design by Committee B.V", so a sentence can end it with its own full stop."""
     return str(text or "").rstrip(".")
+
+
+@register.simple_tag
+def icon(name):
+    """An Icon grid icon (pages/icons.py) as inline SVG."""
+    from pages.icons import icon_svg
+
+    return icon_svg(name)
