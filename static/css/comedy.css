@@ -1002,6 +1002,13 @@
   }
 }
 
+/* links inside running text are underlined, not told apart by colour alone (WCAG 1.4.1) */
+:is(.c-prose, .c-lead, .c-icon-item__body) a:not(.btn) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
 /** text sections: free rich text (paragraphs, h3, lists) **/
 .c-prose {
 
