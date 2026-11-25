@@ -36,3 +36,28 @@ def client_type(package_code):
     from leads.forms import PACKAGE_CLIENT_TYPES
 
     return PACKAGE_CLIENT_TYPES.get(package_code, "")
+
+
+@register.simple_tag(takes_context=True)
+def structured_data(context):
+    """The page's schema.org JSON-LD (pages/structured_data.py), or nothing on pages without it."""
+    page = context.get("page")
+    request = context.get("request")
+    if page is None or request is None or not hasattr(page, "blocks_of_type"):
+        return ""
+    from pages.structured_data import json_ld_script
+
+    return mark_safe(json_ld_script(page, request))  # noqa: S308  (JSON with <, > and & escaped)
+
+
+@register.filter
+def og_locale(lang):
+    """Open Graph locale from a language tag: "en-GB" → "en_GB". Empty when there's no region."""
+    lang = str(lang or "")
+    return lang.replace("-", "_") if "-" in lang else ""
+
+
+@register.filter
+def without_final_full_stop(text):
+    """"Design by Committee B.V." → "Design by Committee B.V", so a sentence can end it with its own full stop."""
+    return str(text or "").rstrip(".")

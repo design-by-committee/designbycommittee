@@ -815,6 +815,23 @@ footer {
   margin: 0 0 1em;
 }
 
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25em 1.25em;
+  margin-top: 0.75em;
+  font-family: Avenir, sans-serif;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.footer__nav a {
+  color: var(--color-text);
+  /* Comfortable tap targets on phones */
+  padding: 0.5em 0;
+}
+
 .footer__logo .logo__text {
   display: none;
 }

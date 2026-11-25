@@ -77,7 +77,9 @@ Each landing page section can have a **Light**, **Paper** or **Dark** background
 2. Fill in the title and add sections. On the **Promote** tab, set the **Slug** (the address, e.g. `festivals` for
    `/festivals/`), the **Title tag** and **Search description**, and optionally the **Social sharing** fields.
 3. Add **Header links** for the sections you want in the top menu, and a **Header button** (usually `#quote`).
-4. Publish.
+4. On the **Promote** tab, tick **Show in menus** to link the page from the site footer (search engines find pages
+   through links), and fill in **Structured data** (see Search engines and AI assistants below).
+5. Publish.
 
 ## Testimonials
 
@@ -112,6 +114,40 @@ address. People with JavaScript turned off also land here, so glance at the list
 - **Company name** in the footer copyright line
 - **Lead notification email** for form submissions
 - **Default social image** for pages without their own
+
+## Search engines and AI assistants
+
+Everything search engines and AI assistants (ChatGPT, Perplexity, Google's AI answers...) read about the site is
+edited in the admin. Nothing needs a developer.
+
+**On each page (Promote tab):**
+
+| Field | What it does |
+|---|---|
+| Title tag | The blue link in Google. Under about 60 characters, most important words first |
+| Search description | The text under it. About 150 characters |
+| Show in menus | Links the page from the footer of every page |
+| Hide from search engines | `noindex`, and leaves the page out of `/sitemap.xml` and `/llms.txt`. For drafts-in-public or thank-you pages |
+| Social sharing | Title, description and image for links shared on WhatsApp, LinkedIn, X... The image's **Description** (in **Images**) becomes its alt text |
+| Structured data → Service name, Who it’s for, Areas served | Describe what the page sells. Together with the page's **Packages and prices** section they tell search engines your prices |
+| Structured data → Extra structured data | Optional JSON-LD for anything not generated, e.g. an `Event`. Must be a JSON object |
+
+The page's **Questions (FAQ)** sections are marked up as FAQs automatically, and its **Packages and prices**
+section as offers with prices (`from` in the price prefix makes it a minimum price).
+
+**For the whole site (Settings → Site settings):**
+
+- **Search & AI:** the business's name, short name, description, logo, founder, where you're based, the countries
+  and regions you work in, specialities and your profiles on other sites. These appear on every page as structured
+  data, and the description opens `/llms.txt`.
+- **Verification & llms.txt:** the codes from Google Search Console and Bing Webmaster Tools (paste only the code
+  from their meta tag), and optional extra text for `/llms.txt`.
+
+`/llms.txt` is a short summary of the site for AI assistants, built from these settings, the pages' titles and
+descriptions, and their packages. It updates itself when you publish.
+
+To check a page's structured data, paste its address into https://validator.schema.org/ or Google's Rich Results
+Test (https://search.google.com/test/rich-results).
 
 ## Things to know
 
