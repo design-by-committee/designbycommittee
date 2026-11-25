@@ -11,6 +11,8 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageBlock
 from wagtail.snippets.blocks import SnippetChooserBlock
 
+from .icons import CHOICES as ICON_CHOICES
+
 # Rich text features for headings and lead paragraphs: the design's emphasis styles only (see core/wagtail_hooks.py)
 EMPHASIS = ["text-bold", "text-extrabold"]
 
@@ -356,6 +358,12 @@ class PackageBlock(blocks.StructBlock):
 
 
 class PackagesBlock(SectionBlock):
+    lead = blocks.RichTextBlock(
+        features=["bold", "italic", "link"],
+        required=False,
+        label="Introduction (optional)",
+        help_text="With a single package, it sits beside the card; with several, above them.",
+    )
     packages = blocks.ListBlock(PackageBlock())
     fine_print = blocks.TextBlock(required=False)
 
@@ -425,6 +433,32 @@ class IllustratedPointsBlock(SectionBlock):
         template = "blocks/sections/illustrated_points.html"
 
 
+class IconItemBlock(blocks.StructBlock):
+    icon = blocks.ChoiceBlock(choices=ICON_CHOICES)
+    title = blocks.CharBlock()
+    text = blocks.RichTextBlock(features=["bold", "italic", "link"])
+
+    class Meta:
+        icon = "pick"
+        label = "Item"
+
+
+class IconGridBlock(SectionBlock):
+    lead = blocks.TextBlock(required=False)
+    columns = blocks.ChoiceBlock(
+        choices=[("3", "Three columns (short text)"), ("2", "Two columns (longer text)")],
+        default="3",
+        help_text="On wide screens. Phones always show one column.",
+    )
+    items = blocks.ListBlock(IconItemBlock())
+    footnote = blocks.RichTextBlock(features=["bold", "italic", "link"], required=False, label="Text under the grid")
+
+    class Meta:
+        icon = "pick"
+        label = "Icon grid"
+        template = "blocks/sections/icon_grid.html"
+
+
 class TextSectionBlock(SectionBlock):
     body = blocks.RichTextBlock(features=["h3", "bold", "italic", "link", "ol", "ul"])
     image = ImageBlock(
@@ -450,6 +484,7 @@ SECTION_BLOCKS = [
     ("enquiry_form", EnquiryFormBlock()),
     ("text", TextSectionBlock()),
     ("illustrated_points", IllustratedPointsBlock()),
+    ("icon_grid", IconGridBlock()),
 ]
 
 # Blocks that contain a lead form, keyed by the form's name (see leads/forms.py)

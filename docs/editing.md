@@ -76,10 +76,11 @@ euro (November 2026). Update them if the exchange rate moves a lot.
 | Columns | Short points side by side, each with an optional link |
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
-| Packages and prices | Pricing cards; mark one as featured and give it a badge |
+| Packages and prices | Pricing cards; mark one as featured and give it a badge. An optional introduction goes above the cards, or beside a single card |
 | Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
 | Quote request form | The enquiry form |
 | Text | Free text with headings, lists and links, and an optional photo beside it (e.g. the comedy page's About section) |
+| Icon grid | Short items, each with an icon, a title and text (bold and links allowed), in two or three columns, with optional text under the grid |
 | Points with screenshots | Short points, each with a screenshot in a browser frame, alternating sides (e.g. the guide's “The essentials”) |
 
 Each landing page section can have a **Light**, **Paper** or **Dark** background.

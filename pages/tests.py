@@ -134,6 +134,46 @@ class TextPhotoTests(SiteTestCase):
         self.assertContains(response, 'alt="Two live shows"')
 
 
+class IconGridAndPackageIntroTests(SiteTestCase):
+    def edit(self, changes):
+        from pages.content_ops import apply_changes
+
+        apply_changes(self.comedy, changes)
+        self.comedy.save_revision().publish()
+        return self.client.get("/comedy/")
+
+    def test_icon_grid(self):
+        response = self.edit([{"op": "insert", "type": "icon_grid", "value": {
+            "heading": "If you’re running a show", "columns": "2",
+            "items": [{"icon": "qr", "title": "A QR code for print", "text": "<p>Opens a <b>ticket page</b>.</p>"}],
+            "footnote": '<p>See the <a href="/edfringe/">Fringe package</a>.</p>',
+        }}])
+        self.assertContains(response, '<ul class="c-icon-grid c-icon-grid--2">')
+        self.assertContains(response, '<svg class="c-icon__svg"')
+        self.assertContains(response, "<h3>A QR code for print</h3>")
+        self.assertContains(response, "<b>ticket page</b>")
+        self.assertContains(response, '<a href="/edfringe/">Fringe package</a>')
+
+    def test_a_single_package_sits_beside_its_introduction(self):
+        from pages.content_ops import stream_data
+
+        packages = next(block for block in self.comedy.body if block.block_type == "packages")
+        raw = next(block for block in stream_data(self.comedy.body) if block["type"] == "packages")
+        first_package = raw["value"]["packages"][0]["value"]
+        response = self.edit([
+            {"op": "set", "block": packages.id, "path": "lead", "value": '<p><a href="/comedy/#packages">All packages</a></p>'},
+            {"op": "set", "block": packages.id, "path": "packages", "value": [first_package]},
+        ])
+        self.assertContains(response, '<div class="c-package-single">')
+        self.assertContains(response, '<div class="c-packages c-packages--single">')
+
+    def test_several_packages_put_the_introduction_above(self):
+        packages = next(block for block in self.comedy.body if block.block_type == "packages")
+        response = self.edit([{"op": "set", "block": packages.id, "path": "lead", "value": "<p>Fixed prices.</p>"}])
+        self.assertContains(response, '<div class="c-prose c-packages__lead"><p>Fixed prices.</p></div>')
+        self.assertNotContains(response, "c-package-single")
+
+
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
         body = self.comedy.body
