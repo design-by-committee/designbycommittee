@@ -226,6 +226,10 @@ class CardBlock(blocks.StructBlock):
         label="Screenshot",
         help_text="Optional. Shown in a browser frame at the top of the card (“work” layout). A 1280×800 screenshot works best.",
     )
+    link = OptionalLinkBlock(
+        label="Link (optional)",
+        help_text="E.g. Visit madcowcomedy.nl and https://madcowcomedy.nl/ for a case study’s live site.",
+    )
 
     class Meta:
         icon = "doc-full"
@@ -279,7 +283,10 @@ class TimelineBlock(SectionBlock):
     panel_button_package = blocks.CharBlock(
         required=False,
         label="Package the panel button preselects",
-        help_text="solo, show or venue: selects Performer, Showrunner or Venue owner in the quote form. Optional.",
+        help_text=(
+            "solo, fringe, show or venue: selects Performer, Performer, Showrunner or Venue owner in the quote form. "
+            "Optional."
+        ),
     )
     footnote = blocks.TextBlock(required=False)
 
@@ -313,7 +320,12 @@ class StepsBlock(SectionBlock):
 class PackageBlock(blocks.StructBlock):
     name = blocks.CharBlock()
     code = blocks.ChoiceBlock(
-        choices=[("solo", "solo (Performer)"), ("show", "show (Showrunner)"), ("venue", "venue (Venue owner)")],
+        choices=[
+            ("solo", "solo (Performer)"),
+            ("fringe", "fringe (Performer)"),
+            ("show", "show (Showrunner)"),
+            ("venue", "venue (Venue owner)"),
+        ],
         help_text="The “I’m a…” option the quote form selects when someone clicks this package’s button.",
     )
     audience = blocks.CharBlock(help_text="E.g. For comedians")

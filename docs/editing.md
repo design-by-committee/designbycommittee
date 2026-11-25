@@ -60,7 +60,7 @@ buttons and header links. Keep the existing anchors in place:
 | Section | Use it for |
 |---|---|
 | Hero with screenshot | Heading, intro, two buttons and a screenshot in a browser frame |
-| Coloured cards | Audience cards, or case studies with a meta line; optional quote card underneath |
+| Coloured cards | Audience cards, or case studies with a meta line and an optional link to the live site; optional quote card underneath |
 | Columns | Short points side by side, each with an optional link |
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
@@ -152,7 +152,7 @@ Test (https://search.google.com/test/rich-results).
 ## Things to know
 
 - The pricing buttons (and the timeline panel's button) scroll to the quote form and select its **I'm a…** option:
-  package code `solo` selects Performer, `show` Showrunner and `venue` Venue owner. Visitors can still change it.
+  package code `solo` or `fringe` selects Performer, `show` Showrunner and `venue` Venue owner. Visitors can still change it.
 - The form fields themselves (questions and options) are also in the code, so they stay in step with the
   validation and the notification emails.
 - Images you upload are resized automatically; upload at least 1120 pixels wide for the hero screenshot.

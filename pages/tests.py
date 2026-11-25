@@ -79,6 +79,23 @@ class PricingButtonTests(SiteTestCase):
             self.assertContains(response, f'name="client-type" value="{client_type}"')
 
 
+class CardLinkTests(SiteTestCase):
+    def test_case_study_links_to_the_live_site(self):
+        body = self.comedy.body
+        work = next(block for block in body if block.block_type == "cards" and block.value["layout"] == "work")
+        work.value["cards"][0]["link"] = {"text": "Visit the site", "url": "https://example.com/"}
+        self.comedy.body = body
+        self.comedy.save_revision().publish()
+        self.assertContains(
+            self.client.get("/comedy/"), '<a href="https://example.com/" class="arrow-right c-card__link">Visit the site</a>'
+        )
+
+    def test_fringe_package_selects_performer(self):
+        from leads.forms import PACKAGE_CLIENT_TYPES
+
+        self.assertEqual(PACKAGE_CLIENT_TYPES["fringe"], "Performer")
+
+
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
         body = self.comedy.body
