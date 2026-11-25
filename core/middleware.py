@@ -37,3 +37,43 @@ class PrivateByDefaultMiddleware:
         if not cache_control or (response.cookies and "public" in cache_control):
             response["Cache-Control"] = PRIVATE
         return response
+
+
+class PackagePriceMiddleware:
+    """Fill price placeholders ({solo.price}, {solo.pounds}) in pages, previews and llms.txt (pages/prices.py).
+
+    Admin screens are left alone, so editors see and save the placeholders, not the prices. It sits after
+    ConditionalGetMiddleware in MIDDLEWARE, so ETags are computed from the filled-in page.
+    """
+
+    CONTENT_TYPES = ("text/html", "text/markdown")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if not self.applies(request, response):
+            return response
+        from core.models import SiteSettings
+        from pages.prices import fill_prices
+
+        charset = response.charset or "utf-8"
+        text = response.content.decode(charset)
+        filled = fill_prices(text, SiteSettings.for_request(request).pounds_per_euro)
+        if filled != text:
+            response.content = filled.encode(charset)
+            if response.has_header("Content-Length"):
+                response["Content-Length"] = str(len(response.content))
+        return response
+
+    def applies(self, request, response):
+        if response.streaming or response.status_code != 200:
+            return False
+        if not response.get("Content-Type", "").startswith(self.CONTENT_TYPES):
+            return False
+        path = request.path
+        if path.startswith(("/static/", "/media/", "/documents/")):
+            return False
+        # Admin screens keep the placeholders; page previews (rendered pages inside the admin) are filled in
+        return not path.startswith("/admin/") or "/preview/" in path
