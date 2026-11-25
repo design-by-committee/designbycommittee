@@ -21,6 +21,24 @@ class PageEditTests(SiteTestCase):
     def live_home(self):
         return HomePage.objects.get().specific
 
+    def test_search_and_structured_data_fields(self):
+        self.edit(
+            "/comedy/",
+            [
+                {"op": "set_field", "field": "show_in_menus", "value": True},
+                {"op": "set_field", "field": "service_name", "value": "Websites for comedians"},
+                {"op": "set_field", "field": "extra_json_ld", "value": '{"@type": "Event", "name": "Showcase"}'},
+            ],
+            "--publish",
+        )
+        comedy = LandingPage.objects.get(slug="comedy")
+        self.assertTrue(comedy.show_in_menus)
+        self.assertEqual(comedy.service_name, "Websites for comedians")
+
+    def test_extra_json_ld_is_validated(self):
+        with self.assertRaises(CommandError):
+            self.edit("/comedy/", [{"op": "set_field", "field": "extra_json_ld", "value": "not json"}], "--publish")
+
     def test_dry_run_validates_and_saves_nothing(self):
         revisions = self.home.revisions.count()
         out = self.edit("/", [{"op": "set", "block": "feature:3", "path": "points.0", "value": "Match copy to each ad"}])
