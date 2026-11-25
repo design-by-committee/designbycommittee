@@ -8,7 +8,11 @@ https://designbycommittee.onrender.com/admin/).
 | Page | Address | Page type |
 |---|---|---|
 | Home | `/` | Home page: the original agency design |
-| Comedy | `/comedy/` | Landing page: full-width sections |
+| Websites for comedians | `/comedy/` | Landing page: full-width sections |
+| Edinburgh Fringe 2027 websites | `/edfringe/` | Landing page, for visitors from the Fringe services directory |
+| Comedy venue websites | `/comedy-venue-websites/` | Landing page |
+| Comedian website guide | `/comedian-website-guide/` | Landing page (text sections) |
+| English-language comedy in Europe | `/english-comedy-europe/` | Landing page |
 
 Open **Pages** in the left menu, then click a page title to edit it.
 
@@ -40,7 +44,15 @@ Sections have an optional **Anchor** field. A section with anchor `packages` can
 buttons and header links. Keep the existing anchors in place:
 
 - Home: `grow` and `contact` (the layout also uses these for spacing and centring)
-- Comedy: `fringe`, `packages`, `work`, `faq` and `quote` (header links and buttons point at them)
+- Comedy: `fringe`, `packages`, `work`, `about`, `faq` and `quote` (header links and buttons point at them)
+- Edinburgh Fringe: `dates`, `packages`, `work`, `faq` and `quote`
+- Venues and Europe: `packages`, `work`, `faq` and `quote`; the guide: `include`, `cost`, `faq` and `quote`
+
+The page **title** is the link text in the footer menu, so keep titles short and descriptive (e.g. “Websites for
+comedians”, not “Comedy”).
+
+**Prices in pounds** are typed into each package's price suffix, e.g. “one-time fee (about £420)”, at about £0.83 to the
+euro (November 2026). Update them if the exchange rate moves a lot.
 
 ## Section types
 
