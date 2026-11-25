@@ -1,4 +1,4 @@
-# Render Blueprint for designbycommitt.ee (Wagtail). See docs/wagtail-relaunch-plan.md, Phase 6.
+# Render Blueprint for designbycommitt.ee (Wagtail). See README.md, "Development to release" and "Hosting".
 #
 # One web service and one Postgres database, both in Frankfurt. Python comes from .python-version (3.13, latest patch).
 # Uploaded images and documents live on a persistent disk, which Render only allows on paid instances; with a disk,

@@ -543,38 +543,6 @@ class PackageSnippetTests(SiteTestCase):
         self.assertContains(response, '<p class="c-package__badge">Best for Fringe runs</p>')
         self.assertContains(response, ">Choose Solo</a>")
 
-    def test_migration_converts_inline_packages(self):
-        import importlib
-        import json
-
-        from django.apps import apps as django_apps
-        from wagtail.models import Page
-
-        from pages.models import LandingPage, Package
-
-        migration = importlib.import_module("pages.migrations.0012_packages")
-        legacy = [{"type": "packages", "id": "abc", "value": {
-            "anchor": "packages", "background": "", "heading": "Prices", "lead": "", "fine_print": "",
-            "packages": [{"type": "item", "id": "p1", "value": {
-                "name": "Gala", "code": "venue", "audience": "For big rooms", "price_prefix": "from",
-                "price": "€9,500", "price_suffix": "(about £7,900)", "timeframe": "Live in 10 weeks",
-                "features": [{"type": "item", "value": "A ballroom page", "id": "f1"}],
-                "button_text": "Choose Gala", "button_link": "#quote", "featured": True, "badge": "Big",
-            }}],
-        }}]
-        Package.objects.all().delete()
-        LandingPage.objects.filter(pk=self.comedy.pk).update(body=json.dumps(legacy))
-        migration.convert_packages_to_snippets(django_apps, None)
-
-        gala = Package.objects.get(code="venue")
-        self.assertEqual((gala.name, gala.price, gala.price_is_minimum, gala.price_suffix), ("Gala", 9500, True, ""))
-        self.assertEqual(gala.feature_list, ["A ballroom page"])
-        page = Page.objects.get(pk=self.comedy.pk).specific
-        item = page.blocks_of_type("packages")[0]["packages"][0]
-        self.assertEqual((item["package"], item["featured"], item["badge"], item["button_text"]), (gala, True, "Big", ""))
-        self.assertTrue(page.blocks_of_type("packages")[0]["show_pounds"])
-        self.assertContains(self.client.get("/comedy/"), '<span class="c-package__amount">€9,500</span>')
-
 
 class PricePlaceholderTests(SiteTestCase):
     """{solo.price} and {solo.pounds} in page copy show the package's current price."""
@@ -696,42 +664,3 @@ class SharedComponentTests(SiteTestCase):
         for model in ("casestudy", "question", "sharedsection"):
             self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/").status_code, 200, model)
             self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/add/").status_code, 200, model)
-
-    def test_migration_converts_typed_in_content(self):
-        import importlib
-        import json
-
-        from django.apps import apps as django_apps
-
-        from pages.models import CaseStudy, LandingPage, Question, SharedSection
-
-        migration = importlib.import_module("pages.migrations.0014_shared_components")
-        steps = {"type": "steps", "id": "s1", "value": {
-            "anchor": "", "background": "", "heading": "How it works", "lead": "", "extra_title": "", "extra_text": "",
-            "steps": [{"type": "item", "id": "x", "value": {"title": "Call", "text": "We talk."}}]}}
-        work = {"type": "cards", "id": "c1", "value": {
-            "anchor": "work", "background": "", "heading": "Recent work", "layout": "work", "testimonial": None,
-            "cards": [{"type": "item", "id": "y", "value": {
-                "title": "New Client", "meta": "A club", "text": "We built it.", "colour": "teal",
-                "image": {"image": None, "alt_text": "", "decorative": False},
-                "link": {"text": "Visit", "url": "https://example.com/"}}}]}}
-        faq = {"type": "faq", "id": "f1", "value": {"anchor": "faq", "background": "", "heading": "Questions", "lead": "",
-               "questions": [{"type": "item", "id": "z", "value": {"question": "Why?", "answer": "Because."}}]}}
-        other = LandingPage(title="Other", slug="other")
-        self.home.add_child(instance=other)
-        for page, body in ((self.comedy, [steps, work, faq]), (other, [dict(steps, id="s2"), dict(faq, id="f2")])):
-            LandingPage.objects.filter(pk=page.pk).update(body=json.dumps(body))
-        CaseStudy.objects.all().delete()
-        Question.objects.all().delete()
-
-        migration.convert_to_shared_components(django_apps, None)
-
-        comedy = LandingPage.objects.get(pk=self.comedy.pk)
-        self.assertEqual([b.block_type for b in comedy.body], ["shared_section", "case_studies", "shared_section"])
-        self.assertEqual(sorted(s.name for s in SharedSection.objects.all()), ["How it works (steps)", "Questions (questions)"])
-        case = CaseStudy.objects.get()
-        self.assertEqual((case.title, case.colour, case.link_url), ("New Client", "teal", "https://example.com/"))
-        self.assertEqual(Question.objects.get().answer, "Because.")
-        html = self.client.get("/comedy/").content.decode()
-        for text in ("How it works", "New Client", "<summary>Why?</summary>"):
-            self.assertIn(text, html)

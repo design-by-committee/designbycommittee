@@ -1,7 +1,6 @@
 # Editing the site
 
-How to change designbycommitt.ee in the Wagtail admin. Sign in at **/admin/** (on staging:
-https://designbycommittee.onrender.com/admin/).
+How to change designbycommitt.ee in the Wagtail admin. Sign in at https://designbycommitt.ee/admin/.
 
 ## Pages
 
@@ -188,8 +187,11 @@ columns, the footer lists the pages ticked **Show in menus** instead.
 
 - **Company name** in the footer copyright line, and the **KvK number** and **VAT number (BTW-nummer)** in the
   footer's bottom line (also given to search engines in the structured data)
+- **Pounds per euro**, the rate for approximate pound prices (empty hides them)
 - **Lead notification email** for form submissions
 - **Default social image** for pages without their own
+
+The **Search & AI**, **Footer** and **Verification & llms.txt** tabs are described in their own sections.
 
 ## Search engines and AI assistants
 
