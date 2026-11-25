@@ -183,15 +183,20 @@ class StructuredData:
         }
 
     def faq_questions(self):
-        return [
-            {
-                "@type": "Question",
-                "name": item["question"],
-                "acceptedAnswer": {"@type": "Answer", "text": "\n\n".join(paragraphs(item["answer"]))},
-            }
-            for faq in self.page.blocks_of_type("faq")
-            for item in faq["questions"]
-        ]
+        """Shared questions (snippets) and one-off questions alike have .question/["question"] and an answer."""
+        questions = []
+        for faq in self.page.blocks_of_type("faq"):
+            for item in faq["questions"]:
+                value = item.value
+                if value is None:
+                    continue
+                question, answer = (value.question, value.answer) if hasattr(value, "answer") else (value["question"], value["answer"])
+                questions.append({
+                    "@type": "Question",
+                    "name": question,
+                    "acceptedAnswer": {"@type": "Answer", "text": "\n\n".join(paragraphs(answer))},
+                })
+        return questions
 
     def service_label(self):
         page = self.page

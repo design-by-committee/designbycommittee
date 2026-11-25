@@ -260,7 +260,10 @@ class CardBlock(blocks.StructBlock):
 
 class CardsBlock(SectionBlock):
     layout = blocks.ChoiceBlock(
-        choices=[("cards", "Cards (short text)"), ("work", "Case studies (title, meta line, longer text)")],
+        choices=[
+            ("cards", "Cards (short text)"),
+            ("work", "Case studies typed in here (use a Case studies section instead)"),
+        ],
         default="cards",
     )
     cards = blocks.ListBlock(CardBlock())
@@ -274,6 +277,23 @@ class CardsBlock(SectionBlock):
         icon = "table"
         label = "Coloured cards"
         template = "blocks/sections/cards.html"
+
+
+class CaseStudiesBlock(SectionBlock):
+    case_studies = blocks.ListBlock(
+        SnippetChooserBlock("pages.CaseStudy", label="Case study"),
+        help_text="Choose from Snippets → Case studies. Edit one there to change it on every page.",
+    )
+    testimonial = SnippetChooserBlock(
+        "core.Testimonial",
+        required=False,
+        help_text="Optional quote card under the case studies. Uses the testimonial’s short quote if it has one.",
+    )
+
+    class Meta:
+        icon = "doc-full-inverse"
+        label = "Case studies"
+        template = "blocks/sections/case_studies.html"
 
 
 class ColumnBlock(blocks.StructBlock):
@@ -385,12 +405,21 @@ class PackagesBlock(SectionBlock):
 
 class QuestionBlock(blocks.StructBlock):
     question = blocks.CharBlock()
-    answer = blocks.TextBlock()
+    answer = blocks.TextBlock(help_text="Leave a blank line to start a new paragraph.")
 
 
 class FaqBlock(SectionBlock):
     lead = blocks.RichTextBlock(features=["link"], required=False)
-    questions = blocks.ListBlock(QuestionBlock())
+    questions = blocks.StreamBlock(
+        [
+            ("question", SnippetChooserBlock("pages.Question", label="Shared question", icon="help")),
+            ("custom", QuestionBlock(label="One-off question", icon="edit")),
+        ],
+        help_text=(
+            "Shared questions come from Snippets → Questions and change everywhere when edited there. Use a one-off "
+            "question for something only this page needs."
+        ),
+    )
 
     class Meta:
         icon = "help"
@@ -483,18 +512,34 @@ class TextSectionBlock(SectionBlock):
         template = "blocks/sections/text.html"
 
 
-SECTION_BLOCKS = [
+SHAREABLE_BLOCKS = [
     ("screenshot_hero", ScreenshotHeroBlock()),
     ("cards", CardsBlock()),
     ("columns", ColumnsBlock()),
     ("timeline", TimelineBlock()),
     ("steps", StepsBlock()),
     ("packages", PackagesBlock()),
+    ("case_studies", CaseStudiesBlock()),
     ("faq", FaqBlock()),
     ("enquiry_form", EnquiryFormBlock()),
     ("text", TextSectionBlock()),
     ("illustrated_points", IllustratedPointsBlock()),
     ("icon_grid", IconGridBlock()),
+]
+
+
+# Landing page sections: every section type, plus a Shared section (which holds one of the others)
+SECTION_BLOCKS = SHAREABLE_BLOCKS + [
+    (
+        "shared_section",
+        SnippetChooserBlock(
+            "pages.SharedSection",
+            icon="snippet",
+            label="Shared section",
+            template="blocks/sections/shared_section.html",
+            help_text="A section written once under Snippets → Shared sections and used on several pages.",
+        ),
+    ),
 ]
 
 # Blocks that contain a lead form, keyed by the form's name (see leads/forms.py)

@@ -1,0 +1,1 @@
+{% load wagtailcore_tags %}{% if value %}{% for block in value.body %}{% include_block block with block_id=block.id %}{% endfor %}{% endif %}

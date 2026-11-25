@@ -1,0 +1,25 @@
+{% load wagtailimages_tags %}
+<section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+
+    <div class="c-work">
+      {% for case in value.case_studies %}{% if case %}
+        <article class="c-work__item c-card--{{ case.colour }}">
+          {% if case.screenshot %}
+            <div class="c-browser c-browser--card">
+              <div class="c-browser__bar" aria-hidden="true"><span class="c-browser__dots"><i></i><i></i><i></i></span></div>
+              {% srcset_image case.screenshot width-{400,800} format-webp sizes="(min-width: 48em) min(340px, 30vw), calc(100vw - 80px)" alt=case.screenshot_alt loading="lazy" decoding="async" %}
+            </div>
+          {% endif %}
+          <h3>{{ case.title }}</h3>
+          {% if case.meta %}<p class="c-work__meta">{{ case.meta }}</p>{% endif %}
+          <p>{{ case.text }}</p>
+          {% if case.link_text and case.link_url %}<a href="{{ case.link_url }}" class="arrow-right c-card__link">{{ case.link_text }}</a>{% endif %}
+        </article>
+      {% endif %}{% endfor %}
+    </div>
+
+    {% include "blocks/sections/quote_card.html" with testimonial=value.testimonial %}
+  </div>
+</section>
