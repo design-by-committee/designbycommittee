@@ -390,6 +390,30 @@ class EnquiryFormBlock(SectionBlock):
         return context
 
 
+class IllustratedPointBlock(blocks.StructBlock):
+    title = blocks.CharBlock()
+    text = blocks.TextBlock(help_text="Leave a blank line to start a new paragraph.")
+    image = ImageBlock(
+        label="Screenshot",
+        help_text="Shown in a browser frame next to the text. About 1200×750 pixels works best.",
+    )
+    address = blocks.CharBlock(required=False, label="Address shown in the browser frame", help_text="E.g. yourname.com/gigs")
+
+    class Meta:
+        icon = "image"
+        label = "Point"
+
+
+class IllustratedPointsBlock(SectionBlock):
+    lead = blocks.TextBlock(required=False)
+    points = blocks.ListBlock(IllustratedPointBlock())
+
+    class Meta:
+        icon = "image"
+        label = "Points with screenshots"
+        template = "blocks/sections/illustrated_points.html"
+
+
 class TextSectionBlock(SectionBlock):
     body = blocks.RichTextBlock(features=["h3", "bold", "italic", "link", "ol", "ul"])
 
@@ -409,6 +433,7 @@ SECTION_BLOCKS = [
     ("faq", FaqBlock()),
     ("enquiry_form", EnquiryFormBlock()),
     ("text", TextSectionBlock()),
+    ("illustrated_points", IllustratedPointsBlock()),
 ]
 
 # Blocks that contain a lead form, keyed by the form's name (see leads/forms.py)

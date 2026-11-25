@@ -96,6 +96,29 @@ class CardLinkTests(SiteTestCase):
         self.assertEqual(PACKAGE_CLIENT_TYPES["fringe"], "Performer")
 
 
+class IllustratedPointsTests(SiteTestCase):
+    def test_points_with_screenshots(self):
+        from pages.content_ops import apply_changes
+
+        image = self.comedy.body[0].value["screenshot"]
+        apply_changes(self.comedy, [{"op": "insert", "type": "illustrated_points", "value": {
+            "anchor": "include",
+            "heading": "The essentials",
+            "points": [{
+                "title": "A short bio",
+                "text": "First paragraph.\r\n\r\nSecond paragraph.",
+                "image": {"image": image.pk, "alt_text": "A bio page", "decorative": False},
+                "address": "yourname.com/about",
+            }],
+        }}])
+        self.comedy.save_revision().publish()
+        response = self.client.get("/comedy/")
+        self.assertContains(response, '<h3>A short bio</h3>')
+        self.assertContains(response, "<p>Second paragraph.</p>")
+        self.assertContains(response, '<span class="c-browser__url">yourname.com/about</span>')
+        self.assertContains(response, 'alt="A bio page"')
+
+
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
         body = self.comedy.body
