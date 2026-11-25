@@ -219,7 +219,16 @@ class ScreenshotHeroBlock(blocks.StructBlock):
     show_editor_mockup = blocks.BooleanBlock(
         required=False,
         default=True,
-        label="Show the “Edit show” editor mockup next to the screenshot",
+        label="Show an editor mockup next to the screenshot",
+    )
+    editor_mockup = blocks.ChoiceBlock(
+        choices=[
+            ("show", "Edit show (date, doors, lineup, ticket link)"),
+            ("review", "Add review (show, quote, source, star rating)"),
+        ],
+        default="show",
+        required=False,
+        label="Which editor mockup",
     )
     caption = blocks.CharBlock(required=False)
 
@@ -268,6 +277,11 @@ class CardsBlock(SectionBlock):
 
 
 class ColumnBlock(blocks.StructBlock):
+    image = ImageBlock(
+        required=False,
+        label="Picture (optional)",
+        help_text="Shown above the title. A 3:2 picture (e.g. 1200×800) works best; use the same shape for every column.",
+    )
     title = blocks.CharBlock()
     text = blocks.TextBlock()
     link = OptionalLinkBlock()

@@ -71,9 +71,9 @@ euro (November 2026). Update them if the exchange rate moves a lot.
 
 | Section | Use it for |
 |---|---|
-| Hero with screenshot | Heading, intro, two buttons and a screenshot in a browser frame |
+| Hero with screenshot | Heading, intro, two buttons and a screenshot in a browser frame, with an optional editor mockup (“Edit show” or “Add review”) |
 | Coloured cards | Audience cards, or case studies with a meta line and an optional link to the live site; optional quote card underneath |
-| Columns | Short points side by side, each with an optional link |
+| Columns | Short points side by side, each with an optional link and an optional picture above it |
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
 | Packages and prices | Pricing cards; mark one as featured and give it a badge. An optional introduction goes above the cards, or beside a single card |
