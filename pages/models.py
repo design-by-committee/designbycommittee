@@ -1,3 +1,6 @@
+import json
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel
 from wagtail.fields import StreamField
@@ -9,8 +12,25 @@ from core.cache import cache_privately, cache_publicly, is_public_request
 from .blocks import AGENCY_BLOCKS, FORM_BLOCK_TYPES, SECTION_BLOCKS, LinkBlock
 
 
+def validate_json_ld(value):
+    """Extra structured data must be a JSON object (or a list of them), as it's added to the page's @graph."""
+    try:
+        data = json.loads(value)
+    except ValueError as error:
+        raise ValidationError(f"This isn’t valid JSON: {error}") from error
+    items = data if isinstance(data, list) else [data]
+    if not items or not all(isinstance(item, dict) for item in items):
+        raise ValidationError("Enter a JSON object such as {\"@type\": \"Event\", …}, or a list of them.")
+
+
 class BasePage(Page):
-    """Fields and behaviour shared by every page: social sharing tags and lead form handling."""
+    """Fields and behaviour shared by every page: search and social tags, structured data and lead form handling."""
+
+    noindex = models.BooleanField(
+        "Hide from search engines",
+        default=False,
+        help_text="Asks search engines not to list this page, and leaves it out of the sitemap and llms.txt.",
+    )
 
     og_title = models.CharField(
         "Social title",
@@ -33,13 +53,53 @@ class BasePage(Page):
         help_text="Image when the page is shared on social media. Defaults to the site’s social image.",
     )
 
+    service_name = models.CharField(
+        "Service name",
+        max_length=255,
+        blank=True,
+        help_text=(
+            "What this page sells, e.g. Website design for comedians, comedy shows and venues. Describes the "
+            "page’s packages to search engines. Defaults to the title tag."
+        ),
+    )
+    service_audience = models.CharField(
+        "Who it’s for",
+        max_length=255,
+        blank=True,
+        help_text="E.g. Comedians, comedy shows and comedy venues.",
+    )
+    areas_served = models.TextField(
+        blank=True,
+        help_text="Countries or regions, one per line. Leave empty to use the ones in Site settings.",
+    )
+    extra_json_ld = models.TextField(
+        "Extra structured data",
+        blank=True,
+        validators=[validate_json_ld],
+        help_text=(
+            "Optional JSON-LD added to the page’s structured data, e.g. {\"@type\": \"Event\", …}. "
+            "Organisation, web page, FAQ, breadcrumb and package/price data are already generated from the page "
+            "and Site settings."
+        ),
+    )
+
     # Language of the page's copy, for <html lang>
     html_lang = "en"
 
     promote_panels = Page.promote_panels + [
+        FieldPanel("noindex"),
         MultiFieldPanel(
             [FieldPanel("og_title"), FieldPanel("og_description"), FieldPanel("og_image")],
             heading="Social sharing",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("service_name"),
+                FieldPanel("service_audience"),
+                FieldPanel("areas_served"),
+                FieldPanel("extra_json_ld"),
+            ],
+            heading="Structured data (for search engines and AI assistants)",
         ),
     ]
 
@@ -56,6 +116,16 @@ class BasePage(Page):
 
         site = self.get_site()
         return SiteSettings.for_site(site).default_social_image if site else None
+
+    def get_sitemap_urls(self, request=None):
+        return [] if self.noindex else super().get_sitemap_urls(request)
+
+    def is_indexable(self):
+        """Live, public and not hidden from search engines."""
+        return self.live and not self.noindex and not self.get_view_restrictions().exists()
+
+    def blocks_of_type(self, block_type):
+        return [block.value for block in self.body if block.block_type == block_type]
 
     def form_names(self):
         """Names of the lead forms on this page, e.g. {"comedy-enquiry"}."""

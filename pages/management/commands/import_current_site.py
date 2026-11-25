@@ -203,6 +203,9 @@ def comedy_page_content(images, testimonials):
         "og_title": "Fill more seats at every show",
         "og_description": "WordPress websites for comedians, comedy shows and venues, built by a comedy producer.",
         "og_image": images["mad_cow"],
+        "show_in_menus": True,
+        "service_name": "Website design for comedians, comedy shows and comedy venues",
+        "service_audience": "Comedians, comedy shows and comedy venues",
         "header_links": [
             block("link", {"text": "Fringe 2027", "url": "#fringe"}),
             block("link", {"text": "Packages", "url": "#packages"}),

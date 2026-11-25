@@ -25,6 +25,73 @@ def robots_txt(request):
 
 
 @require_safe
+def llms_txt(request):
+    """/llms.txt (https://llmstxt.org/): a short Markdown guide to the site for AI assistants.
+
+    Built from Site settings (Search & AI tab) and the live pages that search engines may index, so it stays in step
+    with the admin.
+    """
+    from wagtail.models import Site
+
+    from core.models import SiteSettings
+    from pages.structured_data import StructuredData
+
+    site = Site.find_for_request(request)
+    settings_ = SiteSettings.for_request(request)
+    lines = [f"# {settings_.site_name}", ""]
+    if settings_.organisation_description:
+        lines += [f"> {' '.join(settings_.organisation_description.split())}", ""]
+    if settings_.llms_txt_details.strip():
+        lines += [settings_.llms_txt_details.strip(), ""]
+
+    facts = []
+    if settings_.company_name:
+        facts.append(f"- Company: {settings_.company_name}")
+    if settings_.founder_name:
+        founder = f"[{settings_.founder_name}]({settings_.founder_url})" if settings_.founder_url else settings_.founder_name
+        facts.append(f"- Founder: {founder}")
+    if place := ", ".join(filter(None, [settings_.address_locality, settings_.address_country])):
+        facts.append(f"- Based in: {place}")
+    if areas := SiteSettings.lines(settings_.areas_served):
+        facts.append(f"- Works with clients in: {', '.join(areas)}")
+    if settings_.public_email:
+        facts.append(f"- Email: {settings_.public_email}")
+    if facts:
+        lines += ["## About", "", *facts, ""]
+
+    pages = []
+    if site:
+        root = site.root_page.specific
+        candidates = [root, *root.get_descendants().live().public().specific()]
+        pages = [page for page in candidates if hasattr(page, "is_indexable") and page.is_indexable()]
+    if pages:
+        lines += ["## Pages", ""]
+        for page in pages:
+            entry = f"- [{page.seo_title or page.title}]({page.get_full_url(request)})"
+            if page.search_description:
+                entry += f": {' '.join(page.search_description.split())}"
+            lines.append(entry)
+        lines.append("")
+
+    for page in pages:
+        packages = [package for block in page.blocks_of_type("packages") for package in block["packages"]]
+        if not packages:
+            continue
+        lines += [f"## Prices: {StructuredData(page, request).service_label()}", ""]
+        for package in packages:
+            price = " ".join(filter(None, [package["price_prefix"], package["price"], package["price_suffix"]]))
+            details = "; ".join(filter(None, [package["audience"], package["timeframe"], *package["features"]]))
+            lines.append(f"- {package['name']} ({price}): {details}")
+        for block in page.blocks_of_type("packages"):
+            if block["fine_print"]:
+                lines += ["", " ".join(block["fine_print"].split())]
+        lines += ["", f"Quotes: {page.get_full_url(request)}#quote", ""]
+
+    response = HttpResponse("\n".join(lines).rstrip() + "\n", content_type="text/markdown; charset=utf-8")
+    return cache_publicly(response)
+
+
+@require_safe
 def media(request, path):
     """Serve uploaded images and documents from the media folder (the persistent disk on Render).
 

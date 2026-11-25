@@ -1,5 +1,5 @@
 from django.db import models
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, ObjectList, TabbedInterface
 from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -25,14 +25,174 @@ class SiteSettings(BaseSiteSetting):
         help_text="Used when a page has no social image of its own.",
     )
 
-    panels = [
-        FieldPanel("company_name"),
-        FieldPanel("lead_notification_email"),
-        FieldPanel("default_social_image"),
-    ]
+    # Search engines and AI assistants: the organisation behind the site (JSON-LD on every page, llms.txt)
+    site_name = models.CharField(
+        max_length=255,
+        default="Design by Committee",
+        help_text="The site’s name in search results, social previews (og:site_name) and structured data.",
+    )
+    alternate_name = models.CharField(
+        "Short name",
+        max_length=255,
+        blank=True,
+        default="Committee",
+        help_text="Another name people use for the business, e.g. Committee. Optional.",
+    )
+    organisation_type = models.CharField(
+        max_length=40,
+        choices=[
+            ("ProfessionalService", "Professional service (a business that serves clients remotely or on site)"),
+            ("Organization", "Organisation"),
+        ],
+        default="ProfessionalService",
+        help_text="How search engines classify the business (schema.org type).",
+    )
+    organisation_description = models.TextField(
+        "Description",
+        blank=True,
+        default=(
+            "Design by Committee is a web design studio that builds custom websites for comedians, comedy shows and "
+            "comedy venues on WordPress or Wagtail, with fixed prices and sites live in weeks, as well as "
+            "conversion-focused landing pages. It works with clients in the UK and across Europe, including shows "
+            "going to the Edinburgh Festival Fringe."
+        ),
+        help_text=(
+            "One or two plain sentences about what the business does and for whom. Search engines and AI assistants "
+            "use it to describe you, and it opens llms.txt."
+        ),
+    )
+    logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Square logo, at least 112×112 pixels (PNG or JPG). Used by search engines.",
+    )
+    public_email = models.EmailField(
+        "Public contact email",
+        blank=True,
+        help_text="A contact address search engines and AI assistants may show. Leave empty to keep it off the site.",
+    )
+    founder_name = models.CharField(max_length=255, blank=True, default="Andres Lucero")
+    founder_url = models.URLField(
+        "Founder profile",
+        blank=True,
+        default="https://www.linkedin.com/in/andreslucero/",
+        help_text="E.g. the founder’s LinkedIn profile.",
+    )
+    address_locality = models.CharField(
+        "Town or city",
+        max_length=255,
+        blank=True,
+        help_text="Where the business is based, e.g. Utrecht. Optional; no street address is shown.",
+    )
+    address_country = models.CharField(
+        "Country",
+        max_length=100,
+        blank=True,
+        default="Netherlands",
+        help_text="E.g. Netherlands or United Kingdom.",
+    )
+    areas_served = models.TextField(
+        blank=True,
+        default="United Kingdom\nIreland\nEurope",
+        help_text="Countries or regions you work in, one per line. Pages can override this.",
+    )
+    knows_about = models.TextField(
+        "Specialities",
+        blank=True,
+        default=(
+            "Website design for comedians\nComedy show websites\nComedy venue websites\nEdinburgh Festival Fringe\n"
+            "WordPress\nWagtail\nLanding page design\nConversion rate optimisation"
+        ),
+        help_text="Topics the business is expert in, one per line.",
+    )
+    same_as = models.TextField(
+        "Profiles elsewhere",
+        blank=True,
+        help_text=(
+            "Addresses of the business’s own profiles on other sites (LinkedIn company page, Instagram, Google "
+            "Business Profile, directories), one per line. Helps search engines connect them to this site."
+        ),
+    )
+    google_site_verification = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The content of Google Search Console’s HTML tag, e.g. abc123… (only the code, not the whole tag).",
+    )
+    bing_site_verification = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The content of Bing Webmaster Tools’ msvalidate.01 meta tag (only the code).",
+    )
+    llms_txt_details = models.TextField(
+        "Extra llms.txt text",
+        blank=True,
+        help_text=(
+            "Optional facts for AI assistants, added to /llms.txt after the description (Markdown). E.g. what "
+            "you don’t do, who you’ve worked with, how to get a quote."
+        ),
+    )
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(
+                [
+                    FieldPanel("company_name"),
+                    FieldPanel("lead_notification_email"),
+                    FieldPanel("default_social_image"),
+                ],
+                heading="General",
+            ),
+            ObjectList(
+                [
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("site_name"),
+                            FieldPanel("alternate_name"),
+                            FieldPanel("organisation_type"),
+                            FieldPanel("organisation_description"),
+                            FieldPanel("logo"),
+                            FieldPanel("public_email"),
+                        ],
+                        heading="Organisation",
+                    ),
+                    MultiFieldPanel(
+                        [FieldPanel("founder_name"), FieldPanel("founder_url")],
+                        heading="Founder",
+                    ),
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("address_locality"),
+                            FieldPanel("address_country"),
+                            FieldPanel("areas_served"),
+                        ],
+                        heading="Location",
+                    ),
+                    FieldPanel("knows_about"),
+                    FieldPanel("same_as"),
+                ],
+                heading="Search & AI",
+            ),
+            ObjectList(
+                [
+                    FieldPanel("google_site_verification"),
+                    FieldPanel("bing_site_verification"),
+                    FieldPanel("llms_txt_details"),
+                ],
+                heading="Verification & llms.txt",
+            ),
+        ]
+    )
 
     class Meta:
         verbose_name = "Site settings"
+
+    @staticmethod
+    def lines(text):
+        """Non-empty lines of a one-per-line field."""
+        return [line.strip() for line in (text or "").splitlines() if line.strip()]
 
 
 @register_snippet

@@ -7,7 +7,7 @@ from wagtail import views as wagtail_views
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from core.views import media, robots_txt, sitemap
+from core.views import llms_txt, media, robots_txt, sitemap
 
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("sitemap.xml", sitemap),
     path("robots.txt", robots_txt),
+    path("llms.txt", llms_txt),
     # Old static-site address of the home page
     path("index.html", RedirectView.as_view(url="/", permanent=True)),
 ]
