@@ -45,6 +45,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     # ETags, so browsers revalidating a cached page get a short 304 instead of the whole page
     "django.middleware.http.ConditionalGetMiddleware",
+    # Fills {solo.price}-style placeholders in served pages; after ConditionalGet so ETags see the prices
+    "core.middleware.PackagePriceMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

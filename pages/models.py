@@ -46,7 +46,10 @@ class Package(index.Indexed, models.Model):
     code = models.CharField(
         max_length=20,
         choices=Code.choices,
-        help_text="The quote form’s “I’m a…” option that this package’s button selects.",
+        help_text=(
+            "The quote form’s “I’m a…” option that this package’s button selects. Also the name for prices in page "
+            "copy: {solo.price} shows the price (€500) and {solo.pounds} the approximate pounds (£420)."
+        ),
     )
     audience = models.CharField("Who it’s for", max_length=255, help_text="E.g. For comedians")
     price = models.DecimalField(max_digits=9, decimal_places=2, help_text="The amount only, e.g. 1200")

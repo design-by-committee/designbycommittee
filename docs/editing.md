@@ -106,8 +106,17 @@ Pages choose packages in their **Packages and prices** sections. What can differ
 shown: **featured** (the dark card), a **badge**, the **button text** (defaults to “Choose Solo” etc.) and link, and,
 for the whole section, **Show approximate prices in pounds**.
 
-Prices also appear in some written copy (search descriptions, FAQ answers, the comedian website guide). Those don't
-update themselves: search the admin for the old price when you change one.
+**Prices in written copy.** Instead of typing a price, type a placeholder with the package's **code**:
+
+| Type | Shows |
+|---|---|
+| `{solo.price}` | the Solo price, e.g. €500 |
+| `{solo.pounds}` | its approximate pounds, e.g. £420 (empty if Site settings has no rate) |
+
+The same works for `fringe`, `show` and `venue`. Placeholders work anywhere: titles, title tags, search and social
+descriptions, every section's text, FAQ answers, and Site settings. The admin shows the placeholder; visitors,
+previews, search engines and `/llms.txt` see the price. Write the words around it yourself, e.g.
+`from {venue.price} (about {venue.pounds})`. A misspelt placeholder stays visible on the page, so check the preview.
 
 ## Testimonials
 

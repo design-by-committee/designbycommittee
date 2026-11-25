@@ -575,3 +575,47 @@ class PackageSnippetTests(SiteTestCase):
         self.assertEqual((item["package"], item["featured"], item["badge"], item["button_text"]), (gala, True, "Big", ""))
         self.assertTrue(page.blocks_of_type("packages")[0]["show_pounds"])
         self.assertContains(self.client.get("/comedy/"), '<span class="c-package__amount">€9,500</span>')
+
+
+class PricePlaceholderTests(SiteTestCase):
+    """{solo.price} and {solo.pounds} in page copy show the package's current price."""
+
+    def setUp(self):
+        self.comedy.seo_title = "Comedian websites from {solo.price} | Committee"
+        self.comedy.search_description = "Fixed prices from {solo.price} (about {solo.pounds})."
+        body = self.comedy.body
+        faq = next(block for block in body if block.block_type == "faq")
+        faq.value["questions"][0]["answer"] = "Solo is {solo.price}, Venue from {venue.price}. {nope.price} stays."
+        self.comedy.body = body
+        self.comedy.save_revision().publish()
+
+    def test_copy_meta_structured_data_and_llms_txt(self):
+        html = self.client.get("/comedy/").content.decode()
+        self.assertIn("<title>Comedian websites from €495 | Committee</title>", html)
+        self.assertIn('<meta name="description" content="Fixed prices from €495 (about £410).">', html)
+        self.assertIn("Solo is €495, Venue from €1,950. {nope.price} stays.", html)
+        self.assertIn('"description":"Fixed prices from €495 (about £410)."', html)  # JSON-LD
+        self.assertNotIn("{solo.", html)
+        self.assertIn("Fixed prices from €495 (about £410).", self.client.get("/llms.txt").content.decode())
+
+    def test_a_package_edit_updates_the_copy(self):
+        from pages.models import Package
+
+        Package.objects.filter(code="solo").update(price=550)
+        self.assertContains(self.client.get("/comedy/"), "<title>Comedian websites from €550 | Committee</title>")
+
+    def test_admin_keeps_the_placeholders(self):
+        from django.contrib.auth import get_user_model
+
+        self.client.force_login(get_user_model().objects.create_superuser("editor", "e@example.com", "x"))
+        edit = self.client.get(f"/admin/pages/{self.comedy.pk}/edit/").content.decode()
+        self.assertIn("Comedian websites from {solo.price} | Committee", edit)
+
+    def test_etag_matches_the_filled_page(self):
+        first = self.client.get("/comedy/")
+        again = self.client.get("/comedy/", HTTP_IF_NONE_MATCH=first["ETag"])
+        self.assertEqual(again.status_code, 304)
+        from pages.models import Package
+
+        Package.objects.filter(code="solo").update(price=560)
+        self.assertEqual(self.client.get("/comedy/", HTTP_IF_NONE_MATCH=first["ETag"]).status_code, 200)
