@@ -119,6 +119,21 @@ class IllustratedPointsTests(SiteTestCase):
         self.assertContains(response, 'alt="A bio page"')
 
 
+class TextPhotoTests(SiteTestCase):
+    def test_text_section_with_a_photo(self):
+        from pages.content_ops import apply_changes
+
+        image = self.comedy.body[0].value["screenshot"]
+        apply_changes(self.comedy, [{"op": "insert", "type": "text", "value": {
+            "anchor": "about", "heading": "About Committee", "body": "<p>Hello.</p>",
+            "image": {"image": image.pk, "alt_text": "Two live shows", "decorative": False},
+        }}])
+        self.comedy.save_revision().publish()
+        response = self.client.get("/comedy/")
+        self.assertContains(response, '<div class="c-wrap c-text-photo">')
+        self.assertContains(response, 'alt="Two live shows"')
+
+
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
         body = self.comedy.body
@@ -311,16 +326,34 @@ class SearchTagTests(SiteTestCase):
         self.assertNotContains(self.client.get("/sitemap.xml"), "/comedy/")
         self.assertNotContains(self.client.get("/llms.txt"), "/comedy/")
 
-    def test_footer_links_to_pages_shown_in_menus(self):
-        self.assertContains(self.client.get("/"), '<nav class="footer__nav" aria-label="Site">')
-        self.assertContains(self.client.get("/"), 'href="/comedy/">Comedy</a>')
-        self.assertContains(self.client.get("/comedy/"), 'href="/comedy/" aria-current="page">Comedy</a>')
+    def test_footer_columns_from_site_settings(self):
+        response = self.client.get("/")
+        self.assertContains(response, '<h2 class="footer__heading">Websites for</h2>')
+        self.assertContains(response, '<a href="/edfringe/">Edinburgh Fringe 2027 shows</a>')
+        self.assertContains(response, '<a href="/comedy/#quote" class="btn btn-prim footer__cta">Get a quote</a>')
+        self.assertContains(self.client.get("/comedy/"), '<a href="/comedy/" aria-current="page">Comedians</a>')
+
+    def test_footer_without_columns_lists_pages_shown_in_menus(self):
+        from core.models import SiteSettings
+
+        settings = SiteSettings.objects.get()
+        settings.footer_columns = []
+        settings.save()
+        response = self.client.get("/")
+        self.assertContains(response, '<h2 class="footer__heading">Pages</h2>')
+        self.assertContains(response, 'href="/comedy/">Comedy</a>')
+
+    def test_footer_shows_the_location(self):
+        from core.models import SiteSettings
+
+        SiteSettings.objects.filter().update(address_locality="Utrecht")
+        self.assertContains(self.client.get("/"), "<p>Utrecht, Netherlands</p>")
 
     def test_company_name_ending_in_a_full_stop(self):
         from core.models import SiteSettings
 
         SiteSettings.objects.filter().update(company_name="Design by Committee B.V.")
-        self.assertContains(self.client.get("/"), "Design by Committee B.V. <span")
+        self.assertContains(self.client.get("/"), "Design by Committee B.V. All rights reserved.")
 
 
 class LlmsTxtTests(SiteTestCase):

@@ -1,7 +1,14 @@
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags wagtailimages_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
-  <div class="c-wrap">
-    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
-    <div class="c-prose">{{ value.body }}</div>
+  <div class="c-wrap{% if value.image %} c-text-photo{% endif %}">
+    <div>
+      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+      <div class="c-prose">{{ value.body }}</div>
+    </div>
+    {% if value.image %}
+      <figure class="c-text-photo__image">
+        {% srcset_image value.image width-{480,720,960} format-webp sizes="(min-width: 56em) min(520px, 44vw), calc(100vw - 48px)" loading="lazy" decoding="async" %}
+      </figure>
+    {% endif %}
   </div>
 </section>

@@ -50,26 +50,59 @@
 <body class="{% block body_class %}{% endblock %}">
   {% block content %}{% endblock %}
 
-  <footer>
-    <div class="grid">
-      <a href="/" class="footer__logo" aria-label="Design by Committee home">
-        {% include "includes/logo.html" %}
-      </a>
+  {% with site=settings.core.SiteSettings %}
+  <footer class="site-footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <a href="/" class="footer__logo" aria-label="Design by Committee home">
+          {% include "includes/logo.html" %}
+        </a>
+        {% if site.footer_text %}<p class="footer__about">{{ site.footer_text }}</p>{% endif %}
+        {% if site.footer_button_text and site.footer_button_link %}
+          <a href="{{ site.footer_button_link }}" class="btn btn-prim footer__cta">{{ site.footer_button_text }}</a>
+        {% endif %}
+      </div>
 
-      <p class="footer__text text-center">© {% now "Y" %} {{ settings.core.SiteSettings.company_name|without_final_full_stop }}. <span class="hide-xs">All rights
-          reserved.</span></p>
-
-      {% with site_root=page.get_site.root_page %}{% if site_root %}
-        {% with menu_pages=site_root.get_children.live.public.in_menu %}{% if menu_pages %}
-          <nav class="footer__nav" aria-label="Site">
-            {% for menu_page in menu_pages %}
-              <a href="{% pageurl menu_page %}"{% if menu_page.pk == page.pk %} aria-current="page"{% endif %}>{{ menu_page.title }}</a>
-            {% endfor %}
-          </nav>
+      {% if site.footer_columns %}
+        <nav class="footer__columns" aria-label="Site">
+          {% for column in site.footer_columns %}
+            <div class="footer__column">
+              <h2 class="footer__heading">{{ column.value.heading }}</h2>
+              <ul>
+                {% for link in column.value.links %}
+                  <li><a href="{{ link.url }}"{% if link.url == request.path %} aria-current="page"{% endif %}>{{ link.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </nav>
+      {% else %}
+        {# No columns in Site settings: list the pages ticked "Show in menus" #}
+        {% with site_root=page.get_site.root_page %}{% if site_root %}
+          {% with menu_pages=site_root.get_children.live.public.in_menu %}{% if menu_pages %}
+            <nav class="footer__columns" aria-label="Site">
+              <div class="footer__column">
+                <h2 class="footer__heading">Pages</h2>
+                <ul>
+                  {% for menu_page in menu_pages %}
+                    <li><a href="{% pageurl menu_page %}"{% if menu_page.pk == page.pk %} aria-current="page"{% endif %}>{{ menu_page.title }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </nav>
+          {% endif %}{% endwith %}
         {% endif %}{% endwith %}
-      {% endif %}{% endwith %}
+      {% endif %}
+    </div>
+
+    <div class="footer__bottom">
+      <p>© {% now "Y" %} {{ site.company_name|without_final_full_stop }}. All rights reserved.</p>
+      {% if site.address_locality or site.address_country %}
+        <p>{% firstof site.address_locality "" %}{% if site.address_locality and site.address_country %}, {% endif %}{% firstof site.address_country "" %}</p>
+      {% endif %}
     </div>
   </footer>
+  {% endwith %}
 
 </body>
 

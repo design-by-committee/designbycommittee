@@ -56,6 +56,17 @@ class ExternalLinkBlock(OptionalLinkBlock):
     new_tab = blocks.BooleanBlock(required=False, label="Open in a new tab")
 
 
+class FooterColumnBlock(blocks.StructBlock):
+    """A titled group of links in the site footer (Settings → Site settings → Footer)."""
+
+    heading = blocks.CharBlock(help_text="E.g. Websites for")
+    links = blocks.ListBlock(LinkBlock(label="Link"))
+
+    class Meta:
+        icon = "list-ul"
+        label = "Column"
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Agency (home page) blocks
 # ---------------------------------------------------------------------------------------------------------------------
@@ -416,6 +427,11 @@ class IllustratedPointsBlock(SectionBlock):
 
 class TextSectionBlock(SectionBlock):
     body = blocks.RichTextBlock(features=["h3", "bold", "italic", "link", "ol", "ul"])
+    image = ImageBlock(
+        required=False,
+        label="Photo (optional)",
+        help_text="Shown beside the text on wide screens, under it on phones. PNGs with transparency work too.",
+    )
 
     class Meta:
         icon = "pilcrow"

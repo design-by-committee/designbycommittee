@@ -48,8 +48,8 @@ buttons and header links. Keep the existing anchors in place:
 - Edinburgh Fringe: `dates`, `packages`, `work`, `faq` and `quote`
 - Venues and Europe: `packages`, `work`, `faq` and `quote`; the guide: `include`, `cost`, `faq` and `quote`
 
-The page **title** is the link text in the footer menu, so keep titles short and descriptive (e.g. “Websites for
-comedians”, not “Comedy”).
+Keep page titles short and descriptive (e.g. “Websites for comedians”, not “Comedy”): they're used in breadcrumbs and
+in search results.
 
 **Prices in pounds** are typed into each package's price suffix, e.g. “one-time fee (about £420)”, at about £0.83 to the
 euro (November 2026). Update them if the exchange rate moves a lot.
@@ -79,7 +79,7 @@ euro (November 2026). Update them if the exchange rate moves a lot.
 | Packages and prices | Pricing cards; mark one as featured and give it a badge |
 | Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
 | Quote request form | The enquiry form |
-| Text | Free text with headings, lists and links |
+| Text | Free text with headings, lists and links, and an optional photo beside it (e.g. the comedy page's About section) |
 | Points with screenshots | Short points, each with a screenshot in a browser frame, alternating sides (e.g. the guide's “The essentials”) |
 
 Each landing page section can have a **Light**, **Paper** or **Dark** background.
@@ -119,6 +119,18 @@ sender sees the usual thank-you message. If a real lead ends up there, open it, 
 back to the inbox. Reasons include sending the form within a few seconds of opening the page, HTML or lots of links
 in the answers, a call time the date and time pickers wouldn't allow, and more than five sends an hour from one
 address. People with JavaScript turned off also land here, so glance at the list now and then.
+
+## Footer
+
+The footer on every page is edited in **Settings → Site settings → Footer**:
+
+- **Footer introduction:** the sentence or two under the logo.
+- **Button:** text and link (e.g. “Get a quote” → `/comedy/#quote`). Leave either empty to hide it.
+- **Footer link columns:** titled groups of links, side by side (three fit best). Add, reorder or remove columns and
+  links like page sections. Links take a path (`/edfringe/`), a section (`/comedy/#faq`) or a full address.
+
+The bottom line shows the company name and the town and country from the **Search & AI** tab. If there are no
+columns, the footer lists the pages ticked **Show in menus** instead.
 
 ## Site settings
 
