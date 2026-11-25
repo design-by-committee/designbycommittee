@@ -970,6 +970,48 @@
   }
 }
 
+/** points with screenshots: text beside a browser-framed screenshot, alternating sides on wide screens **/
+.c-points {
+  display: grid;
+  gap: clamp(3rem, 2rem + 4vw, 5.5rem);
+  margin-top: 2.5rem;
+}
+
+.c-point {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+
+  @media (width >= 48em) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(2rem, 1rem + 3vw, 4rem);
+
+    &:nth-child(even) {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+
+      & .c-point__copy {
+        order: 2;
+      }
+    }
+  }
+
+  & p {
+    max-width: 34em;
+  }
+
+  & p + p {
+    margin-top: 0.75em;
+  }
+}
+
+.c-point__shot {
+  margin: 0;
+
+  & .c-browser--card {
+    margin-bottom: 0;
+  }
+}
+
 /** enquiry **/
 .c-enquiry .c-wrap {
   display: grid;

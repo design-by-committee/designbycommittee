@@ -80,6 +80,7 @@ euro (November 2026). Update them if the exchange rate moves a lot.
 | Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
 | Quote request form | The enquiry form |
 | Text | Free text with headings, lists and links |
+| Points with screenshots | Short points, each with a screenshot in a browser frame, alternating sides (e.g. the guide's “The essentials”) |
 
 Each landing page section can have a **Light**, **Paper** or **Dark** background.
 
