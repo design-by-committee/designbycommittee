@@ -39,6 +39,7 @@ ICONS = {
         '<path d="M14 6v2M14 11v2M14 16v2"/>',
     ),
     "video": ("Video", '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3z"/>'),
+    "card": ("Payment card", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>'),
 }
 
 CHOICES = [(name, label) for name, (label, _) in ICONS.items()]
