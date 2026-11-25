@@ -179,7 +179,7 @@ on your Render account (Account Settings → SSH Public Keys).
 | Database | Render Postgres 17 `designbycommittee-db`, `0.1c-256mb` |
 | Uploads | 1 GB Render disk at `/opt/render/project/src/storage` (`MEDIA_ROOT`), served by the app |
 | Email | Resend SMTP relay, sending from `forms@designbycommitt.ee` |
-| DNS | Netlify DNS: apex `A 216.24.57.1`, `www CNAME designbycommittee.onrender.com` (www redirects to the apex). Mail records are separate and untouched |
+| Domain and DNS | Zone.eu (registrar and DNS, since 25 Nov 2026): apex `A 216.24.57.1`, `www CNAME designbycommittee.onrender.com` (www redirects to the apex); Google Workspace MX and SPF; Resend's `send`, `rsend` and `resend._domainkey`; `_dmarc` |
 
 | Variable | Set by | Purpose |
 |---|---|---|
@@ -198,10 +198,9 @@ on your Render account (Account Settings → SSH Public Keys).
 
 ## Open items
 
-- **Netlify leftovers** (the static site before 23 Nov 2026): after two problem-free weeks (from 7 Dec 2026), remove
-  the custom domain from the Netlify site and delete the site (keep the DNS zone), then delete `netlify.toml`, whose
-  only job is stopping Netlify from building `main`. Until then, the rollback is to delete the two DNS records above
-  and re-add the domain on the Netlify site.
+- **Netlify leftovers** (the static site before 23 Nov 2026, and the DNS zone before 25 Nov): remove the custom
+  domain from the `design-by-committee` Netlify project, delete its DNS zone and the project, then delete
+  `netlify.toml`, whose only job is stopping Netlify from building `main`.
 - **Edge caching:** on 25 Nov 2026 static files were edge-cached (`HIT`) but pages weren't
   (`CF-Cache-Status: DYNAMIC`), and `RENDER_API_KEY` wasn't set (`s-maxage=300`). To cache pages, check Edge Caching
   is **All files** and add a Render API key so edits purge the cache.
