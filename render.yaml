@@ -38,6 +38,9 @@ services:
       # The service's own *.onrender.com host is added automatically (RENDER_EXTERNAL_HOSTNAME).
       - key: ALLOWED_HOSTS
         value: designbycommitt.ee,www.designbycommitt.ee
+      # Links in admin emails (otherwise the *.onrender.com address)
+      - key: WAGTAILADMIN_BASE_URL
+        value: https://designbycommitt.ee
       - key: MEDIA_ROOT
         value: /opt/render/project/src/storage/media
       - key: WEB_CONCURRENCY

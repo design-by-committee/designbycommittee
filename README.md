@@ -191,7 +191,7 @@ on your Render account (Account Settings → SSH Public Keys).
 | `RESEND_API_KEY` | Render dashboard | Sends form notification emails through Resend |
 | `RENDER_API_KEY` | Render dashboard (optional) | Lets the site purge the edge cache when content changes |
 | `RENDER_SERVICE_ID`, `RENDER_EXTERNAL_HOSTNAME`, `RENDER_EXTERNAL_URL` | Render (automatic) | Service to purge; extra allowed host; fallback admin URL |
-| `WAGTAILADMIN_BASE_URL` | optional | Site URL for links in admin emails. Defaults to `RENDER_EXTERNAL_URL` |
+| `WAGTAILADMIN_BASE_URL` | `render.yaml` | Site URL for links in admin emails (falls back to `RENDER_EXTERNAL_URL`) |
 | `INDEXABLE_HOSTS` | optional | Hosts search engines may index (default `designbycommitt.ee,www.designbycommitt.ee`); others get `noindex` |
 | `EDGE_HTML_MAX_AGE` | optional | Seconds the edge keeps pages (default 300, or 86400 with `RENDER_API_KEY`) |
 | `SECURE_HSTS_SECONDS` | optional | HSTS max-age (default 1 day) |
@@ -205,8 +205,6 @@ on your Render account (Account Settings → SSH Public Keys).
 - **Edge caching:** on 25 Nov 2026 static files were edge-cached (`HIT`) but pages weren't
   (`CF-Cache-Status: DYNAMIC`), and `RENDER_API_KEY` wasn't set (`s-maxage=300`). To cache pages, check Edge Caching
   is **All files** and add a Render API key so edits purge the cache.
-- **`WAGTAILADMIN_BASE_URL`** isn't set, so admin email links use the `onrender.com` address; set it to
-  `https://designbycommitt.ee` in `render.yaml`.
 - **Backups:** confirm what Render keeps for Postgres and the disk, and write down the restore steps here.
 - Raise `SECURE_HSTS_SECONDS` once the site has run on Render for a while; enable Dependabot for Python packages.
 - Upgrade to the next Wagtail LTS before 7.4's support ends in November 2027.
