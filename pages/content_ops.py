@@ -32,7 +32,21 @@ import json
 from django.core.exceptions import ValidationError
 from wagtail.models import Page, Site
 
-EDITABLE_FIELDS = {"title", "slug", "seo_title", "search_description", "og_title", "og_description"}
+EDITABLE_FIELDS = {
+    "title",
+    "slug",
+    "seo_title",
+    "search_description",
+    "show_in_menus",
+    "og_title",
+    "og_description",
+    "og_image_id",  # an image id (`cms images list`), or null
+    "noindex",
+    "service_name",
+    "service_audience",
+    "areas_served",
+    "extra_json_ld",
+}
 
 
 class ContentError(Exception):
