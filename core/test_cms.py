@@ -151,6 +151,17 @@ class RecordTests(SiteTestCase):
         cms("snippets", "create", "package", "--data", json.dumps(data), "--apply")
         self.assertEqual(Package.objects.get(name="Tour").feature_list, ["Tour dates", "Press"])
 
+    def test_snippets_with_a_stream_field_print_their_blocks(self):
+        import json as json_module
+
+        from pages.models import SharedSection
+
+        form = {"type": "enquiry_form", "value": {"anchor": "quote", "heading": "Get a quote", "lead": "",
+                "submit_label": "Send", "thanks_text": "Thanks", "background": "dark"}}
+        SharedSection.objects.create(name="Quote form", body=json_module.dumps([form]))
+        listed = json_module.loads(cms("snippets", "list", "sharedsection"))
+        self.assertEqual(listed[0]["body"][0]["type"], "enquiry_form")
+
     def test_redirects(self):
         cms("redirects", "create", "--data", json.dumps({"old_path": "/old-comedy", "redirect_page": self.comedy.pk, "is_permanent": True}), "--apply")
         redirect = Redirect.objects.get()

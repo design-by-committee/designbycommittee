@@ -78,6 +78,9 @@ def to_json(value):
     """Make model values printable as JSON."""
     if isinstance(value, models.Model):
         return value.pk
+    if hasattr(value, "stream_block") and hasattr(value, "get_prep_value"):
+        # A StreamField: its stored blocks. str() would render it, and sections such as a quote form need a page.
+        return value.get_prep_value()
     if isinstance(value, (list, tuple, set)):
         return [to_json(item) for item in value]
     if isinstance(value, dict):
