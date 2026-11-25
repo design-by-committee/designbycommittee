@@ -1,14 +1,17 @@
 {% load site_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap">
-    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
-
     {% if value.packages|length == 1 and value.lead %}
+      {# One package: the heading and introduction on the left, the card on the right #}
       <div class="c-package-single">
-        <div class="c-prose">{{ value.lead }}</div>
+        <div>
+          <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+          <div class="c-prose">{{ value.lead }}</div>
+        </div>
         {% include "blocks/sections/package_cards.html" with single=True %}
       </div>
     {% else %}
+      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
       {% if value.lead %}<div class="c-prose c-packages__lead">{{ value.lead }}</div>{% endif %}
       {% include "blocks/sections/package_cards.html" %}
     {% endif %}
