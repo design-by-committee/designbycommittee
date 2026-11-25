@@ -1,7 +1,5 @@
-# The site is moving to Wagtail on Render (see docs/wagtail-relaunch-plan.md).
-# An ignore command that exits 0 tells Netlify to skip the build, so:
-# - Deploy Previews of this branch never publish the Python source as static files
-# - after the merge, main stops rebuilding and Netlify keeps serving the last static deploy
-#   until DNS points at Render (that deploy is the rollback path)
+# The site runs on Render (see README). Netlify only hosts the DNS zone and the old static site, kept until
+# 7 Dec 2026 as a rollback. An ignore command that exits 0 tells Netlify to skip every build, so it never publishes
+# this repository's Python source as a static site. Delete this file once the Netlify site is deleted.
 [build]
   ignore = "exit 0"

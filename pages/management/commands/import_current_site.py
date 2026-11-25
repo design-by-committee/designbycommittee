@@ -1,8 +1,9 @@
 """Create the site's pages, testimonials, images and settings with the copy from the original static site.
 
-Run once on each new environment (local, staging, production):
+Seeds a new environment (local development, the tests, and a fresh Render service, where render.yaml runs it with
+--initial on every start). It isn't a copy of production: pages added and edits made since live only in that database.
 
-    python manage.py import_current_site --hostname designbycommitt.ee --port 443
+    python manage.py import_current_site --hostname localhost --port 8000
 
 It is safe to run again: images, testimonials and settings are matched and updated in place, and page content is
 only replaced when a page has no content yet, or when --force is given (which overwrites edits made in the admin).

@@ -36,7 +36,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W021"]
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
-# Full site URL for links in admin emails. Until the domain moves, Render's own URL (RENDER_EXTERNAL_URL).
+# Full site URL for links in admin emails. Falls back to Render's own *.onrender.com URL (RENDER_EXTERNAL_URL).
 WAGTAILADMIN_BASE_URL = os.environ.get("WAGTAILADMIN_BASE_URL") or os.environ.get(
     "RENDER_EXTERNAL_URL", WAGTAILADMIN_BASE_URL  # noqa: F405
 )
