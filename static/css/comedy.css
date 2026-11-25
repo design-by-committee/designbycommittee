@@ -1123,7 +1123,6 @@
   display: grid;
   gap: 2rem;
   align-items: center;
-  margin-top: 1rem;
 
   @media (width >= 56em) {
     grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);

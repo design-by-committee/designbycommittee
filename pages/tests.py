@@ -172,6 +172,8 @@ class IconGridAndPackageIntroTests(SiteTestCase):
             {"op": "set", "block": packages.id, "path": "packages", "value": [first_package]},
         ])
         self.assertContains(response, '<div class="c-package-single">')
+        # The heading sits in the left column with the introduction, not above both columns
+        self.assertRegex(response.content.decode(), r'<div class="c-package-single">\s*<div>\s*<h2 ')
         self.assertContains(response, '<div class="c-packages c-packages--single">')
 
     def test_several_packages_put_the_introduction_above(self):
