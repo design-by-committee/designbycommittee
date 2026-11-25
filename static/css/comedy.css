@@ -459,7 +459,9 @@
   }
 }
 
-.c-why__item .arrow-right {
+.c-why__item .arrow-right,
+.c-card__link {
+  display: inline-block;
   margin-top: 0.75rem;
   font-size: 1rem;
   font-weight: 700;

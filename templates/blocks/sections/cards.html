@@ -16,6 +16,7 @@
             <h3>{{ card.title }}</h3>
             {% if card.meta %}<p class="c-work__meta">{{ card.meta }}</p>{% endif %}
             <p>{{ card.text }}</p>
+            {% if card.link.text and card.link.url %}<a href="{{ card.link.url }}" class="arrow-right c-card__link">{{ card.link.text }}</a>{% endif %}
           </article>
         {% endfor %}
       </div>
@@ -26,6 +27,7 @@
             <h3>{{ card.title }}</h3>
             {% if card.meta %}<p class="c-work__meta">{{ card.meta }}</p>{% endif %}
             <p>{{ card.text }}</p>
+            {% if card.link.text and card.link.url %}<a href="{{ card.link.url }}" class="arrow-right c-card__link">{{ card.link.text }}</a>{% endif %}
           </article>
         {% endfor %}
       </div>

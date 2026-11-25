@@ -152,7 +152,7 @@ AssessmentForm = build_form(
 CLIENT_TYPES = [(label, label) for label in ["Performer", "Showrunner", "Venue owner", "Something else"]]
 
 # The comedy page's pricing buttons carry a package code; clicking one selects this "I’m a…" option (comedy.js)
-PACKAGE_CLIENT_TYPES = {"solo": "Performer", "show": "Showrunner", "venue": "Venue owner"}
+PACKAGE_CLIENT_TYPES = {"solo": "Performer", "fringe": "Performer", "show": "Showrunner", "venue": "Venue owner"}
 
 
 class ComedyEnquiryFormBase(LeadForm):
