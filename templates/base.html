@@ -97,8 +97,12 @@
 
     <div class="footer__bottom">
       <p>© {% now "Y" %} {{ site.company_name|without_final_full_stop }}. All rights reserved.</p>
-      {% if site.address_locality or site.address_country %}
-        <p>{% firstof site.address_locality "" %}{% if site.address_locality and site.address_country %}, {% endif %}{% firstof site.address_country "" %}</p>
+      {% if site.kvk_number or site.vat_number or site.address_locality or site.address_country %}
+        <p class="footer__legal">
+          {% if site.kvk_number %}<span><abbr title="Kamer van Koophandel (Dutch Chamber of Commerce)">KvK</abbr> {{ site.kvk_number }}</span>{% endif %}
+          {% if site.vat_number %}<span>VAT (BTW) {{ site.vat_number }}</span>{% endif %}
+          {% if site.address_locality or site.address_country %}<span>{% firstof site.address_locality "" %}{% if site.address_locality and site.address_country %}, {% endif %}{% firstof site.address_country "" %}</span>{% endif %}
+        </p>
       {% endif %}
     </div>
   </footer>

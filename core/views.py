@@ -47,6 +47,10 @@ def llms_txt(request):
     facts = []
     if settings_.company_name:
         facts.append(f"- Company: {settings_.company_name}")
+    if settings_.kvk_number:
+        facts.append(f"- KvK (Dutch Chamber of Commerce) number: {settings_.kvk_number}")
+    if settings_.vat_number:
+        facts.append(f"- VAT number: {settings_.vat_number}")
     if settings_.founder_name:
         founder = f"[{settings_.founder_name}]({settings_.founder_url})" if settings_.founder_url else settings_.founder_name
         facts.append(f"- Founder: {founder}")

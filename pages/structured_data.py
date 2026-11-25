@@ -97,6 +97,10 @@ class StructuredData:
             node["legalName"] = s.company_name
         if s.alternate_name:
             node["alternateName"] = s.alternate_name
+        if s.vat_number:
+            node["vatID"] = s.vat_number
+        if s.kvk_number:
+            node["identifier"] = {"@type": "PropertyValue", "propertyID": "KvK", "value": s.kvk_number}
         if s.organisation_description:
             node["description"] = s.organisation_description
         if s.logo:
