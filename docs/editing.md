@@ -51,8 +51,8 @@ buttons and header links. Keep the existing anchors in place:
 Keep page titles short and descriptive (e.g. “Websites for comedians”, not “Comedy”): they're used in breadcrumbs and
 in search results.
 
-**Prices in pounds** are typed into each package's price suffix, e.g. “one-time fee (about £420)”, at about £0.83 to the
-euro (November 2026). Update them if the exchange rate moves a lot.
+**Prices in pounds** (“about £420”) are worked out from the euro price at the rate in **Settings → Site settings →
+General → Pounds per euro**. Change the rate there and every page follows; leave it empty to hide pound prices.
 
 ## Section types
 
@@ -76,7 +76,7 @@ euro (November 2026). Update them if the exchange rate moves a lot.
 | Columns | Short points side by side, each with an optional link and an optional picture above it |
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
-| Packages and prices | Pricing cards; mark one as featured and give it a badge. An optional introduction goes above the cards, or beside a single card |
+| Packages and prices | Pricing cards chosen from **Snippets → Packages**; on each page, mark one as featured and give it a badge. An optional introduction goes above the cards, or beside a single card |
 | Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
 | Quote request form | The enquiry form |
 | Text | Free text with headings, lists and links, and an optional photo beside it (e.g. the comedy page's About section) |
@@ -94,6 +94,20 @@ Each landing page section can have a **Light**, **Paper** or **Dark** background
 4. On the **Promote** tab, tick **Show in menus** to link the page from the site footer (search engines find pages
    through links), and fill in **Structured data** (see Search engines and AI assistants below).
 5. Publish.
+
+## Packages
+
+**Snippets → Packages.** Each package (Solo, Fringe, Show, Venue) is written once: name, who it's for, price, whether
+it's a starting price (“from €3,500”), the text after the price, the timeframe and what's included (one per line).
+Change a package there and it changes on every page that shows it, in the search engines' structured data and in
+`/llms.txt`.
+
+Pages choose packages in their **Packages and prices** sections. What can differ per page is only how the card is
+shown: **featured** (the dark card), a **badge**, the **button text** (defaults to “Choose Solo” etc.) and link, and,
+for the whole section, **Show approximate prices in pounds**.
+
+Prices also appear in some written copy (search descriptions, FAQ answers, the comedian website guide). Those don't
+update themselves: search the admin for the old price when you change one.
 
 ## Testimonials
 
@@ -159,7 +173,7 @@ edited in the admin. Nothing needs a developer.
 | Structured data → Service name, Who it’s for, Areas served | Describe what the page sells. Together with the page's **Packages and prices** section they tell search engines your prices |
 | Structured data → Extra structured data | Optional JSON-LD for anything not generated, e.g. an `Event`. Must be a JSON object |
 
-The page's **Questions (FAQ)** sections are marked up as FAQs automatically, and its **Packages and prices**
+The page's **Questions (FAQ)** sections are marked up as FAQs automatically, and the packages in its **Packages and prices**
 section as offers with prices (`from` in the price prefix makes it a minimum price).
 
 **For the whole site (Settings → Site settings):**

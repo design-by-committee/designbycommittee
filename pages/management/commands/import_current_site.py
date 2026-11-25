@@ -191,7 +191,44 @@ def home_page_content(testimonials):
     }
 
 
-def comedy_page_content(images, testimonials):
+PACKAGES = {
+    "solo": {
+        "name": "Solo", "audience": "For comedians", "price": "495", "price_is_minimum": False,
+        "price_suffix": "one-off", "timeframe": "Live in 2–4 weeks",
+        "features": [
+            "Home, about, gigs, video and press pages",
+            "A gig list you can update from your phone",
+            "Downloadable press photos and bio",
+            "Mailing list sign-up",
+            "Domain, SSL and launch setup",
+        ],
+    },
+    "show": {
+        "name": "Show", "audience": "For shows, nights and festival runs", "price": "795", "price_is_minimum": False,
+        "price_suffix": "one-off", "timeframe": "Live in 4–6 weeks",
+        "features": [
+            "Everything in Solo",
+            "Show pages with dates and ticket links",
+            "Review quotes and star ratings",
+            "A QR code landing page for flyers",
+            "Lineup pages for recurring nights",
+        ],
+    },
+    "venue": {
+        "name": "Venue", "audience": "For clubs, theatres and venues", "price": "1950", "price_is_minimum": True,
+        "price_suffix": "", "timeframe": "Live in 6–8 weeks",
+        "features": [
+            "As many pages as your programme needs",
+            "A show calendar connected to your ticketing",
+            "Pages for classes and workshops",
+            "Private hire, memberships or donations",
+            "Training for your staff",
+        ],
+    },
+}
+
+
+def comedy_page_content(images, testimonials, packages):
     return {
         "title": "Comedy",
         "slug": "comedy",
@@ -340,47 +377,14 @@ def comedy_page_content(images, testimonials):
                 "background": "paper",
                 "heading": "Packages and prices",
                 "packages": [
-                    {
-                        "name": "Solo", "code": "solo", "audience": "For comedians",
-                        "price_prefix": "", "price": "€495", "price_suffix": "one-off",
-                        "timeframe": "Live in 2–4 weeks",
-                        "features": [
-                            "Home, about, gigs, video and press pages",
-                            "A gig list you can update from your phone",
-                            "Downloadable press photos and bio",
-                            "Mailing list sign-up",
-                            "Domain, SSL and launch setup",
-                        ],
-                        "button_text": "Choose Solo", "button_link": "#quote", "featured": False, "badge": "",
-                    },
-                    {
-                        "name": "Show", "code": "show", "audience": "For shows, nights and festival runs",
-                        "price_prefix": "", "price": "€795", "price_suffix": "one-off",
-                        "timeframe": "Live in 4–6 weeks",
-                        "features": [
-                            "Everything in Solo",
-                            "Show pages with dates and ticket links",
-                            "Review quotes and star ratings",
-                            "A QR code landing page for flyers",
-                            "Lineup pages for recurring nights",
-                        ],
-                        "button_text": "Choose Show", "button_link": "#quote", "featured": True,
-                        "badge": "Best for Fringe runs",
-                    },
-                    {
-                        "name": "Venue", "code": "venue", "audience": "For clubs, theatres and venues",
-                        "price_prefix": "from", "price": "€1,950", "price_suffix": "",
-                        "timeframe": "Live in 6–8 weeks",
-                        "features": [
-                            "As many pages as your programme needs",
-                            "A show calendar connected to your ticketing",
-                            "Pages for classes and workshops",
-                            "Private hire, memberships or donations",
-                            "Training for your staff",
-                        ],
-                        "button_text": "Choose Venue", "button_link": "#quote", "featured": False, "badge": "",
-                    },
+                    {"package": packages["solo"].pk, "featured": False, "badge": "", "button_text": "",
+                     "button_link": "#quote"},
+                    {"package": packages["show"].pk, "featured": True, "badge": "Best for Fringe runs",
+                     "button_text": "", "button_link": "#quote"},
+                    {"package": packages["venue"].pk, "featured": False, "badge": "", "button_text": "",
+                     "button_link": "#quote"},
                 ],
+                "show_pounds": False,
                 "fine_print": (
                     "Timelines start once we have your copy, photos and links. Prices exclude VAT where it applies. "
                     "Hosting and ongoing support are available as an optional monthly plan."
@@ -512,6 +516,7 @@ class Command(BaseCommand):
 
         images = {key: self.get_or_create_image(filename, title) for key, (filename, title) in IMAGES.items()}
         testimonials = {key: self.update_testimonial(data, images) for key, data in TESTIMONIALS.items()}
+        packages = {code: self.get_or_create_package(code, data) for code, data in PACKAGES.items()}
 
         site_settings = SiteSettings.for_site(site)
         site_settings.company_name = "Design by Committee BV"
@@ -529,7 +534,7 @@ class Command(BaseCommand):
             comedy = LandingPage(title="Comedy", slug="comedy")
             home.add_child(instance=comedy)
             force = True  # a brand-new page always gets its content
-        self.update_page(comedy, comedy_page_content(images, testimonials), force)
+        self.update_page(comedy, comedy_page_content(images, testimonials, packages), force)
 
         self.stdout.write(self.style.SUCCESS("Done."))
 
@@ -543,6 +548,15 @@ class Command(BaseCommand):
             image.save()
         self.stdout.write(f"Image: {title}")
         return image
+
+    def get_or_create_package(self, code, data):
+        """Packages are edited in the admin once they exist, so only missing ones are created."""
+        from pages.models import Package
+
+        package = Package.objects.filter(code=code).first()
+        if package is None:
+            package = Package.objects.create(code=code, **{**data, "features": "\n".join(data["features"])})
+        return package
 
     def update_testimonial(self, data, images):
         values = {**data, "logo": images[data["logo"]]}

@@ -344,27 +344,14 @@ class StepsBlock(SectionBlock):
         template = "blocks/sections/steps.html"
 
 
-class PackageBlock(blocks.StructBlock):
-    name = blocks.CharBlock()
-    code = blocks.ChoiceBlock(
-        choices=[
-            ("solo", "solo (Performer)"),
-            ("fringe", "fringe (Performer)"),
-            ("show", "show (Showrunner)"),
-            ("venue", "venue (Venue owner)"),
-        ],
-        help_text="The “I’m a…” option the quote form selects when someone clicks this package’s button.",
-    )
-    audience = blocks.CharBlock(help_text="E.g. For comedians")
-    price_prefix = blocks.CharBlock(required=False, help_text="E.g. from")
-    price = blocks.CharBlock(help_text="E.g. €495")
-    price_suffix = blocks.CharBlock(required=False, help_text="E.g. one-off")
-    timeframe = blocks.CharBlock(required=False, help_text="E.g. Live in 2–4 weeks")
-    features = blocks.ListBlock(blocks.CharBlock(label="Feature"))
-    button_text = blocks.CharBlock()
+class PackageChoiceBlock(blocks.StructBlock):
+    """A package (Snippets → Packages) as shown on this page: its card can be featured here and not elsewhere."""
+
+    package = SnippetChooserBlock("pages.Package")
+    featured = blocks.BooleanBlock(required=False, help_text="Highlight this package on this page (dark card).")
+    badge = blocks.CharBlock(required=False, help_text="Label above the card, e.g. Best for Fringe runs")
+    button_text = blocks.CharBlock(required=False, help_text="Defaults to “Choose” and the package name.")
     button_link = blocks.CharBlock(default="#quote", help_text="Usually the quote form’s anchor, e.g. #quote")
-    featured = blocks.BooleanBlock(required=False, help_text="Highlight this package (dark card).")
-    badge = blocks.CharBlock(required=False, help_text="Label above a featured package, e.g. Best for Fringe runs")
 
     class Meta:
         icon = "tag"
@@ -378,7 +365,16 @@ class PackagesBlock(SectionBlock):
         label="Introduction (optional)",
         help_text="With a single package, it sits beside the card; with several, above them.",
     )
-    packages = blocks.ListBlock(PackageBlock())
+    packages = blocks.ListBlock(
+        PackageChoiceBlock(),
+        help_text="Choose from Snippets → Packages. Edit a package there to change it on every page.",
+    )
+    show_pounds = blocks.BooleanBlock(
+        required=False,
+        default=True,
+        label="Show approximate prices in pounds",
+        help_text="Next to euro prices, using the rate in Site settings.",
+    )
     fine_print = blocks.TextBlock(required=False)
 
     class Meta:

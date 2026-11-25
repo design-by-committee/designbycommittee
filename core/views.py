@@ -77,15 +77,20 @@ def llms_txt(request):
             lines.append(entry)
         lines.append("")
 
+    rate = settings_.pounds_per_euro
     for page in pages:
-        packages = [package for block in page.blocks_of_type("packages") for package in block["packages"]]
+        packages = page.packages()
         if not packages:
             continue
+        show_pounds = any(block["show_pounds"] for block in page.blocks_of_type("packages"))
         lines += [f"## Prices: {StructuredData(page, request).service_label()}", ""]
         for package in packages:
-            price = " ".join(filter(None, [package["price_prefix"], package["price"], package["price_suffix"]]))
-            details = "; ".join(filter(None, [package["audience"], package["timeframe"], *package["features"]]))
-            lines.append(f"- {package['name']} ({price}): {details}")
+            price = " ".join(filter(None, ["from" if package.price_is_minimum else "", package.price_display, package.price_suffix]))
+            pounds = package.approximate_pounds(rate) if show_pounds else None
+            if pounds:
+                price += f" (about {pounds})"
+            details = "; ".join(filter(None, [package.audience, package.timeframe, *package.feature_list]))
+            lines.append(f"- {package.name} ({price}): {details}")
         for block in page.blocks_of_type("packages"):
             if block["fine_print"]:
                 lines += ["", " ".join(block["fine_print"].split())]
