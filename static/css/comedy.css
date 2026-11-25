@@ -998,6 +998,7 @@
     display: block;
     width: 100%;
     height: auto;
+    max-height: none;  /* small.css and medium.css cap images in main at 260/360px, which squashes this one */
   }
 }
 
