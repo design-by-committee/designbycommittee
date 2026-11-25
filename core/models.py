@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, ObjectList, TabbedInterface
 from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
@@ -50,6 +52,17 @@ class SiteSettings(BaseSiteSetting):
         max_length=30,
         blank=True,
         help_text="E.g. NL123456789B01. Shown in the footer.",
+    )
+    pounds_per_euro = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        default=Decimal("0.834"),
+        help_text=(
+            "For the approximate pound prices next to euro packages, e.g. 0.834 (£0.834 per €1). Leave empty to hide "
+            "them everywhere."
+        ),
     )
     lead_notification_email = models.EmailField(
         blank=True,
@@ -209,6 +222,7 @@ class SiteSettings(BaseSiteSetting):
                         [FieldPanel("company_name"), FieldPanel("kvk_number"), FieldPanel("vat_number")],
                         heading="Company",
                     ),
+                    FieldPanel("pounds_per_euro"),
                     FieldPanel("lead_notification_email"),
                     FieldPanel("default_social_image"),
                 ],

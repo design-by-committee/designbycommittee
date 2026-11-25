@@ -5,7 +5,7 @@ assistants can tell who the business is, what it sells, where and for how much. 
 
 - Settings → Site settings → Search & AI: the organisation (name, description, founder, location, areas served...)
 - A page's Promote tab: service name, audience, areas served and extra JSON-LD
-- The page's content: FAQ sections become FAQPage questions, packages become offers with prices
+- The page's content: FAQ sections become FAQPage questions, chosen packages (Snippets → Packages) become offers
 """
 
 import json
@@ -200,7 +200,7 @@ class StructuredData:
     def service(self):
         """A Service with an offer per package, on pages that list packages or name a service."""
         page = self.page
-        packages = [package for block in page.blocks_of_type("packages") for package in block["packages"]]
+        packages = page.packages()
         if not packages and not page.service_name:
             return None
         node = {
@@ -225,26 +225,27 @@ class StructuredData:
         return node
 
     def offer(self, package):
-        description = [package["audience"], package["timeframe"], *package["features"]]
+        description = [package.audience, package.timeframe, *package.feature_list]
         item = {
             "@type": "Service",
-            "name": f"{package['name']}: {package['audience']}" if package["audience"] else package["name"],
+            "name": f"{package.name}: {package.audience}" if package.audience else package.name,
             "description": ". ".join(part.rstrip(".") for part in description if part) + ".",
         }
-        offer = {"@type": "Offer", "name": package["name"], "itemOffered": item, "url": f"{self.page_url}#quote"}
-        price = parse_price(package["price"])
-        if price:
-            amount, currency = price
-            if "from" in (package["price_prefix"] or "").lower() or "from" in package["price"].lower():
-                offer["priceSpecification"] = {
-                    "@type": "PriceSpecification",
-                    "minPrice": amount,
-                    "priceCurrency": currency,
-                }
-                offer["priceCurrency"] = currency
-            else:
-                offer["price"] = amount
-                offer["priceCurrency"] = currency
+        offer = {
+            "@type": "Offer",
+            "name": package.name,
+            "itemOffered": item,
+            "url": f"{self.page_url}#quote",
+            "priceCurrency": package.currency,
+        }
+        if package.price_is_minimum:
+            offer["priceSpecification"] = {
+                "@type": "PriceSpecification",
+                "minPrice": package.offer_price,
+                "priceCurrency": package.currency,
+            }
+        else:
+            offer["price"] = package.offer_price
         return offer
 
     def extra(self):

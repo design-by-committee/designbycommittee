@@ -477,8 +477,101 @@ class SeoAdminTests(SiteTestCase):
         for field in ("organisation_description", "areas_served", "same_as", "google_site_verification", "llms_txt_details"):
             self.assertContains(response, f'name="{field}"')
 
+    def test_package_snippet_screens(self):
+        from pages.models import Package
+
+        self.assertContains(self.client.get("/admin/snippets/pages/package/"), "Solo")
+        response = self.client.get(f"/admin/snippets/pages/package/edit/{Package.objects.get(code='solo').pk}/")
+        for field in ("name", "price", "price_is_minimum", "features"):
+            self.assertContains(response, f'name="{field}"')
+
     def test_page_promote_tab(self):
         response = self.client.get(f"/admin/pages/{self.comedy.pk}/edit/")
         self.assertEqual(response.status_code, 200)
         for field in ("noindex", "service_name", "service_audience", "areas_served", "extra_json_ld"):
             self.assertContains(response, f'name="{field}"')
+
+
+class PackageSnippetTests(SiteTestCase):
+    """Packages are written once (Snippets → Packages) and chosen by pages."""
+
+    def test_one_edit_changes_every_place_the_package_appears(self):
+        import json
+
+        from pages.models import Package
+
+        solo = Package.objects.get(code="solo")
+        solo.price = 525
+        solo.features = "Home and gigs pages\nA press page"
+        solo.save()
+        html = self.client.get("/comedy/").content.decode()
+        self.assertIn('<span class="c-package__amount">€525</span>', html)
+        self.assertIn("<li>A press page</li>", html)
+        graph = json.loads(re.search(r'ld\+json">(.*?)</script>', html, re.DOTALL).group(1))["@graph"]
+        offers = {o["name"]: o for o in next(n for n in graph if n["@type"] == "Service")["hasOfferCatalog"]["itemListElement"]}
+        self.assertEqual(offers["Solo"]["price"], "525")
+        self.assertIn("- Solo (€525 one-off): For comedians; Live in 2–4 weeks; Home and gigs pages; A press page",
+                      self.client.get("/llms.txt").content.decode())
+
+    def test_approximate_pounds(self):
+        from decimal import Decimal
+
+        from pages.models import Package
+
+        def pounds(price, rate="0.834"):
+            return Package(price=Decimal(price), currency="EUR").approximate_pounds(Decimal(rate) if rate else None)
+
+        self.assertEqual(pounds(500), "£420")
+        self.assertEqual(pounds(750), "£630")
+        self.assertEqual(pounds(1200), "£1,000")
+        self.assertEqual(pounds(3500), "£2,900")
+        self.assertIsNone(pounds(500, rate=None))
+        self.assertIsNone(Package(price=Decimal(500), currency="GBP").approximate_pounds(Decimal("0.834")))
+
+    def test_pounds_follow_the_section_toggle_and_the_site_rate(self):
+        from core.models import SiteSettings
+        from pages.content_ops import apply_changes
+
+        packages = next(block for block in self.comedy.body if block.block_type == "packages")
+        apply_changes(self.comedy, [{"op": "set", "block": packages.id, "path": "show_pounds", "value": True}])
+        self.comedy.save_revision().publish()
+        self.assertContains(self.client.get("/comedy/"), '<span class="c-package__approx">(about £410)</span>')  # €495
+        SiteSettings.objects.filter().update(pounds_per_euro=None)
+        self.assertNotContains(self.client.get("/comedy/"), "c-package__approx")
+
+    def test_page_specific_featured_badge_and_button(self):
+        response = self.client.get("/comedy/")
+        self.assertContains(response, '<p class="c-package__badge">Best for Fringe runs</p>')
+        self.assertContains(response, ">Choose Solo</a>")
+
+    def test_migration_converts_inline_packages(self):
+        import importlib
+        import json
+
+        from django.apps import apps as django_apps
+        from wagtail.models import Page
+
+        from pages.models import LandingPage, Package
+
+        migration = importlib.import_module("pages.migrations.0012_packages")
+        legacy = [{"type": "packages", "id": "abc", "value": {
+            "anchor": "packages", "background": "", "heading": "Prices", "lead": "", "fine_print": "",
+            "packages": [{"type": "item", "id": "p1", "value": {
+                "name": "Gala", "code": "venue", "audience": "For big rooms", "price_prefix": "from",
+                "price": "€9,500", "price_suffix": "(about £7,900)", "timeframe": "Live in 10 weeks",
+                "features": [{"type": "item", "value": "A ballroom page", "id": "f1"}],
+                "button_text": "Choose Gala", "button_link": "#quote", "featured": True, "badge": "Big",
+            }}],
+        }}]
+        Package.objects.all().delete()
+        LandingPage.objects.filter(pk=self.comedy.pk).update(body=json.dumps(legacy))
+        migration.convert_packages_to_snippets(django_apps, None)
+
+        gala = Package.objects.get(code="venue")
+        self.assertEqual((gala.name, gala.price, gala.price_is_minimum, gala.price_suffix), ("Gala", 9500, True, ""))
+        self.assertEqual(gala.feature_list, ["A ballroom page"])
+        page = Page.objects.get(pk=self.comedy.pk).specific
+        item = page.blocks_of_type("packages")[0]["packages"][0]
+        self.assertEqual((item["package"], item["featured"], item["badge"], item["button_text"]), (gala, True, "Big", ""))
+        self.assertTrue(page.blocks_of_type("packages")[0]["show_pounds"])
+        self.assertContains(self.client.get("/comedy/"), '<span class="c-package__amount">€9,500</span>')

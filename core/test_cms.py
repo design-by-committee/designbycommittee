@@ -143,6 +143,14 @@ class RecordTests(SiteTestCase):
             bad = [{"type": "column", "value": {"heading": "", "links": []}}]
             cms("settings", "update", "sitesettings", "--data", json.dumps({"footer_columns": bad}), "--apply")
 
+    def test_packages_are_snippets(self):
+        from pages.models import Package
+
+        data = {"name": "Tour", "code": "show", "audience": "For tours", "price": "2400", "currency": "EUR",
+                "price_suffix": "one-time fee", "timeframe": "Live in 6 weeks", "features": "Tour dates\nPress"}
+        cms("snippets", "create", "package", "--data", json.dumps(data), "--apply")
+        self.assertEqual(Package.objects.get(name="Tour").feature_list, ["Tour dates", "Press"])
+
     def test_redirects(self):
         cms("redirects", "create", "--data", json.dumps({"old_path": "/old-comedy", "redirect_page": self.comedy.pk, "is_permanent": True}), "--apply")
         redirect = Redirect.objects.get()

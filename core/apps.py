@@ -24,6 +24,7 @@ def connect_edge_cache_purging():
 
     from core.cache import purge_edge_cache_on_commit
     from core.models import SiteSettings, Testimonial
+    from pages.models import Package
 
     def purge(sender, **kwargs):
         update_fields = kwargs.get("update_fields")
@@ -40,6 +41,6 @@ def connect_edge_cache_purging():
 
     post_delete.connect(purge_on_page_delete, dispatch_uid="edge-purge-page-delete")
 
-    for model in (Testimonial, SiteSettings, get_image_model(), Redirect, Site):
+    for model in (Testimonial, Package, SiteSettings, get_image_model(), Redirect, Site):
         post_save.connect(purge, sender=model, dispatch_uid=f"edge-purge-save-{model.__name__}")
         post_delete.connect(purge, sender=model, dispatch_uid=f"edge-purge-delete-{model.__name__}")

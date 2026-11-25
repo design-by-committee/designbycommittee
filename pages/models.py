@@ -1,4 +1,5 @@
 import json
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -6,10 +7,99 @@ from wagtail.admin.panels import FieldPanel, MultiFieldPanel
 from wagtail.fields import StreamField
 from wagtail.models import Page
 from wagtail.search import index
+from wagtail.snippets.models import register_snippet
 
 from core.cache import cache_privately, cache_publicly, is_public_request
 
 from .blocks import AGENCY_BLOCKS, FORM_BLOCK_TYPES, SECTION_BLOCKS, LinkBlock
+
+
+CURRENCY_SYMBOLS = {"EUR": "€", "GBP": "£", "USD": "$"}
+
+
+def format_amount(amount, currency="EUR"):
+    """€1,200 or €1,200.50: whole amounts without decimals, thousands separated with commas."""
+    amount = Decimal(amount)
+    text = f"{amount:,.0f}" if amount == amount.to_integral_value() else f"{amount:,.2f}"
+    return f"{CURRENCY_SYMBOLS.get(currency, currency + ' ')}{text}"
+
+
+@register_snippet
+class Package(index.Indexed, models.Model):
+    """A pricing package, written once and chosen in the "Packages and prices" sections of any page.
+
+    Its price feeds the cards, the pages' structured data (offers) and llms.txt, so a price change shows everywhere.
+    """
+
+    class Code(models.TextChoices):
+        SOLO = "solo", "solo (Performer)"
+        FRINGE = "fringe", "fringe (Performer)"
+        SHOW = "show", "show (Showrunner)"
+        VENUE = "venue", "venue (Venue owner)"
+
+    class Currency(models.TextChoices):
+        EUR = "EUR", "Euro (€)"
+        GBP = "GBP", "Pound (£)"
+        USD = "USD", "Dollar ($)"
+
+    name = models.CharField(max_length=60, help_text="E.g. Solo")
+    code = models.CharField(
+        max_length=20,
+        choices=Code.choices,
+        help_text="The quote form’s “I’m a…” option that this package’s button selects.",
+    )
+    audience = models.CharField("Who it’s for", max_length=255, help_text="E.g. For comedians")
+    price = models.DecimalField(max_digits=9, decimal_places=2, help_text="The amount only, e.g. 1200")
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR)
+    price_is_minimum = models.BooleanField(
+        "Starting price",
+        default=False,
+        help_text="Shows “from” before the price, for packages whose final price depends on the project.",
+    )
+    price_suffix = models.CharField(
+        max_length=60, blank=True, default="one-time fee", help_text="Shown after the price, e.g. one-time fee"
+    )
+    timeframe = models.CharField(max_length=60, blank=True, help_text="E.g. Live in 2–4 weeks")
+    features = models.TextField(help_text="What’s included, one per line.")
+
+    panels = [
+        MultiFieldPanel([FieldPanel("name"), FieldPanel("audience"), FieldPanel("code")], heading="Package"),
+        MultiFieldPanel(
+            [FieldPanel("price"), FieldPanel("currency"), FieldPanel("price_is_minimum"), FieldPanel("price_suffix")],
+            heading="Price",
+        ),
+        FieldPanel("timeframe"),
+        FieldPanel("features"),
+    ]
+
+    search_fields = [index.SearchField("name"), index.SearchField("audience"), index.AutocompleteField("name")]
+
+    class Meta:
+        ordering = ["price", "name"]
+
+    def __str__(self):
+        return f"{self.name}: {'from ' if self.price_is_minimum else ''}{self.price_display}"
+
+    @property
+    def price_display(self):
+        return format_amount(self.price, self.currency)
+
+    @property
+    def feature_list(self):
+        return [line.strip() for line in self.features.splitlines() if line.strip()]
+
+    @property
+    def offer_price(self):
+        """The price for structured data: "1200", or "1200.50"."""
+        return str(self.price.normalize()) if self.price != self.price.to_integral_value() else str(int(self.price))
+
+    def approximate_pounds(self, pounds_per_euro):
+        """"£1,000" for a euro price, rounded to £10 under £1,000 and to £100 above; None if there's no rate."""
+        if self.currency != self.Currency.EUR or not pounds_per_euro:
+            return None
+        pounds = Decimal(self.price) * Decimal(pounds_per_euro)
+        step = Decimal(100) if pounds >= 1000 else Decimal(10)
+        return format_amount((pounds / step).quantize(Decimal(1), rounding=ROUND_HALF_UP) * step, "GBP")
 
 
 def validate_json_ld(value):
@@ -126,6 +216,16 @@ class BasePage(Page):
 
     def blocks_of_type(self, block_type):
         return [block.value for block in self.body if block.block_type == block_type]
+
+    def packages(self):
+        """The packages chosen in this page's "Packages and prices" sections, in order, without repeats."""
+        found = []
+        for block in self.blocks_of_type("packages"):
+            for item in block["packages"]:
+                package = item["package"]
+                if package is not None and package not in found:
+                    found.append(package)
+        return found
 
     def form_names(self):
         """Names of the lead forms on this page, e.g. {"comedy-enquiry"}."""

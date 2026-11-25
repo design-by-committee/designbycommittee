@@ -1,19 +1,18 @@
 {% load site_tags %}
 <div class="c-packages{% if single %} c-packages--single{% endif %}">
-      {% for package in value.packages %}
-        <article class="c-package{% if package.featured %} c-package--featured c-dark{% endif %}" aria-labelledby="pkg-{{ package.code }}">
-          {% if package.badge %}<p class="c-package__badge">{{ package.badge }}</p>{% endif %}
-          <h3 id="pkg-{{ package.code }}">{{ package.name }}</h3>
-          <p class="c-package__for">{{ package.audience }}</p>
-          <p class="c-package__price">{% if package.price_prefix %}<span class="c-package__from">{{ package.price_prefix }}</span> {% endif %}<span class="c-package__amount">{{ package.price }}</span>{% if package.price_suffix %} {{ package.price_suffix }}{% endif %}</p>
-          {% if package.timeframe %}<p class="c-package__time">{{ package.timeframe }}</p>{% endif %}
-          <ul class="c-checks">
-            {% for feature in package.features %}
-              <li>{{ feature }}</li>
-            {% endfor %}
-          </ul>
-          <a href="{{ package.button_link }}" class="btn {% if package.featured %}btn-prim{% else %}btn-outline{% endif %}" data-package="{{ package.code }}"{% with type=package.code|client_type %}{% if type %} data-client-type="{{ type }}"{% endif %}{% endwith %}>{{ package.button_text }}</a>
-        </article>
-      {% endfor %}
-    </div>
-
+  {% for item in value.packages %}{% with package=item.package %}{% if package %}
+    <article class="c-package{% if item.featured %} c-package--featured c-dark{% endif %}" aria-labelledby="pkg-{{ package.code }}-{{ forloop.counter }}">
+      {% if item.badge %}<p class="c-package__badge">{{ item.badge }}</p>{% endif %}
+      <h3 id="pkg-{{ package.code }}-{{ forloop.counter }}">{{ package.name }}</h3>
+      <p class="c-package__for">{{ package.audience }}</p>
+      <p class="c-package__price">{% if package.price_is_minimum %}<span class="c-package__from">from</span> {% endif %}<span class="c-package__amount">{{ package.price_display }}</span>{% if package.price_suffix %} {{ package.price_suffix }}{% endif %}{% if value.show_pounds %}{% about_pounds package as pounds %}{% if pounds %} <span class="c-package__approx">(about {{ pounds }})</span>{% endif %}{% endif %}</p>
+      {% if package.timeframe %}<p class="c-package__time">{{ package.timeframe }}</p>{% endif %}
+      <ul class="c-checks">
+        {% for feature in package.feature_list %}
+          <li>{{ feature }}</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ item.button_link|default:'#quote' }}" class="btn {% if item.featured %}btn-prim{% else %}btn-outline{% endif %}" data-package="{{ package.code }}"{% with type=package.code|client_type %}{% if type %} data-client-type="{{ type }}"{% endif %}{% endwith %}>{% firstof item.button_text "Choose "|add:package.name %}</a>
+    </article>
+  {% endif %}{% endwith %}{% endfor %}
+</div>

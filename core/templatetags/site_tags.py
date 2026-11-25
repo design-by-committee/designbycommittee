@@ -69,3 +69,11 @@ def icon(name):
     from pages.icons import icon_svg
 
     return icon_svg(name)
+
+
+@register.simple_tag(takes_context=True)
+def about_pounds(context, package):
+    """"£420" for a euro package at the rate in Site settings, or "" when there's no rate."""
+    settings = context.get("settings")
+    rate = settings["core"]["SiteSettings"].pounds_per_euro if settings else None
+    return package.approximate_pounds(rate) or ""
