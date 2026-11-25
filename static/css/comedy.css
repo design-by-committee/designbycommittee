@@ -96,6 +96,12 @@
   background: var(--c-paper);
 }
 
+/* cream cards would vanish on a cream section: make them white, outlined like .c-card */
+.c-paper :is(.c-work__item, .c-step) {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.1), 0 20px 40px -28px rgb(0 0 0 / 0.35);
+}
+
 .c-dark {
   background: var(--c-stage);
   color: var(--c-on-dark);
