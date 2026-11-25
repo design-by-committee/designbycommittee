@@ -131,6 +131,15 @@ class TextPhotoTests(SiteTestCase):
         self.comedy.save_revision().publish()
         response = self.client.get("/comedy/")
         self.assertContains(response, '<div class="c-wrap c-text-photo">')
+        # The images-in-main height cap (small.css, medium.css) would squash the photo at full width
+        import re
+        from pathlib import Path
+
+        from django.conf import settings
+
+        css = (Path(settings.BASE_DIR) / "static/css/comedy.css").read_text()
+        rule = re.search(r"\.c-text-photo__image \{.*?\n\}", css, re.DOTALL).group(0)
+        self.assertIn("max-height: none", rule)
         self.assertContains(response, 'alt="Two live shows"')
 
 
