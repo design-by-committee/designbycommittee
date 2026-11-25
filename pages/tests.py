@@ -183,6 +183,29 @@ class IconGridAndPackageIntroTests(SiteTestCase):
         self.assertNotContains(response, "c-package-single")
 
 
+class HeroMockupAndColumnImageTests(SiteTestCase):
+    def test_editor_mockups(self):
+        from pages.content_ops import apply_changes
+
+        self.assertContains(self.client.get("/comedy/"), '<div class="c-admin__bar">Edit show</div>')
+        apply_changes(self.comedy, [{"op": "set", "block": "screenshot_hero", "path": "editor_mockup", "value": "review"}])
+        self.comedy.save_revision().publish()
+        response = self.client.get("/comedy/")
+        self.assertContains(response, '<div class="c-admin__bar">Add review</div>')
+        self.assertNotContains(response, "Edit show")
+
+    def test_column_pictures(self):
+        from pages.content_ops import apply_changes
+
+        image = self.comedy.body[0].value["screenshot"]
+        apply_changes(self.comedy, [{"op": "set", "block": "columns", "path": "columns.0.image",
+                                     "value": {"image": image.pk, "alt_text": "A flyer and a phone", "decorative": False}}])
+        self.comedy.save_revision().publish()
+        response = self.client.get("/comedy/")
+        self.assertContains(response, 'class="c-why__image"')
+        self.assertContains(response, 'alt="A flyer and a phone"')
+
+
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
         body = self.comedy.body

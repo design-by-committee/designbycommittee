@@ -414,6 +414,35 @@
   }
 }
 
+.c-admin__input--select {
+  position: relative;
+  padding-right: 1.4rem;
+
+  &::after {
+    content: "▾";
+    position: absolute;
+    right: 0.5rem;
+    color: #50575e;
+  }
+}
+
+.c-admin__input--area {
+  min-height: 3.4em;
+  white-space: normal;
+}
+
+.c-admin__stars {
+  display: block;
+  padding-top: 0.1rem;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  color: #dba617;
+
+  & span {
+    color: #c3c4c7;
+  }
+}
+
 .c-admin__button {
   justify-self: end;
   padding: 0.3rem 0.9rem;
@@ -467,6 +496,15 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2.5rem;
   }
+}
+
+.c-why__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;  /* small.css and medium.css cap images in main */
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
 }
 
 .c-why__item .arrow-right,

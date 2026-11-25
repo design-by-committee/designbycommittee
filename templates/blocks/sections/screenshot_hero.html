@@ -26,6 +26,33 @@
       </div>
 
       {% if value.show_editor_mockup %}
+      {% if value.editor_mockup == "review" %}
+      <!-- A mockup of the WordPress screen for adding a review to a show -->
+      <div class="c-admin" aria-hidden="true">
+        <div class="c-admin__bar">Add review</div>
+        <div class="c-admin__body">
+          <div class="c-admin__field">
+            <span class="c-admin__label">Show</span>
+            <span class="c-admin__input c-admin__input--select">Trains, Again</span>
+          </div>
+          <div class="c-admin__field">
+            <span class="c-admin__label">Quote</span>
+            <span class="c-admin__input c-admin__input--area">“Sharp, silly and very fast. Go.”</span>
+          </div>
+          <div class="c-admin__cols">
+            <div class="c-admin__field">
+              <span class="c-admin__label">Source</span>
+              <span class="c-admin__input">The Festival Review</span>
+            </div>
+            <div class="c-admin__field">
+              <span class="c-admin__label">Stars</span>
+              <span class="c-admin__stars">★★★★<span>★</span></span>
+            </div>
+          </div>
+          <span class="c-admin__button">Publish</span>
+        </div>
+      </div>
+      {% else %}
       <!-- A mockup of the WordPress screen for editing a show -->
       <div class="c-admin" aria-hidden="true">
         <div class="c-admin__bar">Edit show</div>
@@ -55,6 +82,7 @@
           <span class="c-admin__button">Update</span>
         </div>
       </div>
+      {% endif %}
       {% endif %}
       </div>
 
