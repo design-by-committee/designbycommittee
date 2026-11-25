@@ -39,6 +39,18 @@ class SiteSettings(BaseSiteSetting):
         default="Design by Committee BV",
         help_text="Shown in the footer copyright line.",
     )
+    kvk_number = models.CharField(
+        "KvK number",
+        max_length=20,
+        blank=True,
+        help_text="Kamer van Koophandel (Dutch Chamber of Commerce) number. Shown in the footer.",
+    )
+    vat_number = models.CharField(
+        "VAT number (BTW-nummer)",
+        max_length=30,
+        blank=True,
+        help_text="E.g. NL123456789B01. Shown in the footer.",
+    )
     lead_notification_email = models.EmailField(
         blank=True,
         help_text="Form submissions are emailed here. Leave empty to only keep them under Leads in the admin.",
@@ -193,7 +205,10 @@ class SiteSettings(BaseSiteSetting):
         [
             ObjectList(
                 [
-                    FieldPanel("company_name"),
+                    MultiFieldPanel(
+                        [FieldPanel("company_name"), FieldPanel("kvk_number"), FieldPanel("vat_number")],
+                        heading="Company",
+                    ),
                     FieldPanel("lead_notification_email"),
                     FieldPanel("default_social_image"),
                 ],

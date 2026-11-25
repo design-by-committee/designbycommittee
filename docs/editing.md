@@ -137,7 +137,8 @@ columns, the footer lists the pages ticked **Show in menus** instead.
 
 **Settings → Site settings:**
 
-- **Company name** in the footer copyright line
+- **Company name** in the footer copyright line, and the **KvK number** and **VAT number (BTW-nummer)** in the
+  footer's bottom line (also given to search engines in the structured data)
 - **Lead notification email** for form submissions
 - **Default social image** for pages without their own
 

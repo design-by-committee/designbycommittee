@@ -383,11 +383,25 @@ class SearchTagTests(SiteTestCase):
         self.assertContains(response, '<h2 class="footer__heading">Pages</h2>')
         self.assertContains(response, 'href="/comedy/">Comedy</a>')
 
+    def test_footer_and_structured_data_show_kvk_and_vat(self):
+        import json
+
+        from core.models import SiteSettings
+
+        SiteSettings.objects.filter().update(kvk_number="12345678", vat_number="NL123456789B01")
+        html = self.client.get("/").content.decode()
+        self.assertIn('Chamber of Commerce)">KvK</abbr> 12345678</span>', html)
+        self.assertIn("<span>VAT (BTW) NL123456789B01</span>", html)
+        graph = json.loads(re.search(r'ld\+json">(.*?)</script>', html, re.DOTALL).group(1))["@graph"]
+        self.assertEqual(graph[0]["vatID"], "NL123456789B01")
+        self.assertEqual(graph[0]["identifier"]["value"], "12345678")
+        self.assertIn("- VAT number: NL123456789B01", self.client.get("/llms.txt").content.decode())
+
     def test_footer_shows_the_location(self):
         from core.models import SiteSettings
 
         SiteSettings.objects.filter().update(address_locality="Utrecht")
-        self.assertContains(self.client.get("/"), "<p>Utrecht, Netherlands</p>")
+        self.assertContains(self.client.get("/"), "<span>Utrecht, Netherlands</span>")
 
     def test_company_name_ending_in_a_full_stop(self):
         from core.models import SiteSettings
