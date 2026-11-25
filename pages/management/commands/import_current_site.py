@@ -534,7 +534,7 @@ class Command(BaseCommand):
             comedy = LandingPage(title="Comedy", slug="comedy")
             home.add_child(instance=comedy)
             force = True  # a brand-new page always gets its content
-        self.update_page(comedy, comedy_page_content(images, testimonials, packages), force)
+        self.update_page(comedy, self.use_snippets(comedy_page_content(images, testimonials, packages)), force)
 
         self.stdout.write(self.style.SUCCESS("Done."))
 
@@ -548,6 +548,32 @@ class Command(BaseCommand):
             image.save()
         self.stdout.write(f"Image: {title}")
         return image
+
+    def use_snippets(self, content):
+        """Case studies and FAQ questions are snippets the page chooses: create any that are missing."""
+        from pages.models import CaseStudy, Question
+
+        for section in content["body"]:
+            value = section["value"]
+            if section["type"] == "cards" and value.get("layout") == "work":
+                cases = []
+                for card in value["cards"]:
+                    case, _ = CaseStudy.objects.get_or_create(
+                        title=card["title"],
+                        defaults={"meta": card.get("meta", ""), "text": card["text"], "colour": card["colour"]},
+                    )
+                    cases.append(case.pk)
+                section["type"] = "case_studies"
+                section["value"] = {
+                    "anchor": value.get("anchor", ""), "background": value.get("background", ""),
+                    "heading": value["heading"], "case_studies": cases, "testimonial": value.get("testimonial"),
+                }
+            elif section["type"] == "faq":
+                value["questions"] = [
+                    {"type": "question", "value": Question.objects.get_or_create(**item)[0].pk}
+                    for item in value["questions"]
+                ]
+        return content
 
     def get_or_create_package(self, code, data):
         """Packages are edited in the admin once they exist, so only missing ones are created."""

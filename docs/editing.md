@@ -72,12 +72,14 @@ General → Pounds per euro**. Change the rate there and every page follows; lea
 | Section | Use it for |
 |---|---|
 | Hero with screenshot | Heading, intro, two buttons and a screenshot in a browser frame, with an optional editor mockup (“Edit show” or “Add review”) |
-| Coloured cards | Audience cards, or case studies with a meta line and an optional link to the live site; optional quote card underneath |
+| Coloured cards | Audience cards (who you build for, what a site needs); optional quote card underneath |
+| Case studies | Client projects chosen from **Snippets → Case studies**, with an optional testimonial underneath |
 | Columns | Short points side by side, each with an optional link and an optional picture above it |
 | Timeline with checklist | A dated timeline next to a checklist panel with a button |
 | Numbered steps | A process, numbered automatically |
 | Packages and prices | Pricing cards chosen from **Snippets → Packages**; on each page, mark one as featured and give it a badge. An optional introduction goes above the cards, or beside a single card |
-| Questions (FAQ) | Expandable questions and answers; leave a blank line in an answer to start a new paragraph |
+| Questions (FAQ) | Expandable questions: **shared questions** from **Snippets → Questions**, or **one-off questions** written on the page |
+| Shared section | Any section written once under **Snippets → Shared sections** and placed on several pages |
 | Quote request form | The enquiry form |
 | Text | Free text with headings, lists and links, and an optional photo beside it (e.g. the comedy page's About section) |
 | Icon grid | Short items, each with an icon, a title and text (bold and links allowed), in two or three columns, with optional text under the grid |
@@ -94,6 +96,30 @@ Each landing page section can have a **Light**, **Paper** or **Dark** background
 4. On the **Promote** tab, tick **Show in menus** to link the page from the site footer (search engines find pages
    through links), and fill in **Structured data** (see Search engines and AI assistants below).
 5. Publish.
+
+## Shared pieces: write once, use on any page
+
+Anything that appears on more than one page is written once under **Snippets** and chosen by the pages. Edit it
+there and every page that uses it changes, along with the structured data and `/llms.txt`.
+
+| Snippet | Chosen in | What's shared |
+|---|---|---|
+| **Packages** | Packages and prices sections | Name, price, timeframe, features (see below) |
+| **Case studies** | Case studies sections | Client, description line, text, colour, screenshot and its description, link to the live site |
+| **Questions** | Questions (FAQ) sections | The question and its answer |
+| **Testimonials** | Testimonial carousels, cards and case studies | The quote and who said it |
+| **Shared sections** | Shared section | A whole section of any type, e.g. *How it works (steps)* |
+
+**Shared sections** are for sections that are the same everywhere, such as the numbered steps. Make one under
+**Snippets → Shared sections → Add**: give it a name (only you see it) and build the section as you would on a page.
+Then, on each page, add a **Shared section** and choose it. To change it on one page only, replace the Shared section
+on that page with a normal section.
+
+**Questions:** in an FAQ section, add a **Shared question** to use one from **Snippets → Questions**, or a
+**One-off question** for something only this page needs. Each shared question shows the start of its answer in the
+chooser, so two versions of the same question are easy to tell apart.
+
+Snippets → **Usage** (on each snippet's page) lists the pages that use it.
 
 ## Packages
 

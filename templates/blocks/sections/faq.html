@@ -7,13 +7,13 @@
     </div>
 
     <div class="c-faq__list">
-      {% for item in value.questions %}
+      {% for item in value.questions %}{% with question=item.value %}{% if question %}
         <details>
-          <summary>{{ item.question }}</summary>
+          <summary>{{ question.question }}</summary>
           {# A blank line in an answer starts a new paragraph; a single line break becomes <br>. #}
-          {{ item.answer|linebreaks }}
+          {{ question.answer|linebreaks }}
         </details>
-      {% endfor %}
+      {% endif %}{% endwith %}{% endfor %}
     </div>
   </div>
 </section>

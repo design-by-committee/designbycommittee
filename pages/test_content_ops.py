@@ -85,7 +85,7 @@ class PageEditTests(SiteTestCase):
         )
         types = [block.block_type for block in LandingPage.objects.get(slug="comedy").body]
         self.assertEqual(
-            types, ["screenshot_hero", "cards", "columns", "steps", "text", "faq", "packages", "cards", "enquiry_form"]
+            types, ["screenshot_hero", "cards", "columns", "steps", "text", "faq", "packages", "case_studies", "enquiry_form"]
         )
 
     def test_invalid_content_is_rejected(self):
@@ -100,17 +100,15 @@ class PageEditTests(SiteTestCase):
         self.assertFalse(LandingPage.objects.get(slug="comedy").has_unpublished_changes)
 
     def test_sets_a_field_added_after_the_content_was_saved(self):
-        # The imported work cards were saved before cards had a screenshot field, so their stored data has no "image" key
-        image = self.any_image()
+        # The imported audience cards were saved before cards had a link field, so their stored data has no "link" key
         out = self.edit("/comedy/", [{
-            "op": "set", "block": "cards:2", "path": "cards.0.image",
-            "value": {"image": image.pk, "alt_text": "The Fallout Theater homepage", "decorative": False},
+            "op": "set", "block": "cards", "path": "cards.0.link", "value": {"text": "Comedian sites", "url": "/comedy/"},
         }], "--publish")
 
         self.assertNotIn('-                "colour"', out)  # only the new field shows up in the diff
-        card = LandingPage.objects.get(slug="comedy").body[6].value["cards"][0]
-        self.assertEqual(card["image"].pk, image.pk)
-        self.assertContains(self.client.get("/comedy/"), 'alt="The Fallout Theater homepage"')
+        card = LandingPage.objects.get(slug="comedy").body[1].value["cards"][0]
+        self.assertEqual(card["link"]["url"], "/comedy/")
+        self.assertContains(self.client.get("/comedy/"), 'class="arrow-right c-card__link">Comedian sites</a>')
 
     def any_image(self):
         from wagtail.images import get_image_model

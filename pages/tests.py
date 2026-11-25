@@ -81,11 +81,9 @@ class PricingButtonTests(SiteTestCase):
 
 class CardLinkTests(SiteTestCase):
     def test_case_study_links_to_the_live_site(self):
-        body = self.comedy.body
-        work = next(block for block in body if block.block_type == "cards" and block.value["layout"] == "work")
-        work.value["cards"][0]["link"] = {"text": "Visit the site", "url": "https://example.com/"}
-        self.comedy.body = body
-        self.comedy.save_revision().publish()
+        from pages.models import CaseStudy
+
+        CaseStudy.objects.filter(title="Fallout Theater").update(link_text="Visit the site", link_url="https://example.com/")
         self.assertContains(
             self.client.get("/comedy/"), '<a href="https://example.com/" class="arrow-right c-card__link">Visit the site</a>'
         )
@@ -208,11 +206,10 @@ class HeroMockupAndColumnImageTests(SiteTestCase):
 
 class FaqTests(SiteTestCase):
     def test_blank_lines_in_an_answer_start_new_paragraphs(self):
-        body = self.comedy.body
-        faq = next(block for block in body if block.block_type == "faq")
-        faq.value["questions"][0]["answer"] = "First paragraph.\r\n\r\nSecond paragraph."
-        self.comedy.body = body
-        self.comedy.save_revision().publish()
+        faq = next(block for block in self.comedy.body if block.block_type == "faq")
+        question = faq.value["questions"][0].value
+        question.answer = "First paragraph.\r\n\r\nSecond paragraph."
+        question.save()
         response = self.client.get("/comedy/")
         self.assertContains(response, "<p>First paragraph.</p>")
         self.assertContains(response, "<p>Second paragraph.</p>")
@@ -583,10 +580,10 @@ class PricePlaceholderTests(SiteTestCase):
     def setUp(self):
         self.comedy.seo_title = "Comedian websites from {solo.price} | Committee"
         self.comedy.search_description = "Fixed prices from {solo.price} (about {solo.pounds})."
-        body = self.comedy.body
-        faq = next(block for block in body if block.block_type == "faq")
-        faq.value["questions"][0]["answer"] = "Solo is {solo.price}, Venue from {venue.price}. {nope.price} stays."
-        self.comedy.body = body
+        faq = next(block for block in self.comedy.body if block.block_type == "faq")
+        question = faq.value["questions"][0].value
+        question.answer = "Solo is {solo.price}, Venue from {venue.price}. {nope.price} stays."
+        question.save()
         self.comedy.save_revision().publish()
 
     def test_copy_meta_structured_data_and_llms_txt(self):
@@ -619,3 +616,120 @@ class PricePlaceholderTests(SiteTestCase):
 
         Package.objects.filter(code="solo").update(price=560)
         self.assertEqual(self.client.get("/comedy/", HTTP_IF_NONE_MATCH=first["ETag"]).status_code, 200)
+
+
+class SharedComponentTests(SiteTestCase):
+    """Case studies, questions and whole sections are written once and chosen by pages."""
+
+    def make_shared(self, block_type):
+        """Move the comedy page's section of `block_type` into a Shared section, and place that on the page."""
+        import json
+
+        from pages.content_ops import stream_data
+        from pages.models import SharedSection
+
+        raw = next(block for block in stream_data(self.comedy.body) if block["type"] == block_type)
+        section = SharedSection.objects.create(name=f"Shared {block_type}", body=json.dumps([raw]))
+        body = [b if b["type"] != block_type else {"type": "shared_section", "value": section.pk, "id": b["id"]}
+                for b in stream_data(self.comedy.body)]
+        self.comedy.body = json.dumps(body)
+        self.comedy.save_revision().publish()
+        return section
+
+    def test_shared_section_renders_and_one_edit_changes_it(self):
+        section = self.make_shared("steps")
+        self.assertContains(self.client.get("/comedy/"), "How it works")
+        data = section.body.raw_data[0]
+        data["value"]["heading"] = "How we work"
+        section.body = [dict(data)]
+        section.save()
+        self.assertContains(self.client.get("/comedy/"), ">How we work</h2>")
+
+    def test_faq_in_a_shared_section_is_still_structured_data(self):
+        import json
+
+        self.make_shared("faq")
+        html = self.client.get("/comedy/").content.decode()
+        graph = json.loads(re.search(r'ld\+json">(.*?)</script>', html, re.DOTALL).group(1))["@graph"]
+        webpage = next(node for node in graph if node["@id"].endswith("#webpage"))
+        self.assertEqual(webpage["@type"], ["WebPage", "FAQPage"])
+
+    def test_quote_form_in_a_shared_section_still_takes_enquiries(self):
+        from django.core import mail
+
+        from leads.models import FormSubmission
+        from leads.tests import ENQUIRY, JSON
+
+        self.make_shared("enquiry_form")
+        self.assertEqual(self.comedy.form_names(), {"comedy-enquiry"})
+        with self.settings(LEAD_RATE_LIMIT=100):
+            response = self.client.post("/comedy/", ENQUIRY, **JSON)
+        self.assertEqual(response.json(), {"ok": True})
+        self.assertEqual(FormSubmission.objects.get().form_name, "comedy-enquiry")
+        self.assertLessEqual(len(mail.outbox), 1)
+
+    def test_shared_question_and_one_off_question(self):
+        import json
+
+        from pages.content_ops import apply_changes
+        from pages.models import Question
+
+        faq = next(block for block in self.comedy.body if block.block_type == "faq")
+        apply_changes(self.comedy, [{"op": "set", "block": faq.id, "path": "questions", "value": [
+            {"type": "question", "value": Question.objects.create(question="Shared?", answer="Yes, shared.").pk},
+            {"type": "custom", "value": {"question": "Only here?", "answer": "Yes, one-off."}},
+        ]}])
+        self.comedy.save_revision().publish()
+        html = self.client.get("/comedy/").content.decode()
+        self.assertIn("<summary>Shared?</summary>", html)
+        self.assertIn("<summary>Only here?</summary>", html)
+        graph = json.loads(re.search(r'ld\+json">(.*?)</script>', html, re.DOTALL).group(1))["@graph"]
+        names = [q["name"] for q in next(n for n in graph if n["@id"].endswith("#webpage"))["mainEntity"]]
+        self.assertEqual(names, ["Shared?", "Only here?"])
+
+    def test_snippet_screens(self):
+        from django.contrib.auth import get_user_model
+
+        self.client.force_login(get_user_model().objects.create_superuser("editor", "e@example.com", "x"))
+        for model in ("casestudy", "question", "sharedsection"):
+            self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/").status_code, 200, model)
+            self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/add/").status_code, 200, model)
+
+    def test_migration_converts_typed_in_content(self):
+        import importlib
+        import json
+
+        from django.apps import apps as django_apps
+
+        from pages.models import CaseStudy, LandingPage, Question, SharedSection
+
+        migration = importlib.import_module("pages.migrations.0014_shared_components")
+        steps = {"type": "steps", "id": "s1", "value": {
+            "anchor": "", "background": "", "heading": "How it works", "lead": "", "extra_title": "", "extra_text": "",
+            "steps": [{"type": "item", "id": "x", "value": {"title": "Call", "text": "We talk."}}]}}
+        work = {"type": "cards", "id": "c1", "value": {
+            "anchor": "work", "background": "", "heading": "Recent work", "layout": "work", "testimonial": None,
+            "cards": [{"type": "item", "id": "y", "value": {
+                "title": "New Client", "meta": "A club", "text": "We built it.", "colour": "teal",
+                "image": {"image": None, "alt_text": "", "decorative": False},
+                "link": {"text": "Visit", "url": "https://example.com/"}}}]}}
+        faq = {"type": "faq", "id": "f1", "value": {"anchor": "faq", "background": "", "heading": "Questions", "lead": "",
+               "questions": [{"type": "item", "id": "z", "value": {"question": "Why?", "answer": "Because."}}]}}
+        other = LandingPage(title="Other", slug="other")
+        self.home.add_child(instance=other)
+        for page, body in ((self.comedy, [steps, work, faq]), (other, [dict(steps, id="s2"), dict(faq, id="f2")])):
+            LandingPage.objects.filter(pk=page.pk).update(body=json.dumps(body))
+        CaseStudy.objects.all().delete()
+        Question.objects.all().delete()
+
+        migration.convert_to_shared_components(django_apps, None)
+
+        comedy = LandingPage.objects.get(pk=self.comedy.pk)
+        self.assertEqual([b.block_type for b in comedy.body], ["shared_section", "case_studies", "shared_section"])
+        self.assertEqual(sorted(s.name for s in SharedSection.objects.all()), ["How it works (steps)", "Questions (questions)"])
+        case = CaseStudy.objects.get()
+        self.assertEqual((case.title, case.colour, case.link_url), ("New Client", "teal", "https://example.com/"))
+        self.assertEqual(Question.objects.get().answer, "Because.")
+        html = self.client.get("/comedy/").content.decode()
+        for text in ("How it works", "New Client", "<summary>Why?</summary>"):
+            self.assertIn(text, html)

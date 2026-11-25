@@ -59,7 +59,7 @@ uv run manage.py runserver
 | `dbc/settings/` | `base.py` (shared), `dev.py` (local, loads `.env`), `production.py` (Render, all config from env vars) |
 | `dbc/urls.py` | Admin at `/admin/`, `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/healthz/` health check, then Wagtail pages |
 | `core/` | Site settings (company name, lead email, default social image, the organisation for search engines and AI, footer), Testimonial snippets, rich text styles, robots.txt, llms.txt, media serving |
-| `pages/` | `HomePage` (agency design, grid blocks) and `LandingPage` (section blocks, e.g. /comedy/), `Package` snippets, blocks in `blocks.py`, schema.org JSON-LD in `structured_data.py`, the `import_current_site` command |
+| `pages/` | `HomePage` (agency design, grid blocks) and `LandingPage` (section blocks, e.g. /comedy/), `Package`, `CaseStudy`, `Question` and `SharedSection` snippets, blocks in `blocks.py`, schema.org JSON-LD in `structured_data.py`, the `import_current_site` command |
 | `leads/` | The two lead forms, `FormSubmission` (admin: **Leads**, with CSV/XLSX export), notification emails |
 | `templates/` | `base.html`, page templates, one template per block in `blocks/agency/` and `blocks/sections/` |
 | `static/` | CSS, JS and images (collected to `staticfiles/` and served by WhiteNoise in production) |

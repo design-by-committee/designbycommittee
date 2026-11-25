@@ -11,7 +11,7 @@ from wagtail.snippets.models import register_snippet
 
 from core.cache import cache_privately, cache_publicly, is_public_request
 
-from .blocks import AGENCY_BLOCKS, FORM_BLOCK_TYPES, SECTION_BLOCKS, LinkBlock
+from .blocks import AGENCY_BLOCKS, FORM_BLOCK_TYPES, SECTION_BLOCKS, SHAREABLE_BLOCKS, LinkBlock
 
 
 CURRENCY_SYMBOLS = {"EUR": "€", "GBP": "£", "USD": "$"}
@@ -103,6 +103,92 @@ class Package(index.Indexed, models.Model):
         pounds = Decimal(self.price) * Decimal(pounds_per_euro)
         step = Decimal(100) if pounds >= 1000 else Decimal(10)
         return format_amount((pounds / step).quantize(Decimal(1), rounding=ROUND_HALF_UP) * step, "GBP")
+
+
+@register_snippet
+class CaseStudy(index.Indexed, models.Model):
+    """A client project, written once and chosen in the "Case studies" sections of any page."""
+
+    class Colour(models.TextChoices):
+        PINK = "pink", "Pink"
+        TEAL = "teal", "Teal"
+        BLUE = "blue", "Blue"
+
+    title = models.CharField(max_length=120, help_text="The client, e.g. Mad Cow Comedy")
+    meta = models.CharField(
+        "Description line", max_length=255, blank=True, help_text="E.g. Weekly English-language stand-up in Utrecht"
+    )
+    text = models.TextField(help_text="What we did and what changed for them.")
+    colour = models.CharField(max_length=10, choices=Colour.choices, default=Colour.PINK)
+    screenshot = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Shown in a browser frame at the top of the card. A 1280×800 screenshot works best.",
+    )
+    screenshot_alt = models.CharField(
+        "Screenshot description", max_length=255, blank=True, help_text="Alt text: what the screenshot shows."
+    )
+    link_text = models.CharField(max_length=60, blank=True, help_text="E.g. Visit madcowcomedy.nl")
+    link_url = models.URLField("Link", blank=True, help_text="The live site, e.g. https://madcowcomedy.nl/")
+
+    panels = [
+        MultiFieldPanel([FieldPanel("title"), FieldPanel("meta"), FieldPanel("text"), FieldPanel("colour")], heading="Card"),
+        MultiFieldPanel([FieldPanel("screenshot"), FieldPanel("screenshot_alt")], heading="Screenshot"),
+        MultiFieldPanel([FieldPanel("link_text"), FieldPanel("link_url")], heading="Link to the live site"),
+    ]
+    search_fields = [index.SearchField("title"), index.SearchField("text"), index.AutocompleteField("title")]
+
+    class Meta:
+        ordering = ["title"]
+        verbose_name = "case study"
+        verbose_name_plural = "case studies"
+
+    def __str__(self):
+        return self.title
+
+
+@register_snippet
+class Question(index.Indexed, models.Model):
+    """A question and its answer, written once and chosen in the FAQ sections of any page.
+
+    Answers can use price placeholders such as {solo.price} (pages/prices.py).
+    """
+
+    question = models.CharField(max_length=255)
+    answer = models.TextField(help_text="Leave a blank line to start a new paragraph. Prices: {solo.price}, {solo.pounds}.")
+
+    panels = [FieldPanel("question"), FieldPanel("answer")]
+    search_fields = [index.SearchField("question"), index.SearchField("answer"), index.AutocompleteField("question")]
+
+    class Meta:
+        ordering = ["question"]
+
+    def __str__(self):
+        answer = " ".join(self.answer.split())
+        return f"{self.question} ({answer[:50]}…)" if len(answer) > 50 else f"{self.question} ({answer})"
+
+
+@register_snippet
+class SharedSection(index.Indexed, models.Model):
+    """One page section (any type: steps, a quote form, columns...) placed on several pages with a Shared section.
+
+    Edit it here and every page that uses it changes.
+    """
+
+    name = models.CharField(max_length=120, help_text="For the admin only, e.g. How it works (steps)")
+    body = StreamField(SHAREABLE_BLOCKS, min_num=1, max_num=1, use_json_field=True, verbose_name="Section")
+
+    panels = [FieldPanel("name"), FieldPanel("body")]
+    search_fields = [index.SearchField("name"), index.AutocompleteField("name")]
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
 
 
 def validate_json_ld(value):
@@ -217,8 +303,17 @@ class BasePage(Page):
         """Live, public and not hidden from search engines."""
         return self.live and not self.noindex and not self.get_view_restrictions().exists()
 
+    def sections(self):
+        """The page's body blocks, with each Shared section replaced by the section it holds."""
+        for block in self.body:
+            if block.block_type == "shared_section":
+                if block.value is not None:
+                    yield from block.value.body
+            else:
+                yield block
+
     def blocks_of_type(self, block_type):
-        return [block.value for block in self.body if block.block_type == block_type]
+        return [block.value for block in self.sections() if block.block_type == block_type]
 
     def packages(self):
         """The packages chosen in this page's "Packages and prices" sections, in order, without repeats."""
@@ -232,7 +327,7 @@ class BasePage(Page):
 
     def form_names(self):
         """Names of the lead forms on this page, e.g. {"comedy-enquiry"}."""
-        return {FORM_BLOCK_TYPES[block.block_type] for block in self.body if block.block_type in FORM_BLOCK_TYPES}
+        return {FORM_BLOCK_TYPES[block.block_type] for block in self.sections() if block.block_type in FORM_BLOCK_TYPES}
 
     def serve(self, request, *args, **kwargs):
         # The page's lead forms post back to the page itself, like they did with Netlify Forms.

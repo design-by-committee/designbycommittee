@@ -33,19 +33,6 @@
       </div>
     {% endif %}
 
-    {% with testimonial=value.testimonial %}{% if testimonial %}
-      <figure class="c-quote-card">
-        <blockquote>
-          <p>“{{ testimonial.card_quote }}”</p>
-        </blockquote>
-        <figcaption>
-          {% if testimonial.logo %}{% image testimonial.logo fill-112x112 format-webp preserve-svg alt="" width="56" height="56" loading="lazy" decoding="async" %}{% endif %}
-          <span>
-            <span class="c-quote-card__name">{{ testimonial.name }}</span>
-            <span class="c-quote-card__role">{{ testimonial.role }}, {{ testimonial.company }}</span>
-          </span>
-        </figcaption>
-      </figure>
-    {% endif %}{% endwith %}
+    {% include "blocks/sections/quote_card.html" with testimonial=value.testimonial %}
   </div>
 </section>
