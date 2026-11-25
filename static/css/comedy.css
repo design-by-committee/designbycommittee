@@ -970,6 +970,28 @@
   }
 }
 
+/** text section with a photo beside it **/
+.c-text-photo {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+
+  @media (width >= 56em) {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(2.5rem, 1rem + 4vw, 5rem);
+  }
+}
+
+.c-text-photo__image {
+  margin: 0;
+
+  & img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
 /** points with screenshots: text beside a browser-framed screenshot, alternating sides on wide screens **/
 .c-points {
   display: grid;
@@ -1171,10 +1193,40 @@
   left: -9999px;
 }
 
-/** footer **/
-.comedy footer {
+/** footer: dark, like the header and the quote section above it **/
+.comedy .site-footer {
   margin-top: 0;
   padding-inline: var(--c-gutter);
+  background: var(--c-stage);
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  color: var(--c-on-dark);
+
+  & .logo__text {
+    fill: #fff;
+    opacity: 0.9;
+  }
+
+  & .footer__about,
+  & .footer__bottom p {
+    color: var(--c-on-dark-muted);
+  }
+
+  & .footer__heading {
+    color: var(--c-on-dark);
+  }
+
+  & .footer__column a {
+    color: var(--c-on-dark-muted);
+
+    &:is(:hover, :focus-visible),
+    &[aria-current="page"] {
+      color: var(--c-teal);
+    }
+  }
+
+  & .footer__bottom {
+    border-top-color: rgb(255 255 255 / 0.1);
+  }
 }
 
 /** medium.css sets a desktop font size on every h3; keep this page's scale **/

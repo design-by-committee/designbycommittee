@@ -300,44 +300,6 @@ input#time {
   margin-top: 3em;
 }
 
-/** footer **/
-footer {
-  padding: 0.5em 0;
-}
-.footer__logo {
-  grid-column: 2 / 4;
-  justify-content: flex-start;
-}
-
-.footer__text {
-  grid-column: 4 / 10;
-}
-
-/* Its own row under the logo and copyright line, so any number of page links fits */
-.footer__nav {
-  grid-column: 2 / 12;
-  justify-content: center;
-  gap: 0.25em 1.5em;
-  margin: -1em 0 0.5em;
-  font-size: 0.85em;
-}
-
-.footer__logo {
-  margin: 0.75em 0;
-}
-
-.footer__logo .logo__text {
-  display: block;
-}
-
-.footer__logo .logo__image {
-  margin-right: 0;
-}
-
-.footer__text {
-  font-size: 0.85em;
-}
-
 button.btn {
   width: auto;
 }

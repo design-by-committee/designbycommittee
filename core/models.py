@@ -1,8 +1,35 @@
 from django.db import models
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, ObjectList, TabbedInterface
 from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
+from wagtail.fields import StreamField
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
+
+from pages.blocks import FooterColumnBlock
+
+
+def link(text, url):
+    return {"text": text, "url": url}
+
+
+DEFAULT_FOOTER_COLUMNS = [
+    {"type": "column", "value": {"heading": "Websites for", "links": [
+        link("Comedians", "/comedy/"),
+        link("Edinburgh Fringe 2027 shows", "/edfringe/"),
+        link("Comedy clubs and venues", "/comedy-venue-websites/"),
+        link("English-language comedy in Europe", "/english-comedy-europe/"),
+    ]}},
+    {"type": "column", "value": {"heading": "Resources", "links": [
+        link("Comedian website guide", "/comedian-website-guide/"),
+        link("Packages and prices", "/comedy/#packages"),
+        link("Questions", "/comedy/#faq"),
+    ]}},
+    {"type": "column", "value": {"heading": "Committee", "links": [
+        link("About us", "/comedy/#about"),
+        link("Landing page design", "/"),
+        link("Andres Lucero on LinkedIn", "https://www.linkedin.com/in/andreslucero/"),
+    ]}},
+]
 
 
 @register_setting(icon="cog")
@@ -135,6 +162,33 @@ class SiteSettings(BaseSiteSetting):
         ),
     )
 
+    # Footer on every page
+    footer_text = models.TextField(
+        "Footer introduction",
+        blank=True,
+        default=(
+            "A web design studio in Utrecht, the Netherlands. We build websites for comedians, comedy shows and venues "
+            "across the UK and Europe."
+        ),
+        help_text="One or two sentences under the logo.",
+    )
+    footer_button_text = models.CharField("Footer button text", max_length=60, blank=True, default="Get a quote")
+    footer_button_link = models.CharField(
+        "Footer button link",
+        max_length=255,
+        blank=True,
+        default="/comedy/#quote",
+        help_text="A path (/comedy/#quote) or a full address. Leave the text or link empty to hide the button.",
+    )
+    footer_columns = StreamField(
+        [("column", FooterColumnBlock())],
+        blank=True,
+        default=DEFAULT_FOOTER_COLUMNS,
+        use_json_field=True,
+        verbose_name="Footer link columns",
+        help_text="Titled groups of links, shown side by side. Three columns fit best.",
+    )
+
     edit_handler = TabbedInterface(
         [
             ObjectList(
@@ -174,6 +228,17 @@ class SiteSettings(BaseSiteSetting):
                     FieldPanel("same_as"),
                 ],
                 heading="Search & AI",
+            ),
+            ObjectList(
+                [
+                    FieldPanel("footer_text"),
+                    MultiFieldPanel(
+                        [FieldPanel("footer_button_text"), FieldPanel("footer_button_link")],
+                        heading="Button",
+                    ),
+                    FieldPanel("footer_columns"),
+                ],
+                heading="Footer",
             ),
             ObjectList(
                 [

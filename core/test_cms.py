@@ -132,6 +132,17 @@ class RecordTests(SiteTestCase):
         with self.assertRaisesMessage(CommandError, "Not valid"):
             cms("settings", "update", "sitesettings", "--data", '{"lead_notification_email": "not-an-email"}', "--apply")
 
+    def test_settings_stream_field(self):
+        columns = [{"type": "column", "value": {"heading": "Shows", "links": [{"text": "Fringe", "url": "/edfringe/"}]}}]
+        out = cms("settings", "update", "sitesettings", "--data", json.dumps({"footer_columns": columns}), "--apply")
+        self.assertIn("footer_columns", out)
+        settings = SiteSettings.for_site(Site.objects.get())
+        self.assertEqual(settings.footer_columns[0].value["heading"], "Shows")
+        self.assertEqual(settings.lead_notification_email, settings.lead_notification_email)  # other fields untouched
+        with self.assertRaisesMessage(CommandError, "Not valid"):
+            bad = [{"type": "column", "value": {"heading": "", "links": []}}]
+            cms("settings", "update", "sitesettings", "--data", json.dumps({"footer_columns": bad}), "--apply")
+
     def test_redirects(self):
         cms("redirects", "create", "--data", json.dumps({"old_path": "/old-comedy", "redirect_page": self.comedy.pk, "is_permanent": True}), "--apply")
         redirect = Redirect.objects.get()

@@ -11,6 +11,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.forms.models import model_to_dict
 from wagtail.log_actions import log
@@ -124,8 +125,16 @@ def form_data(form):
     return data
 
 
+def _is_stream_field(field):
+    return field.__class__.__name__ == "BlockField"
+
+
 def save_with_form(form_class, instance, values, *, files=None, form_kwargs=None):
     """Validate `values` (a partial dict of field values) with the admin form for `instance` and save it.
+
+    StreamField values (e.g. Site settings' footer columns) are raw block data, as `cms pages show` prints them. The
+    admin's StreamField widget posts a different, prefixed format, so these skip the HTML form: they're validated by
+    the field's own blocks (the same `clean()` the editor runs) and set on the instance before it's saved.
 
     Returns (saved instance, {field: (before, after)}) for the fields that changed. Raises CmsError with the
     form's errors if the values don't validate.
@@ -137,15 +146,42 @@ def save_with_form(form_class, instance, values, *, files=None, form_kwargs=None
     unknown = set(values) - set(unbound.fields)
     if unknown:
         raise CmsError(f"Unknown field(s): {', '.join(sorted(unknown))}. Fields: {', '.join(unbound.fields)}.")
+    streams = [name for name, field in unbound.fields.items() if _is_stream_field(field)]
 
-    before = form_data(unbound)
-    data = {**before, **{name: _form_value(value, unbound.fields[name]) for name, value in values.items()}}
+    def drop_streams(form):
+        for name in streams:
+            del form.fields[name]
+        return form
+
+    def stream_snapshot(obj):
+        return {name: json.dumps(getattr(obj, name).get_prep_value(), ensure_ascii=False) for name in streams}
+
+    before = {**form_data(drop_streams(form_class(instance=instance, **form_kwargs))), **stream_snapshot(instance)}
+    plain_values = {name: value for name, value in values.items() if name not in streams}
+    data = {**form_data(drop_streams(form_class(instance=instance, **form_kwargs)))}
+    data.update({name: _form_value(value, unbound.fields[name]) for name, value in plain_values.items()})
     data = {name: value for name, value in data.items() if value is not None and value is not False}
-    form = form_class(data=data, files=files or {}, instance=instance, **form_kwargs)
+    form = drop_streams(form_class(data=data, files=files or {}, instance=instance, **form_kwargs))
     if not form.is_valid():
         raise CmsError(f"Not valid: {json.dumps(form.errors.get_json_data(), ensure_ascii=False)}")
-    saved = form.save()
-    after = form_data(form_class(instance=saved, **form_kwargs))
+
+    stream_values = [name for name in streams if name in values]
+    if not stream_values:
+        saved = form.save()
+    else:
+        saved = form.save(commit=False)
+    for name in stream_values:
+        stream_block = instance._meta.get_field(name).stream_block
+        try:
+            cleaned = stream_block.clean(stream_block.to_python(values[name] or []))
+        except ValidationError as error:
+            raise CmsError(f"Not valid: {name}: {'; '.join(error.messages)}") from None
+        setattr(saved, name, cleaned)
+    if stream_values:
+        saved.save()
+        form.save_m2m()
+
+    after = {**form_data(drop_streams(form_class(instance=saved, **form_kwargs))), **stream_snapshot(saved)}
     changed = {
         name: (before.get(name), after.get(name)) for name in sorted(set(before) | set(after)) if before.get(name) != after.get(name)
     }
