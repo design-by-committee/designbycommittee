@@ -28,8 +28,8 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-# Start with a short HSTS max-age; raise it once the site has run on Render for a while.
-SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", 60 * 60 * 24))
+# One year, the usual HSTS max-age. SECURE_HSTS_SECONDS overrides it (set 0 and redeploy to stop sending it).
+SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", 60 * 60 * 24 * 365))
 # HSTS deliberately covers only the website host: other subdomains (email, Resend's send.) aren't
 # served by this app, and preload-list entries are hard to undo.
 SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W021"]

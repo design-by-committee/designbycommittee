@@ -1,10 +1,11 @@
 import tempfile
 from pathlib import Path
 
+from django.conf import settings
 from django.test import SimpleTestCase, override_settings
 from django.urls import path
 
-from core.views import media, robots_txt
+from core.views import MEDIA_CSP, media, robots_txt
 
 urlpatterns = [
     path("robots.txt", robots_txt),
@@ -33,3 +34,13 @@ class CoreViewTests(SimpleTestCase):
     def test_health_check_ignores_the_host_header(self):
         response = self.client.get("/healthz/", HTTP_HOST="10.0.0.12:10000")
         self.assertEqual(response.content, b"ok")
+
+    def test_uploaded_files_cannot_run_scripts(self):
+        # An SVG opened directly is a page on this site; its own CSP stops any script in it.
+        Path(MEDIA_ROOT, "logo.svg").write_text("<svg xmlns='http://www.w3.org/2000/svg'/>")
+        self.assertEqual(self.client.get("/media/logo.svg")["Content-Security-Policy"], MEDIA_CSP)
+
+    def test_security_headers(self):
+        response = self.client.get("/robots.txt")
+        self.assertEqual(response["Content-Security-Policy"], settings.CONTENT_SECURITY_POLICY)
+        self.assertIn("camera=()", response["Permissions-Policy"])

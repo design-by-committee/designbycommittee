@@ -39,6 +39,8 @@ MIDDLEWARE = [
     # Outermost after the health check, so it sees every response (core/cache.py)
     "core.middleware.PrivateByDefaultMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # CSP and Permissions-Policy (CONTENT_SECURITY_POLICY, PERMISSIONS_POLICY below)
+    "core.middleware.SecurityHeadersMiddleware",
     # Serves the collected, hashed static files in production (and with runserver_nostatic)
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -94,6 +96,30 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Security headers added by core.middleware.SecurityHeadersMiddleware (Django's SecurityMiddleware sets the rest).
+# Pages load only this site's own CSS, JS, fonts and images; CSS uses data: URIs for a few small SVGs. Nothing is
+# inline (JSON-LD isn't run, so CSP doesn't apply to it). Adding a third-party script, font or embed means adding its
+# origin here. Not applied to /admin/.
+CONTENT_SECURITY_POLICY = "; ".join(
+    [
+        "default-src 'self'",
+        "img-src 'self' data:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ]
+)
+# Browser features the site never uses, switched off for it and anything it might embed.
+PERMISSIONS_POLICY = ", ".join(
+    f"{feature}=()"
+    for feature in (
+        "accelerometer", "browsing-topics", "camera", "display-capture", "geolocation", "gyroscope",
+        "magnetometer", "microphone", "midi", "payment", "usb",
+    )
+)
 
 
 # Internationalisation
