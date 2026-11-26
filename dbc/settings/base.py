@@ -1,6 +1,7 @@
 """Settings shared by every environment. Environment-specific values live in dev.py and production.py."""
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -52,6 +54,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    # Answers a locked-out sign-in with a 429 page (AXES_* settings below); keep it last
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "dbc.urls"
@@ -92,6 +96,23 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# Brute-force protection for the admin sign-in (django-axes). AxesStandaloneBackend must come first: it refuses
+# sign-ins from a locked-out username + IP address before the password is checked. Unlock with `manage.py axes_reset`.
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(hours=1)
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+# The visitor's address as Render's edge reports it, the same way the lead forms' spam checks read it
+AXES_CLIENT_IP_CALLABLE = "leads.spam.client_ip"
+# Don't keep a log of every successful sign-in (with its IP address); failed attempts are still recorded
+AXES_DISABLE_ACCESS_LOG = True
+# There's no Django admin; `manage.py axes_list_attempts` shows current attempts
+AXES_ENABLE_ADMIN = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
