@@ -101,6 +101,15 @@ anything the form rejects as impossible (`LeadForm.spam_reasons`), or more than 
 (only a keyed hash of the address is stored). Flagged submissions get the normal thank-you response and are saved
 under **Leads → Spam** without an email.
 
+### Security headers
+
+Production sends HSTS (1 year, apex only), `X-Content-Type-Options`, `X-Frame-Options: DENY`,
+`Referrer-Policy`, `Cross-Origin-Opener-Policy` (Django's `SecurityMiddleware`) and, from
+`core.middleware.SecurityHeadersMiddleware`, a Content-Security-Policy and a Permissions-Policy (both in
+`dbc/settings/base.py`). The CSP allows only this site's own files and no inline scripts or styles, so a third-party
+script, font or embed needs its origin added there. The admin gets no CSP (Wagtail uses inline scripts). Uploaded
+media gets a stricter CSP of its own, so an uploaded SVG opened directly can't run scripts.
+
 ### Caching
 
 | What | Cache-Control | How changes show up |
@@ -194,7 +203,7 @@ on your Render account (Account Settings → SSH Public Keys).
 | `WAGTAILADMIN_BASE_URL` | `render.yaml` | Site URL for links in admin emails (falls back to `RENDER_EXTERNAL_URL`) |
 | `INDEXABLE_HOSTS` | optional | Hosts search engines may index (default `designbycommitt.ee,www.designbycommitt.ee`); others get `noindex` |
 | `EDGE_HTML_MAX_AGE` | optional | Seconds the edge keeps pages (default 300, or 86400 with `RENDER_API_KEY`) |
-| `SECURE_HSTS_SECONDS` | optional | HSTS max-age (default 1 day) |
+| `SECURE_HSTS_SECONDS` | optional | HSTS max-age (default 1 year) |
 | `INDEXNOW_ENABLED` | optional | `false` stops IndexNow submissions in production (on by default; always off locally) |
 | `INDEXNOW_KEY` | optional | IndexNow key (8–128 letters, digits, dashes). Default: derived from `SECRET_KEY` |
 
@@ -204,5 +213,5 @@ on your Render account (Account Settings → SSH Public Keys).
   (`CF-Cache-Status: DYNAMIC`), and `RENDER_API_KEY` wasn't set (`s-maxage=300`). To cache pages, check Edge Caching
   is **All files** and add a Render API key so edits purge the cache.
 - **Backups:** confirm what Render keeps for Postgres and the disk, and write down the restore steps here.
-- Raise `SECURE_HSTS_SECONDS` once the site has run on Render for a while; enable Dependabot for Python packages.
+- Enable Dependabot for Python packages.
 - Upgrade to the next Wagtail LTS before 7.4's support ends in November 2027.

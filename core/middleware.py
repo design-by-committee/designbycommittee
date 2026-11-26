@@ -39,6 +39,29 @@ class PrivateByDefaultMiddleware:
         return response
 
 
+class SecurityHeadersMiddleware:
+    """Add Content-Security-Policy and Permissions-Policy, which Django's SecurityMiddleware doesn't set.
+
+    The policies live in settings (CONTENT_SECURITY_POLICY, PERMISSIONS_POLICY). The admin gets no CSP, because
+    Wagtail's admin uses inline scripts and styles; X-Frame-Options and the rest still apply there. A response that
+    sets its own CSP keeps it: uploaded media (core/views.py) and Wagtail's document downloads use a stricter one.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.conf import settings
+
+        response = self.get_response(request)
+        csp = getattr(settings, "CONTENT_SECURITY_POLICY", "")
+        if csp and not request.path.startswith("/admin/"):
+            response.headers.setdefault("Content-Security-Policy", csp)
+        if permissions := getattr(settings, "PERMISSIONS_POLICY", ""):
+            response.headers.setdefault("Permissions-Policy", permissions)
+        return response
+
+
 class PackagePriceMiddleware:
     """Fill price placeholders ({solo.price}, {solo.pounds}) in pages, previews and llms.txt (pages/prices.py).
 

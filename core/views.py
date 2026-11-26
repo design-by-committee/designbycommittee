@@ -8,6 +8,7 @@ from core.cache import cache_publicly
 from core.storage import is_hashed_rendition
 
 ONE_YEAR = 60 * 60 * 24 * 365
+MEDIA_CSP = "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'"
 
 
 def is_indexable_host(request):
@@ -108,6 +109,9 @@ def media(request, path):
     keep them for a year. Other files (originals, documents) can change under the same name: an hour at most.
     """
     response = serve(request, path, document_root=settings.MEDIA_ROOT)
+    # Uploads can be SVGs, which may contain scripts. Opened directly (not through <img>), the file is its own page
+    # on this site, so it gets a policy that runs nothing, like Wagtail's document downloads do.
+    response["Content-Security-Policy"] = MEDIA_CSP
     if is_hashed_rendition(path):
         patch_cache_control(response, public=True, max_age=ONE_YEAR, immutable=True)
     else:

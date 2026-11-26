@@ -25,6 +25,11 @@ class PageCacheHeaderTests(SiteTestCase):
             self.assertNotIn("Cookie", response.get("Vary", ""), url)
             self.assertTrue(response.has_header("ETag"), url)
 
+    def test_pages_get_a_content_security_policy_but_the_admin_does_not(self):
+        # Wagtail's admin relies on inline scripts and styles, so a strict CSP would break it
+        self.assertIn("default-src 'self'", self.client.get("/comedy/")["Content-Security-Policy"])
+        self.assertFalse(self.client.get("/admin/login/").has_header("Content-Security-Policy"))
+
     def test_pages_have_no_csrf_token(self):
         self.assertNotContains(self.client.get("/comedy/"), "csrfmiddlewaretoken")
 
