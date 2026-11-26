@@ -1,5 +1,0 @@
-# The site runs on Render and its DNS is at Zone.eu (see README). Until the old Netlify project is deleted, an ignore
-# command that exits 0 tells Netlify to skip every build, so it never publishes this repository's Python source as a
-# static site. Delete this file once the Netlify project is deleted.
-[build]
-  ignore = "exit 0"
