@@ -143,6 +143,23 @@ Pages load nothing from other hosts (`PageSpeedTests` in `pages/tests.py` checks
   `(min-width: 48em)`: Wagtail's tag parser can't handle the `=` in `(width >= 48em)`. Logos use
   `format-webp preserve-svg`. Keep static PNGs small (256 colours is usually enough for the illustrations).
 
+### Admin sign-in lockout
+
+`django-axes` locks a username out from one IP address after 5 failed sign-ins in a row at `/admin/login/`, for an
+hour (a 429 "too many login attempts" page, even with the right password). A successful sign-in resets the count.
+The address is read like the lead forms' spam checks (`leads/spam.py` `client_ip`). Settings are the `AXES_*`
+values in `dbc/settings/base.py`; `core/test_login.py` has the tests. To see or lift lockouts on the live site:
+
+```bash
+ops/remote-manage.sh axes_list_attempts
+```
+
+```bash
+ops/remote-manage.sh axes_reset_username editor-username
+```
+
+`axes_reset` clears every lockout at once; `axes_reset_ip` takes an address.
+
 ### Price placeholders
 
 `{solo.price}` and `{solo.pounds}` (any package code) in page copy, meta tags, structured data and `/llms.txt` are

@@ -60,5 +60,8 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
         "django": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"), "propagate": False},
+        # django-axes announces itself at every start, which would add a line to every `ops/remote-manage.sh` command's
+        # output. Failed sign-ins and lockouts are logged as warnings by other axes loggers and still show.
+        "axes.apps": {"level": "WARNING"},
     },
 }
