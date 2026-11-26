@@ -458,6 +458,24 @@ class LlmsTxtTests(SiteTestCase):
         self.assertIn("We don’t build online shops.", self.client.get("/llms.txt").content.decode())
 
 
+class SecurityTxtTests(SiteTestCase):
+    def test_security_txt_uses_the_public_email(self):
+        from core.models import SiteSettings
+
+        SiteSettings.objects.update(public_email="")
+        self.assertEqual(self.client.get("/.well-known/security.txt").status_code, 404)
+
+        SiteSettings.objects.update(public_email="hello@example.com")
+        response = self.client.get("/.well-known/security.txt")
+        self.assertEqual(response["Content-Type"], "text/plain; charset=utf-8")
+        text = response.content.decode()
+        self.assertIn("Contact: mailto:hello@example.com\n", text)
+        self.assertIn("Canonical: http://testserver/.well-known/security.txt\n", text)
+        expires = re.search(r"^Expires: (\S+)$", text, re.MULTILINE).group(1)
+        self.assertRegex(expires, r"^\d{4}-\d\d-\d\dT00:00:00Z$")
+        self.assertGreater(expires, "2026-01-01")
+
+
 class SeoAdminTests(SiteTestCase):
     """Everything in the page head is editable in the admin."""
 
