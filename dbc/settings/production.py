@@ -41,6 +41,9 @@ WAGTAILADMIN_BASE_URL = os.environ.get("WAGTAILADMIN_BASE_URL") or os.environ.ge
     "RENDER_EXTERNAL_URL", WAGTAILADMIN_BASE_URL  # noqa: F405
 )
 
+# Submit changed pages to IndexNow (core/indexnow.py). INDEXNOW_ENABLED=false turns it off.
+INDEXNOW_ENABLED = os.environ.get("INDEXNOW_ENABLED", "true").lower() not in ("0", "false", "no", "off")
+
 # Form notification emails go out through Resend's SMTP relay; the password is the Resend API key.
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.resend.com")

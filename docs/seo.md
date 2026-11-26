@@ -18,6 +18,12 @@ Claude). Based on an audit on 25 Nov 2026; how to edit each field is in [editing
 - Landing pages, each written for one search intent: `/comedy/`, `/edfringe/`, `/comedy-venue-websites/`,
   `/comedian-website-guide/` and `/english-comedy-europe/`. The home page links to `/comedy/`.
 - Prices in euros with approximate pounds for UK visitors.
+- [IndexNow](https://www.indexnow.org/) (`core/indexnow.py`): when a page is published, unpublished, deleted, moved or
+  renamed (in the admin, with `cms`, or on a schedule), its URL goes to api.indexnow.org, which shares it with Bing
+  (and through it ChatGPT search), Yandex, Seznam, Naver, Yep and Amazon. Google doesn't take part and uses the
+  sitemap. Only indexable pages on designbycommitt.ee are sent, at most once per URL every 5 minutes, a few seconds
+  after the change (after the edge cache purge). The key file is `/<key>.txt`; results show in the Render logs as
+  `IndexNow: submitted …` (HTTP 202 the first time while the key is checked, then 200).
 
 ## Decisions
 
@@ -30,7 +36,8 @@ Claude). Based on an audit on 25 Nov 2026; how to edit each field is in [editing
 
 - Verify the site in Google Search Console and Bing Webmaster Tools (paste the codes into **Site settings →
   Verification & llms.txt**) and submit `https://designbycommitt.ee/sitemap.xml` to both. Bing matters for AI
-  answers: ChatGPT search has relied on its index.
+  answers: ChatGPT search has relied on its index. Bing Webmaster Tools → **IndexNow** then lists the URLs the site
+  has submitted.
 - Google Business Profile (service-area business, address hidden) and Bing Places, with the same name, description
   and areas as Site settings.
 - A LinkedIn company page, then add it under **Site settings → Search & AI → Profiles elsewhere**.
@@ -38,7 +45,3 @@ Claude). Based on an audit on 25 Nov 2026; how to edit each field is in [editing
   new theme; add a UK or Fringe case study as soon as there is one.
 - Listings comedians read: the Fringe services directory (advertising@edfringe.com), festival supplier lists
   (Brighton, Leicester), comedy newsletters and podcasts.
-
-## Possible follow-ups (code)
-
-- IndexNow pings to Bing (and through it ChatGPT search) when a page is published.

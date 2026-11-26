@@ -7,7 +7,10 @@ class CoreConfig(AppConfig):
     verbose_name = "Site"
 
     def ready(self):
+        from core import indexnow
+
         connect_edge_cache_purging()
+        indexnow.connect_signals()
 
 
 # Saving only these fields doesn't change anything visitors see (Wagtail fills them in when an image is first used).
