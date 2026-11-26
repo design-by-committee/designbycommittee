@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
+from django.utils import timezone
 from django.utils.cache import patch_cache_control
 from django.views.decorators.http import require_safe
 from django.views.static import serve
@@ -23,6 +26,28 @@ def robots_txt(request):
     else:
         lines = ["User-agent: *", "Disallow: /"]
     return cache_publicly(HttpResponse("\n".join(lines) + "\n", content_type="text/plain"))
+
+
+@require_safe
+def security_txt(request):
+    """/.well-known/security.txt (RFC 9116): where to report a security problem with the site.
+
+    The contact is the public email in Site settings (Search & AI tab); without one there is no security.txt. The
+    Expires date rolls forward, so the file never goes stale (the RFC asks for less than a year ahead).
+    """
+    from core.models import SiteSettings
+
+    email = SiteSettings.for_request(request).public_email
+    if not email:
+        raise Http404("No public contact email in Site settings")
+    expires = (timezone.now() + timedelta(days=180)).replace(hour=0, minute=0, second=0, microsecond=0)
+    lines = [
+        f"Contact: mailto:{email}",
+        f"Expires: {expires.strftime('%Y-%m-%dT%H:%M:%SZ')}",
+        "Preferred-Languages: en",
+        f"Canonical: {request.build_absolute_uri('/.well-known/security.txt')}",
+    ]
+    return cache_publicly(HttpResponse("\n".join(lines) + "\n", content_type="text/plain; charset=utf-8"))
 
 
 @require_safe

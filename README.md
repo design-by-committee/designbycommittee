@@ -110,6 +110,9 @@ Production sends HSTS (1 year, apex only), `X-Content-Type-Options`, `X-Frame-Op
 script, font or embed needs its origin added there. The admin gets no CSP (Wagtail uses inline scripts). Uploaded
 media gets a stricter CSP of its own, so an uploaded SVG opened directly can't run scripts.
 
+`/.well-known/security.txt` (RFC 9116) lists the **Public contact email** from Site settings as the place to
+report security problems; with that field empty, it's a 404.
+
 ### Caching
 
 | What | Cache-Control | How changes show up |
