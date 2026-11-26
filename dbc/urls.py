@@ -7,6 +7,7 @@ from wagtail import views as wagtail_views
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
+from core.indexnow import key_file as indexnow_key_file
 from core.views import llms_txt, media, robots_txt, sitemap
 
 
@@ -16,6 +17,8 @@ urlpatterns = [
     path("sitemap.xml", sitemap),
     path("robots.txt", robots_txt),
     path("llms.txt", llms_txt),
+    # IndexNow key file (core/indexnow.py); any other /<name>.txt is a 404
+    path("<str:key>.txt", indexnow_key_file),
     # Old static-site address of the home page
     path("index.html", RedirectView.as_view(url="/", permanent=True)),
 ]

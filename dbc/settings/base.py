@@ -122,6 +122,11 @@ INDEXABLE_HOSTS = [
     if host.strip()
 ]
 
+# IndexNow (core/indexnow.py): tell search engines when pages change. On in production only. INDEXNOW_KEY is
+# optional: without it the key is derived from SECRET_KEY (changing SECRET_KEY changes the key, which is fine).
+INDEXNOW_ENABLED = False
+INDEXNOW_KEY = os.environ.get("INDEXNOW_KEY", "")
+
 # Uploaded images and documents. On Render this points at the persistent disk.
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 MEDIA_URL = "/media/"

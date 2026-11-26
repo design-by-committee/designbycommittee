@@ -195,6 +195,8 @@ on your Render account (Account Settings → SSH Public Keys).
 | `INDEXABLE_HOSTS` | optional | Hosts search engines may index (default `designbycommitt.ee,www.designbycommitt.ee`); others get `noindex` |
 | `EDGE_HTML_MAX_AGE` | optional | Seconds the edge keeps pages (default 300, or 86400 with `RENDER_API_KEY`) |
 | `SECURE_HSTS_SECONDS` | optional | HSTS max-age (default 1 day) |
+| `INDEXNOW_ENABLED` | optional | `false` stops IndexNow submissions in production (on by default; always off locally) |
+| `INDEXNOW_KEY` | optional | IndexNow key (8–128 letters, digits, dashes). Default: derived from `SECRET_KEY` |
 
 ## Open items
 
