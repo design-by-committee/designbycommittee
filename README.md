@@ -198,9 +198,6 @@ on your Render account (Account Settings → SSH Public Keys).
 
 ## Open items
 
-- **Netlify leftovers** (the static site before 23 Nov 2026, and the DNS zone before 25 Nov): remove the custom
-  domain from the `design-by-committee` Netlify project, delete its DNS zone and the project, then delete
-  `netlify.toml`, whose only job is stopping Netlify from building `main`.
 - **Edge caching:** on 25 Nov 2026 static files were edge-cached (`HIT`) but pages weren't
   (`CF-Cache-Status: DYNAMIC`), and `RENDER_API_KEY` wasn't set (`s-maxage=300`). To cache pages, check Edge Caching
   is **All files** and add a Render API key so edits purge the cache.
