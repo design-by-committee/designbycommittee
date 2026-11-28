@@ -1,0 +1,38 @@
+{% load site_tags %}
+{% comment %}
+  A light hero with a sample report beside the heading. The report is an illustration, so it's a figure with a caption;
+  each row's status is spelled out in text (the symbol and colour only repeat it).
+{% endcomment %}
+<section class="c-hero c-hero--report" aria-labelledby="hero-title">
+  <div class="c-wrap c-hero__inner">
+    <div class="c-hero__copy">
+      <h1 id="hero-title">{{ value.heading|emphasis }}</h1>
+      <p class="c-hero__lead">{{ value.lead }}</p>
+
+      <div class="c-actions">
+        <a href="{{ value.primary_button.url }}" class="btn btn-prim">{{ value.primary_button.text }}</a>
+        {% if value.secondary_button.text and value.secondary_button.url %}
+          <a href="{{ value.secondary_button.url }}" class="btn btn-outline">{{ value.secondary_button.text }}</a>
+        {% endif %}
+      </div>
+
+      {% if value.proof %}<p class="c-hero__proof">{{ value.proof }}</p>{% endif %}
+    </div>
+
+    <figure class="c-report">
+      <div class="c-report__head">
+        <p class="c-report__title">{{ value.report_title }}</p>
+        {% if value.report_subtitle %}<p class="c-report__subtitle">{{ value.report_subtitle }}</p>{% endif %}
+      </div>
+      <ul class="c-report__rows">
+        {% for row in value.rows %}
+          <li class="c-report__row">
+            <span>{{ row.label }}</span>
+            <span class="c-report__status c-report__status--{{ row.status }}"><span aria-hidden="true">{% if row.status == "ok" %}✓{% elif row.status == "warn" %}!{% else %}○{% endif %}</span> {{ row.status_text }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if value.caption %}<figcaption class="c-report__caption">{{ value.caption }}</figcaption>{% endif %}
+    </figure>
+  </div>
+</section>

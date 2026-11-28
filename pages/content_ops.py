@@ -46,6 +46,7 @@ EDITABLE_FIELDS = {
     "service_audience",
     "areas_served",
     "extra_json_ld",
+    "design",  # LandingPage: "dark" or "light"
 }
 
 
@@ -90,7 +91,7 @@ def stream_data(stream_value):
 
 def snapshot(page):
     """The page's editable content as plain JSON-ready data."""
-    data = {"fields": {name: getattr(page, name) for name in sorted(EDITABLE_FIELDS)}}
+    data = {"fields": {name: getattr(page, name) for name in sorted(EDITABLE_FIELDS) if hasattr(page, name)}}
     for name in stream_field_names(page):
         data[name] = stream_data(getattr(page, name))
     return data
@@ -246,8 +247,9 @@ def _apply_one(page, streams, change, touched):
 
     if op == "set_field":
         field = change.get("field")
-        if field not in EDITABLE_FIELDS:
-            raise ContentError(f"Field {field!r} can't be edited here. Editable: {', '.join(sorted(EDITABLE_FIELDS))}.")
+        editable = sorted(name for name in EDITABLE_FIELDS if hasattr(page, name))
+        if field not in editable:
+            raise ContentError(f"Field {field!r} can't be edited here. Editable: {', '.join(editable)}.")
         setattr(page, field, change.get("value", ""))
         return
 

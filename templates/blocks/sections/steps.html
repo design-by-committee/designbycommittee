@@ -1,6 +1,7 @@
+{% load site_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap">
-    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+    <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
     {% if value.lead %}<p class="c-lead c-lead--narrow">{{ value.lead }}</p>{% endif %}
 
     <ol class="c-steps">

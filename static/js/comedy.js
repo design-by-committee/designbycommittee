@@ -1,4 +1,4 @@
-// Landing pages such as /comedy/: links to the quote form and the quote request form (handled by leads/views.py).
+// Landing pages such as /comedy/: links to the quote form, the quote request form and other lead forms (leads/views.py).
 // Runs as a module, so it is deferred and the DOM is parsed by now.
 
 const form = document.getElementById('comedy-enquiry');
@@ -7,6 +7,9 @@ if (form) {
   initQuoteLinks();
   initEnquiry(form);
 }
+
+// Other lead forms (e.g. the agent readiness audit) mark their parts with data attributes
+for (const leadForm of document.querySelectorAll('form[data-lead-form]')) initLeadForm(leadForm);
 
 /* "Choose Show" etc. scroll to the quote section and move focus there, and select the matching "I'm a…" option
    (data-client-type, set from the package code in the template). A native hash jump would reset focus after this
@@ -83,6 +86,56 @@ function initEnquiry(form) {
       console.error(error);
       setSending(submitButton, false); // before focusing it: a disabled button can't take focus
       errorMessage.textContent = 'Something went wrong sending your enquiry. Please try again.';
+      submitButton.focus();
+    } finally {
+      setSending(submitButton, false);
+    }
+  });
+}
+
+/* A lead form whose required fields are marked `required`, with its error message, button and thank-you message found
+   by data attributes in the same .c-form card. */
+function initLeadForm(form) {
+  const card = form.closest('.c-form');
+  const errorMessage = card.querySelector('[data-form-error]');
+  const submitButton = form.querySelector('[data-form-submit]');
+  const thanks = card.querySelector('[data-form-thanks]');
+
+  form.addEventListener('input', ({ target }) => setInvalid(target, false));
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const invalid = [...form.querySelectorAll('[required]')].filter((el) => {
+      const bad = !el.value.trim() || !el.checkValidity();
+      setInvalid(el, bad);
+      return bad;
+    });
+    if (invalid.length) {
+      errorMessage.textContent = form.dataset.errorText;
+      invalid[0].focus();
+      return;
+    }
+    errorMessage.textContent = '';
+
+    setSending(submitButton, true);
+    try {
+      const response = await fetch(form.getAttribute('action'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+        body: formBody(form),
+      });
+      if (!response.ok) throw new Error(`Form submission failed with status ${response.status}`);
+
+      const name = form.elements.namedItem('name').value.trim().split(/\s+/)[0];
+      if (name) thanks.querySelector('[data-name]').textContent = `, ${name}`;
+      form.hidden = true;
+      thanks.hidden = false;
+      thanks.querySelector('[data-form-thanks-title]').focus();
+    } catch (error) {
+      console.error(error);
+      setSending(submitButton, false);
+      errorMessage.textContent = 'Something went wrong sending the form. Please try again.';
       submitButton.focus();
     } finally {
       setSending(submitButton, false);

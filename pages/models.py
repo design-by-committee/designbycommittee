@@ -375,9 +375,21 @@ class LandingPage(BasePage):
     )
     body = StreamField(SECTION_BLOCKS, blank=True, use_json_field=True)
 
+    class Design(models.TextChoices):
+        DARK = "dark", "Dark header and hero (the comedy pages)"
+        LIGHT = "light", "Light, like the home page (the Shopify AI agents page)"
+
+    design = models.CharField(
+        max_length=10,
+        choices=Design.choices,
+        default=Design.DARK,
+        help_text="The light design shows *starred* words in headings in extra bold.",
+    )
+
     html_lang = "en-GB"
 
     content_panels = Page.content_panels + [
+        FieldPanel("design"),
         MultiFieldPanel([FieldPanel("header_links"), FieldPanel("header_button")], heading="Header"),
         FieldPanel("body"),
     ]

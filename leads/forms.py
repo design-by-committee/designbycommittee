@@ -43,6 +43,8 @@ class LeadForm(forms.Form):
                 if not value:
                     continue
                 value = "Yes"
+            elif isinstance(field, forms.MultipleChoiceField):
+                value = ", ".join(str(dict(field.choices).get(item, item)) for item in value or [])
             elif isinstance(field, forms.ChoiceField):
                 value = dict(field.choices).get(value, value)
             if value in (None, ""):
@@ -176,4 +178,45 @@ ComedyEnquiryForm = build_form(
 )
 
 
-FORMS = {form.form_name: form for form in (AssessmentForm, ComedyEnquiryForm)}
+# Agent readiness audit (/shopify-ai-agents/) -------------------------------------------------------------------------
+
+PRODUCT_COUNTS = [(label, label) for label in ["Under 100", "100–1,000", "1,000–10,000", "Over 10,000"]]
+COUNTRIES = [
+    (label, label) for label in ["United States", "Canada", "United Kingdom", "European Union", "Australia", "Other"]
+]
+HELP_TOPICS = [
+    (label, label)
+    for label in [
+        "Catalog eligibility",
+        "Product data and taxonomy",
+        "Structured data",
+        "Knowledge base and policies",
+        "Selling in AI channels",
+    ]
+]
+
+
+class AgentAuditFormBase(LeadForm):
+    form_name = "shopify-agent-audit"
+    title = "Agent readiness audit request"
+
+    def submitter(self):
+        return self.cleaned_data["name"], self.cleaned_data["email"]
+
+
+AgentAuditForm = build_form(
+    "AgentAuditForm",
+    AgentAuditFormBase,
+    {
+        "name": forms.CharField(label="Your name", max_length=200),
+        "email": forms.EmailField(label="Email"),
+        "store": forms.CharField(label="Store URL", max_length=500),
+        "products": forms.ChoiceField(label="Number of products", choices=PRODUCT_COUNTS, required=False),
+        "countries": forms.MultipleChoiceField(label="Countries you sell to", choices=COUNTRIES, required=False),
+        "help": forms.MultipleChoiceField(label="I want help with", choices=HELP_TOPICS, required=False),
+        "details": forms.CharField(label="Anything else", required=False, max_length=5000),
+    },
+)
+
+
+FORMS = {form.form_name: form for form in (AssessmentForm, ComedyEnquiryForm, AgentAuditForm)}

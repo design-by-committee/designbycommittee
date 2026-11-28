@@ -163,7 +163,7 @@ class Command(BaseCommand):
         # Leads
         lead_actions = areas.add_parser("leads", help="Form submissions").add_subparsers(dest="action", required=True)
         p = lead_actions.add_parser("list")
-        p.add_argument("--form", choices=["comedy-enquiry", "landing-page-assessment"])
+        p.add_argument("--form", choices=["comedy-enquiry", "landing-page-assessment", "shopify-agent-audit"])
         p.add_argument("--unhandled", action="store_true")
         p.add_argument("--since", help="YYYY-MM-DD")
         p.add_argument("--spam", action="store_true", help="List the submissions flagged as spam instead")

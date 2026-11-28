@@ -1,0 +1,19 @@
+{% load static site_tags %}
+<section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap c-checklist">
+    <div class="c-checklist__image">
+      <img src="{% static illustration.src %}" width="{{ illustration.width }}" height="{{ illustration.height }}" alt="" loading="lazy" decoding="async">
+    </div>
+
+    <div class="c-checklist__body">
+      <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
+      {% if value.lead %}<p class="c-lead">{{ value.lead }}</p>{% endif %}
+
+      <ul class="c-checks c-checklist__items">
+        {% for item in value.items %}
+          <li><b>{{ item.title }}</b>{% if item.text %} {{ item.text }}{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>

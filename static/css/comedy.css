@@ -119,6 +119,20 @@
   }
 }
 
+/* light tints, mostly for the light design (light.css): cards on them turn white */
+.c-tint--blue {
+  background: #f4f8fd;
+}
+
+.c-tint--pink {
+  background: #fff7f7;
+}
+
+.c-tint :is(.c-work__item, .c-step) {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.08), 0 20px 40px -28px rgb(0 0 0 / 0.35);
+}
+
 /** skip link **/
 .c-skip {
   position: absolute;
@@ -870,6 +884,13 @@
   }
 }
 
+/* two case studies share the row instead of leaving a gap for a third */
+.c-work--2 {
+  @media (width >= 48em) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .c-work__item {
   padding: 1.75rem 1.5rem 1.5rem;
   border-radius: 12px;
@@ -895,6 +916,11 @@
     width: 0.45rem;
     height: 0.45rem;
   }
+}
+
+.c-work__footnote {
+  margin-top: 2rem;
+  text-align: center;
 }
 
 .c-work__meta {
@@ -1350,6 +1376,194 @@
 .c-hidden-field {
   position: absolute;
   left: -9999px;
+}
+
+/** hero with a sample report (light): heading and buttons beside a report card **/
+.c-hero--report {
+  background: var(--color-surface);
+  color: var(--color-text);
+
+  & .c-hero__inner {
+    @media (width >= 56em) {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    }
+  }
+
+  & .c-hero__lead {
+    color: var(--color-text);
+  }
+
+  & .c-hero__proof {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+  }
+}
+
+.c-report {
+  margin: 0;
+  padding: 1.5rem 1.5rem 1.25rem;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgb(23 25 27 / 0.1), 0 30px 60px -36px rgb(0 0 0 / 0.4);
+  font-size: 1rem;
+
+  @media (width >= 40em) {
+    padding: 2rem 2rem 1.5rem;
+  }
+
+  /* a slight tilt, like a sheet of paper on the desk; level on phones, where it would poke out of the gutter */
+  @media (width >= 56em) {
+    rotate: 1deg;
+  }
+}
+
+.c-report__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 2px solid var(--c-stage);
+}
+
+.c-report__title {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.c-report__subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.comedy .c-report__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0 0.6rem;
+  padding-left: 0;
+  border-bottom: 1px solid #ece6dc;
+  line-height: 1.4;
+
+  &::before {
+    content: none;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.c-report__status {
+  flex: none;
+  font-weight: 700;
+  text-align: right;
+}
+
+.c-report__status--ok {
+  color: var(--color-link);
+}
+
+.c-report__status--warn {
+  color: var(--c-coral-ink);
+}
+
+.c-report__status--todo {
+  color: var(--color-text-muted);
+}
+
+.c-report__caption {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/** checklist beside a piggy illustration **/
+.c-checklist {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+
+  @media (width >= 56em) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 4rem;
+  }
+}
+
+.c-checklist__image {
+  display: flex;
+  justify-content: center;
+
+  & img {
+    width: min(100%, 300px);
+    height: auto;
+    max-height: none;
+  }
+
+  /* on phones the heading comes first, then the illustration */
+  @media (width < 56em) {
+    order: 1;
+
+    & img {
+      width: min(60%, 220px);
+    }
+  }
+}
+
+.c-checklist__items {
+  margin-top: 1.5rem;
+  max-width: 44em;
+
+  & li {
+    margin-bottom: 0.9em;
+  }
+
+  & b {
+    font-weight: 700;
+    color: var(--c-stage);
+  }
+}
+
+/** agent readiness audit form: centred introduction above the form card **/
+.c-audit .c-wrap {
+  max-width: calc(46rem + 2 * var(--c-gutter));
+}
+
+.c-audit__intro {
+  margin-bottom: 2rem;
+  text-align: center;
+
+  & h2 {
+    text-align: center;
+  }
+
+  & .c-lead {
+    margin-inline: auto;
+    margin-bottom: 0;
+  }
+}
+
+.c-audit .c-form {
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.1), 0 30px 50px -36px rgb(0 0 0 / 0.4);
+}
+
+.c-radios--3 {
+  @media (width >= 20em) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (width >= 40em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.c-form .optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 /** footer: dark, like the header and the quote section above it **/

@@ -1,0 +1,80 @@
+{% load wagtailcore_tags site_tags %}
+{% comment %}
+  The agent readiness audit request form. comedy.js checks the required fields and posts it with fetch (data-lead-form).
+  Without JavaScript the form posts normally and the page comes back with ?sent= or ?error= (see leads/views.py).
+{% endcomment %}
+{% with sent=request.GET.sent error=request.GET.error %}
+<section class="c-section {{ background_class }} c-audit"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
+  <div class="c-wrap">
+    <div class="c-audit__intro">
+      <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
+      {% if value.lead %}<p class="c-lead">{{ value.lead }}</p>{% endif %}
+    </div>
+
+    <div class="c-form">
+      <p class="c-form__error" role="alert" data-form-error>{% if error == form_name %}Please add your name, a valid email address and your store’s address.{% endif %}</p>
+
+      <form action="{% pageurl page %}" method="POST" id="{{ form_name }}" name="{{ form_name }}" data-lead-form
+        data-error-text="Please add your name, a valid email address and your store’s address." novalidate{% if sent == form_name %} hidden{% endif %}>
+        <input type="hidden" name="form-name" value="{{ form_name }}">
+        <p class="c-hidden-field">
+          <label>Leave this empty if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+        </p>
+
+        <div class="c-form__row">
+          <label for="a-name">Your name
+            <input type="text" id="a-name" name="name" autocomplete="name" autocapitalize="words" autocorrect="off"
+              spellcheck="false" enterkeyhint="next" required>
+          </label>
+          <label for="a-email">Email
+            <input type="email" id="a-email" name="email" autocomplete="email" inputmode="email"
+              autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" required>
+          </label>
+        </div>
+
+        <label for="a-store">Store URL
+          {# type="text" with the URL keyboard: yourstore.com without https:// is fine #}
+          <input type="text" id="a-store" name="store" placeholder="e.g. yourstore.com" inputmode="url" autocomplete="url"
+            autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" required>
+        </label>
+
+        <label for="a-products">Number of products <span class="optional">(optional)</span>
+          <select id="a-products" name="products">
+            <option value="">Choose…</option>
+            {% for value_, label in product_counts %}<option value="{{ value_ }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+
+        <fieldset class="c-form__group">
+          <legend>Countries you sell to <span class="optional">(optional)</span></legend>
+          <div class="c-radios c-radios--3">
+            {% for value_, label in countries %}
+              <label class="c-radio"><input type="checkbox" name="countries" value="{{ value_ }}"> {{ label }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <fieldset class="c-form__group">
+          <legend>I want help with <span class="optional">(optional)</span></legend>
+          <div class="c-radios">
+            {% for value_, label in help_topics %}
+              <label class="c-radio"><input type="checkbox" name="help" value="{{ value_ }}"> {{ label }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <label for="a-details">Anything else <span class="optional">(optional)</span>
+          <textarea id="a-details" name="details" rows="4"></textarea>
+        </label>
+
+        <button type="submit" class="btn btn-prim" data-form-submit>{{ value.submit_label }}</button>
+      </form>
+
+      <div class="c-form__thanks" data-form-thanks{% if sent != form_name %} hidden{% endif %}>
+        <h3 tabindex="-1" data-form-thanks-title>Thanks<span data-name></span>.</h3>
+        <p>{{ value.thanks_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endwith %}
