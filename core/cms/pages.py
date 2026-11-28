@@ -93,7 +93,7 @@ def create(parent_ref, page_type, values, *, draft, publish):
                 if not isinstance(block, dict) or "type" not in block:
                     raise CmsError(f'Each block in "{name}" needs a "type" and a "value".')
                 stream_ops.append({"op": "insert", "stream": name, "type": block["type"], "value": block.get("value")})
-        elif name in EDITABLE_FIELDS:
+        elif name in EDITABLE_FIELDS and hasattr(page, name):
             setattr(page, name, value)
         else:
             raise CmsError(f"Unknown field {name!r}. Fields: {', '.join(sorted(EDITABLE_FIELDS | set(streams)))}.")

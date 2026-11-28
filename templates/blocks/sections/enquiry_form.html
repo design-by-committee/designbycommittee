@@ -1,4 +1,4 @@
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags site_tags %}
 {% comment %}
   The quote request form. comedy.js validates it and posts it with fetch; the ids below are what it relies on.
   Without JavaScript the form posts normally and the page comes back with ?sent= or ?error= (see leads/views.py).
@@ -7,7 +7,7 @@
 <section class="c-section {{ background_class }} c-enquiry"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap">
     <div class="c-enquiry__intro">
-      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+      <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
       {% if value.lead %}<p class="c-lead">{{ value.lead }}</p>{% endif %}
     </div>
 

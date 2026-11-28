@@ -12,6 +12,7 @@ How to change designbycommitt.ee in the Wagtail admin. Sign in at https://design
 | Comedy venue websites | `/comedy-venue-websites/` | Landing page |
 | Comedian website guide | `/comedian-website-guide/` | Landing page (text sections) |
 | English-language comedy in Europe | `/english-comedy-europe/` | Landing page |
+| Shopify AI agents (Agent Readiness Audit) | `/shopify-ai-agents/` | Landing page, **Light** design |
 
 Open **Pages** in the left menu, then click a page title to edit it.
 
@@ -46,6 +47,7 @@ buttons and header links. Keep the existing anchors in place:
 - Comedy: `fringe`, `packages`, `work`, `about`, `faq` and `quote` (header links and buttons point at them)
 - Edinburgh Fringe: `dates`, `packages`, `work`, `faq` and `quote`
 - Venues and Europe: `packages`, `work`, `faq` and `quote`; the guide: `include`, `cost`, `faq` and `quote`
+- Shopify AI agents: `check`, `work`, `faq` and `audit`
 
 Keep page titles short and descriptive (e.g. “Websites for comedians”, not “Comedy”): they're used in breadcrumbs and
 in search results.
@@ -83,8 +85,18 @@ General → Pounds per euro**. Change the rate there and every page follows; lea
 | Text | Free text with headings, lists and links, and an optional photo beside it (e.g. the comedy page's About section) |
 | Icon grid | Short items, each with an icon, a title and text (bold and links allowed), in two or three columns, with optional text under the grid |
 | Points with screenshots | Short points, each with a screenshot in a browser frame, alternating sides (e.g. the guide's “The essentials”) |
+| Hero with sample report | Heading, intro, two buttons and a sample report card (rows with a status: done, needs work, not started), for the Shopify AI agents page |
+| Checklist with illustration | A list of bold titles with text, beside a piggy illustration (detective, champion or laptop) |
+| Agent readiness audit form | The audit request form (name, email, store URL, product count, countries, topics); leads arrive as **Agent readiness audit** |
 
-Each landing page section can have a **Light**, **Paper** or **Dark** background.
+Each landing page section can have a **Light**, **Paper**, **Light blue**, **Light pink** or **Dark** background.
+
+### Light and dark design
+
+A landing page's **Design** field (at the top of the Content tab) picks its look: **Dark** (the comedy pages: dark
+header and hero) or **Light** (like the home page: white header, light sections, the home page's footer). In the
+light design, headings are set in the regular weight; put `*asterisks*` around the words to show in extra bold, e.g.
+`*What agents need* from your store`. The asterisks don't show on the page.
 
 ## New landing page
 

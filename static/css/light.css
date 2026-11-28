@@ -1,0 +1,155 @@
+/* The light landing page design, like the home page: white header and hero, headings in the regular weight with
+   *starred* words in extra bold, soft white cards on light tints. Loads after comedy.css on landing pages whose
+   Design is "Light" (body.comedy.c-light) and only overrides it. */
+
+/** type: regular-weight headings, key words in extra bold (the |emphasis filter turns *words* into <b>) **/
+.c-light :is(h1, h2) {
+  font-weight: 400;
+  color: #2a2e31;
+  letter-spacing: -0.015em;
+
+  & b {
+    font-weight: 800;
+  }
+}
+
+.c-light h1 {
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 4.1rem);
+  line-height: 1.08;
+}
+
+.c-light h2 {
+  font-size: clamp(1.9rem, 1.3rem + 2vw, 2.75rem);
+  line-height: 1.15;
+}
+
+.c-light h3 {
+  color: #2a2e31;
+}
+
+/* a section heading straight inside the wrap is centred, with its introduction (cards, steps, case studies) */
+.c-light .c-section > .c-wrap > h2,
+.c-light .c-section > .c-wrap > h2 + .c-lead {
+  text-align: center;
+  margin-inline: auto;
+}
+
+/** header: white, with the logo's dark text **/
+.c-light .c-header {
+  border-bottom: 0;
+
+  & .logo__text {
+    fill: #111;
+    opacity: 0.5;
+  }
+}
+
+.c-light a.c-nav__link {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+
+  &:hover {
+    color: var(--color-link);
+  }
+}
+
+.c-light a.c-header__cta {
+  color: var(--c-stage);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.55em 1.1em 0.4em;
+  border: 2px solid var(--c-coral);
+  border-radius: 3em;
+  transition: background-color var(--ease);
+
+  &:hover {
+    background: rgb(252 95 107 / 0.12);
+  }
+}
+
+/** hero **/
+.c-light .c-hero--report {
+  padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(4rem, 3rem + 4vw, 6.5rem);
+}
+
+/** icon grid: each item a white card with the icon in a soft circle above the title **/
+.c-light .c-icon-grid .c-icon-item {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding: 2rem;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(53 57 60 / 0.06), 0 20px 40px -30px rgb(0 0 0 / 0.35);
+}
+
+.c-light .c-icon {
+  border-radius: 50%;
+  color: #c42f3b;
+  background: #ffe3e5;
+
+  .c-icon-item:nth-child(3n + 2) & {
+    color: var(--color-link);
+    background: #d9f5f4;
+  }
+
+  .c-icon-item:nth-child(3n) & {
+    color: #2a5a96;
+    background: #e3ecf8;
+  }
+}
+
+.c-light .c-icon-grid__footnote {
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/** cards: soft white cards with rounded corners, no coloured top border **/
+.c-light .c-work__item,
+.c-light .c-step {
+  border-top: 0;
+  border-radius: 20px;
+}
+
+.c-light .c-step {
+  background: #f4f8fd;
+}
+
+/** footer: the home page's light footer **/
+.c-light .site-footer {
+  background: #f6f7f8;
+  border-top-color: #e6e8ea;
+  color: var(--color-text);
+
+  & .logo__text {
+    fill: #111;
+    opacity: 0.5;
+  }
+
+  & .footer__about,
+  & .footer__bottom p {
+    color: var(--color-text-muted);
+  }
+
+  & .footer__heading {
+    color: var(--color-text);
+  }
+
+  & .footer__column a {
+    color: var(--color-text);
+
+    &:is(:hover, :focus-visible),
+    &[aria-current="page"] {
+      color: var(--color-link);
+    }
+  }
+
+  & .footer__bottom {
+    border-top-color: #e6e8ea;
+  }
+}
+
+/* "Request an audit" stays on one line beside the logo on phones */
+.c-light a.c-header__cta {
+  white-space: nowrap;
+}

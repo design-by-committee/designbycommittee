@@ -3,16 +3,17 @@
 
 {% block extra_head %}
   <link rel="stylesheet" href="{% static 'css/comedy.css' %}">
+  {% if page.design == "light" %}<link rel="stylesheet" href="{% static 'css/light.css' %}">{% endif %}
 
   <script type="module" src="{% static 'js/comedy.js' %}"></script>
 {% endblock %}
 
-{% block body_class %}comedy{% endblock %}
+{% block body_class %}comedy{% if page.design == "light" %} c-light{% endif %}{% endblock %}
 
 {% block content %}
   <a class="c-skip" href="#main">Skip to content</a>
 
-  <header class="c-header c-dark">
+  <header class="c-header{% if page.design != "light" %} c-dark{% endif %}">
     <div class="c-wrap c-header__inner">
       <a href="/" class="logo c-logo" aria-label="Design by Committee home">
         {% include "includes/logo.html" %}

@@ -1,8 +1,8 @@
-{% load wagtailcore_tags wagtailimages_tags %}
+{% load wagtailcore_tags wagtailimages_tags site_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap{% if value.image %} c-text-photo{% endif %}">
     <div>
-      <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+      <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
       <div class="c-prose">{{ value.body }}</div>
     </div>
     {% if value.image %}

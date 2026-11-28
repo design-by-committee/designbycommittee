@@ -682,3 +682,69 @@ class SharedComponentTests(SiteTestCase):
         for model in ("casestudy", "question", "sharedsection"):
             self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/").status_code, 200, model)
             self.assertEqual(self.client.get(f"/admin/snippets/pages/{model}/add/").status_code, 200, model)
+
+
+class AgentReadinessPageTests(SiteTestCase):
+    """The light landing page design and its sections: hero with a sample report, checklist, audit form."""
+
+    PAGE = {
+        "title": "Shopify AI agents",
+        "slug": "shopify-ai-agents",
+        "design": "light",
+        "body": [
+            {"type": "report_hero", "value": {
+                "heading": "*Get your store ready* for <agents>",
+                "lead": "Agents need good data.",
+                "primary_button": {"text": "Request an audit", "url": "#audit"},
+                "report_title": "Agent readiness report",
+                "rows": [
+                    {"label": "Catalog eligibility", "status": "ok", "status_text": "Eligible"},
+                    {"label": "Alt text", "status": "warn", "status_text": "Needs work"},
+                ],
+            }},
+            {"type": "illustrated_checklist", "value": {
+                "anchor": "check", "heading": "*What we* check", "illustration": "detective",
+                "items": [{"title": "Product data.", "text": "Categories and attributes."}],
+            }},
+            {"type": "audit_form", "value": {"heading": "Request an audit", "thanks_text": "Thanks!"}},
+        ],
+    }
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from core.cms import pages as cms_pages
+
+        cms_pages.create("/", "LandingPage", cls.PAGE, draft=False, publish=True)
+
+    def test_light_design(self):
+        response = self.client.get("/shopify-ai-agents/")
+        self.assertContains(response, 'class="comedy c-light"')
+        self.assertContains(response, "css/light.css")
+        self.assertContains(response, '<header class="c-header">')
+        # The comedy pages keep the dark design
+        comedy = self.client.get("/comedy/")
+        self.assertNotContains(comedy, "css/light.css")
+        self.assertContains(comedy, '<header class="c-header c-dark">')
+
+    def test_starred_words_are_bold_and_other_html_is_escaped(self):
+        response = self.client.get("/shopify-ai-agents/")
+        self.assertContains(response, '<h1 id="hero-title"><b>Get your store ready</b> for &lt;agents&gt;</h1>')
+        self.assertContains(response, "<b>What we</b> check</h2>")
+
+    def test_report_rows_spell_out_their_status(self):
+        response = self.client.get("/shopify-ai-agents/")
+        self.assertContains(response, '<span class="c-report__status c-report__status--warn"><span aria-hidden="true">!</span> Needs work</span>', html=False)
+        self.assertContains(response, "<span>Catalog eligibility</span>")
+
+    def test_checklist_illustration_is_decorative(self):
+        response = self.client.get("/shopify-ai-agents/")
+        self.assertRegex(response.content.decode(), r'<img src="/static/img/detective\.png" width="303" height="385" alt=""')
+        self.assertContains(response, "<li><b>Product data.</b> Categories and attributes.</li>")
+
+    def test_audit_form_fields(self):
+        response = self.client.get("/shopify-ai-agents/")
+        for field in ('name="store"', 'name="products"', 'name="countries" value="Canada"', 'name="help" value="Structured data"'):
+            self.assertContains(response, field)
+        self.assertContains(response, 'id="audit"')
+        self.assertContains(response, 'name="form-name" value="shopify-agent-audit"')

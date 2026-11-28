@@ -312,3 +312,59 @@ class BackgroundEmailTests(SiteTestCase):
                     self.client.post("/comedy/", ENQUIRY, **JSON)
         self.assertEqual(FormSubmission.objects.count(), 1)
 
+
+
+AUDIT = {
+    "form-name": "shopify-agent-audit",
+    "name": "Sam Shop",
+    "email": "sam@example.com",
+    "store": "example-store.com",
+    "products": "100–1,000",
+    "countries": ["United States", "Canada"],
+    "help": ["Structured data"],
+    "details": "",
+    "fill-time": "60",
+}
+
+
+@override_settings(LEAD_EMAILS_IN_BACKGROUND=False)
+class AgentAuditFormTests(SiteTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from core.cms import pages as cms_pages
+
+        cms_pages.create("/", "LandingPage", {
+            "title": "Shopify AI agents",
+            "slug": "shopify-ai-agents",
+            "design": "light",
+            "body": [{"type": "audit_form", "value": {"heading": "Request an audit", "thanks_text": "Thanks!"}}],
+        }, draft=False, publish=True)
+
+    def setUp(self):
+        settings = SiteSettings.for_site(Site.objects.get(is_default_site=True))
+        settings.lead_notification_email = "leads@example.com"
+        settings.save()
+
+    def test_audit_request_is_saved_and_emailed(self):
+        response = self.client.post("/shopify-ai-agents/", AUDIT, **JSON)
+
+        self.assertEqual(response.json(), {"ok": True})
+        submission = FormSubmission.objects.get()
+        self.assertEqual(submission.form_name, "shopify-agent-audit")
+        self.assertFalse(submission.is_spam)
+        self.assertIn("Store URL: example-store.com", submission.answers)
+        self.assertIn("Countries you sell to: United States, Canada", submission.answers)
+        self.assertIn("I want help with: Structured data", submission.answers)
+        self.assertEqual(submission.data["countries"], ["United States", "Canada"])
+        self.assertEqual(mail.outbox[0].subject, "New agent readiness audit request from Sam Shop")
+
+    def test_store_url_is_required(self):
+        response = self.client.post("/shopify-ai-agents/", {**AUDIT, "store": ""}, **JSON)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("store", response.json()["errors"])
+        self.assertFalse(FormSubmission.objects.exists())
+
+    def test_other_pages_do_not_accept_it(self):
+        response = self.client.post("/comedy/", AUDIT, **JSON)
+        self.assertEqual(response.status_code, 400)

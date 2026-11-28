@@ -77,3 +77,24 @@ def about_pounds(context, package):
     settings = context.get("settings")
     rate = settings["core"]["SiteSettings"].pounds_per_euro if settings else None
     return package.approximate_pounds(rate) or ""
+
+
+EMPHASIS = re.compile(r"\*([^*]+)\*")
+
+
+@register.filter
+def emphasis(text):
+    """A plain-text heading with *starred words* in extra bold: "*What agents need* from your store".
+
+    The light landing page design sets headings in the regular weight with the key words in bold, like the home page.
+    The text is escaped first, so a heading can't carry other HTML.
+    """
+    from django.utils.html import escape
+
+    return mark_safe(EMPHASIS.sub(r"<b>\1</b>", escape(str(text or ""))))  # noqa: S308  (escaped above)
+
+
+@register.filter
+def without_emphasis(text):
+    """The heading's text without the asterisks, for places that show plain text (e.g. aria labels)."""
+    return EMPHASIS.sub(r"\1", str(text or ""))

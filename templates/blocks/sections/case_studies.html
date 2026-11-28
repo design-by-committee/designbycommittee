@@ -1,9 +1,9 @@
-{% load wagtailimages_tags %}
+{% load wagtailimages_tags site_tags %}
 <section class="c-section {{ background_class }}"{% if value.anchor %} id="{{ value.anchor }}"{% endif %} aria-labelledby="{{ title_id }}">
   <div class="c-wrap">
-    <h2 id="{{ title_id }}">{{ value.heading }}</h2>
+    <h2 id="{{ title_id }}">{{ value.heading|emphasis }}</h2>
 
-    <div class="c-work">
+    <div class="c-work{% if value.case_studies|length == 2 %} c-work--2{% endif %}">
       {% for case in value.case_studies %}{% if case %}
         <article class="c-work__item c-card--{{ case.colour }}">
           {% if case.screenshot %}
@@ -19,6 +19,8 @@
         </article>
       {% endif %}{% endfor %}
     </div>
+
+    {% if value.footnote %}<p class="c-work__footnote">{{ value.footnote }}</p>{% endif %}
 
     {% include "blocks/sections/quote_card.html" with testimonial=value.testimonial %}
   </div>

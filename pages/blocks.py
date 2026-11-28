@@ -187,7 +187,15 @@ AGENCY_BLOCKS = [
 # Section (landing page) blocks
 # ---------------------------------------------------------------------------------------------------------------------
 
-BACKGROUNDS = [("", "Light"), ("paper", "Paper (warm off-white)"), ("dark", "Dark")]
+BACKGROUNDS = [
+    ("", "Light"),
+    ("paper", "Paper (warm off-white)"),
+    ("blue", "Light blue"),
+    ("pink", "Light pink"),
+    ("dark", "Dark"),
+]
+BACKGROUND_CLASSES = {"paper": "c-paper", "blue": "c-tint c-tint--blue", "pink": "c-tint c-tint--pink", "dark": "c-dark"}
+HEADING_HELP = "In the light design, put *asterisks* around the words to show in extra bold, e.g. *What agents need* from your store."
 CARD_COLOURS = [("pink", "Pink"), ("teal", "Teal"), ("blue", "Blue")]
 
 
@@ -196,7 +204,7 @@ class SectionBlock(blocks.StructBlock):
 
     anchor = anchor_block()
     background = blocks.ChoiceBlock(choices=BACKGROUNDS, default="", required=False)
-    heading = blocks.CharBlock()
+    heading = blocks.CharBlock(help_text=HEADING_HELP)
 
     def get_context(self, value, parent_context=None):
         """Adds `background_class` and `title_id` (for aria-labelledby) to every section template."""
@@ -204,7 +212,7 @@ class SectionBlock(blocks.StructBlock):
         block_id = str((parent_context or {}).get("block_id") or "")
         section_id = value.get("anchor") or f"section-{block_id[:8]}"
         context["title_id"] = f"{section_id}-title"
-        context["background_class"] = {"paper": "c-paper", "dark": "c-dark"}.get(value.get("background") or "", "")
+        context["background_class"] = BACKGROUND_CLASSES.get(value.get("background") or "", "")
         return context
 
 
@@ -289,6 +297,7 @@ class CaseStudiesBlock(SectionBlock):
         required=False,
         help_text="Optional quote card under the case studies. Uses the testimonial’s short quote if it has one.",
     )
+    footnote = blocks.TextBlock(required=False, label="Text under the case studies (optional)")
 
     class Meta:
         icon = "doc-full-inverse"
@@ -512,6 +521,91 @@ class TextSectionBlock(SectionBlock):
         template = "blocks/sections/text.html"
 
 
+class ReportRowBlock(blocks.StructBlock):
+    STATUSES = [("ok", "✓ Done (teal)"), ("warn", "! Needs work (coral)"), ("todo", "○ Not started (grey)")]
+
+    label = blocks.CharBlock(help_text="E.g. Shopify Catalog eligibility")
+    status = blocks.ChoiceBlock(choices=STATUSES, default="ok")
+    status_text = blocks.CharBlock(help_text="E.g. Eligible, Needs work, Not started")
+
+    class Meta:
+        icon = "list-ul"
+        label = "Row"
+
+
+class ReportHeroBlock(blocks.StructBlock):
+    """A light hero with a sample report card beside the heading (the agent readiness page)."""
+
+    heading = blocks.CharBlock(help_text=HEADING_HELP)
+    lead = blocks.TextBlock()
+    primary_button = LinkBlock(label="Main button")
+    secondary_button = OptionalLinkBlock(label="Second button (optional)")
+    proof = blocks.CharBlock(required=False, label="Small print under the buttons")
+    report_title = blocks.CharBlock(default="Agent readiness report", label="Report title")
+    report_subtitle = blocks.CharBlock(required=False, label="Report subtitle", help_text="E.g. yourstore.com · Example")
+    rows = blocks.ListBlock(ReportRowBlock(), label="Report rows")
+    caption = blocks.CharBlock(required=False, help_text="Under the report, e.g. what the report’s summary looks like.")
+
+    class Meta:
+        icon = "list-ul"
+        label = "Hero with sample report"
+        template = "blocks/sections/report_hero.html"
+
+
+class ChecklistItemBlock(blocks.StructBlock):
+    title = blocks.CharBlock(help_text="Shown in bold, e.g. Shopify Catalog eligibility")
+    text = blocks.CharBlock(required=False, help_text="Follows the title on the same line.")
+
+    class Meta:
+        icon = "tick"
+        label = "Item"
+
+
+class IllustratedChecklistBlock(SectionBlock):
+    """A checklist beside one of the site's piggy illustrations."""
+
+    lead = blocks.TextBlock(required=False)
+    illustration = blocks.ChoiceBlock(choices=FeatureRowBlock.ILLUSTRATIONS, default="detective")
+    items = blocks.ListBlock(ChecklistItemBlock())
+
+    class Meta:
+        icon = "tick"
+        label = "Checklist with illustration"
+        template = "blocks/sections/illustrated_checklist.html"
+
+    def get_context(self, value, parent_context=None):
+        context = super().get_context(value, parent_context)
+        name = value["illustration"]
+        width, height = FeatureRowBlock.ILLUSTRATION_SIZES[name]
+        context["illustration"] = {"src": f"img/{name}.png", "width": width, "height": height}
+        return context
+
+
+class AuditFormBlock(SectionBlock):
+    """The Agent Readiness Audit request form (leads.forms.AgentAuditForm)."""
+
+    anchor = anchor_block(default="audit")
+    lead = blocks.TextBlock(required=False)
+    submit_label = blocks.CharBlock(default="Request an audit", label="Button text")
+    thanks_text = blocks.TextBlock(label="Thank-you message")
+
+    class Meta:
+        icon = "form"
+        label = "Agent readiness audit form"
+        template = "blocks/sections/audit_form.html"
+
+    def get_context(self, value, parent_context=None):
+        from leads import forms
+
+        context = super().get_context(value, parent_context)
+        form = forms.AgentAuditForm
+        context["form_name"] = form.form_name
+        context["product_counts"] = forms.PRODUCT_COUNTS
+        context["countries"] = forms.COUNTRIES
+        context["help_topics"] = forms.HELP_TOPICS
+        return context
+
+
 SHAREABLE_BLOCKS = [
     ("screenshot_hero", ScreenshotHeroBlock()),
     ("cards", CardsBlock()),
@@ -525,6 +619,9 @@ SHAREABLE_BLOCKS = [
     ("text", TextSectionBlock()),
     ("illustrated_points", IllustratedPointsBlock()),
     ("icon_grid", IconGridBlock()),
+    ("report_hero", ReportHeroBlock()),
+    ("illustrated_checklist", IllustratedChecklistBlock()),
+    ("audit_form", AuditFormBlock()),
 ]
 
 
@@ -546,4 +643,5 @@ SECTION_BLOCKS = SHAREABLE_BLOCKS + [
 FORM_BLOCK_TYPES = {
     "assessment_form": "landing-page-assessment",
     "enquiry_form": "comedy-enquiry",
+    "audit_form": "shopify-agent-audit",
 }

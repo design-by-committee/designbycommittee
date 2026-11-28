@@ -7,6 +7,7 @@ class FormSubmission(models.Model):
     class FormName(models.TextChoices):
         ASSESSMENT = "landing-page-assessment", "Landing page assessment"
         COMEDY_ENQUIRY = "comedy-enquiry", "Comedy enquiry"
+        AGENT_AUDIT = "shopify-agent-audit", "Agent readiness audit"
 
     form_name = models.CharField("Form", max_length=50, choices=FormName.choices)
     page = models.ForeignKey(

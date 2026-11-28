@@ -40,6 +40,24 @@ ICONS = {
     ),
     "video": ("Video", '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3z"/>'),
     "card": ("Payment card", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>'),
+    "tag": (
+        "Price tag (product data)",
+        '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    ),
+    "book": ("Book (store facts)", '<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h8M8 11h6"/>'),
+    "cart": (
+        "Shopping cart (checkout)",
+        '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/>'
+        '<path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/>',
+    ),
+    "report": (
+        "Report (audit)",
+        '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M9 11l2 2 4-4M9 17h6"/>',
+    ),
+    "wrench": (
+        "Wrench (fixes)",
+        '<path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 1.3-1.3a4 4 0 0 0-5-5L3 9l8-8 3 3z"/>',
+    ),
 }
 
 CHOICES = [(name, label) for name, (label, _) in ICONS.items()]
